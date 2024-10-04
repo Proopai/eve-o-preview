@@ -1,6 +1,7 @@
 ## Notice
 This is a fork of the latest verion v6.0.0.3 of eve-o preview, to attempt to add linux support to v6+
-Linux code HAS NOT yet been added.
+
+I am not a developer by trade and Linux code HAS NOT yet been added as of 10.3.24.
 
 ## Overview
 
