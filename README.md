@@ -1,3 +1,7 @@
+## Notice
+This is a fork of the latest verion v6.0.0.3 of eve-o preview, to attempt to add linux support to v6+
+Linux code HAS NOT yet been added.
+
 ## Overview
 
 The purpose of this application is to provide a simple way to keep an eye on several simultaneously running EVE Online clients and to easily switch between them. While running it shows a set of live thumbnails for each of the active EVE Online clients. These thumbnails allow fast switch to the corresponding EVE Online client either using mouse or configurable hotkeys.
