@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using EveOPreview.Configuration;
@@ -48,19 +49,72 @@ namespace EveOPreview.Services.Implementation
 			}
 		}
 
-        private void WineActivateWindow(string windowName)
-        {
-            // On Wine it is not possible to manipulate windows directly.
-            // They are managed by native Window Manager
-            // So a separate command-line utility is used
-            if (string.IsNullOrEmpty(windowName))
-            {
-                return;
-            }
+		private void WriteToLog(string filePath, string message)
+		{
+			try
+			{
+				System.IO.File.AppendAllText(filePath, message + Environment.NewLine);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Failed to write to log file: {ex.Message}");
+			}
+		}
 
-            var cmd = "-c \"wmctrl -a \"\"" + windowName + "\"\"\"";
-            System.Diagnostics.Process.Start("/bin/bash", cmd);
-        }
+		private void WineActivateWindow(string windowName)
+		{
+			if (string.IsNullOrEmpty(windowName))
+			{
+				return;
+			}
+
+			string logFilePath = "logs.txt";
+			string bashPath = FindBashPath();
+			if (bashPath == null)
+			{
+				File.AppendAllText(logFilePath, $"[{DateTime.Now}] Error: bash not found in expected locations.\n");
+				return;
+			}
+			string binLocation = System.IO.Path.GetDirectoryName(bashPath);
+			string binLocationUnixStyle = binLocation.Replace("\\", "/");
+
+			var cmd = $"-c \"{binLocationUnixStyle}/wmctrl -a \\\"{windowName}\\\"\"";
+
+			try
+			{
+				// Configure and start the process
+				var processStartInfo = new System.Diagnostics.ProcessStartInfo
+				{
+					FileName = $"{binLocationUnixStyle}/bash",
+					Arguments = cmd,
+					UseShellExecute = false,
+					CreateNoWindow = false
+				};
+				
+				using (var process = System.Diagnostics.Process.Start(processStartInfo))
+				{
+					process.WaitForExit();
+				}
+			}
+			catch (Exception ex)
+			{
+				WriteToLog(logFilePath, $"[{DateTime.Now}] Exception: {ex.Message}");
+			}
+		}
+
+		private string FindBashPath()
+		{
+			// Check common paths for bash
+			string[] paths = { "/run/host/usr/bin/bash", "/bin/bash" };
+			foreach (var path in paths)
+			{
+				if (System.IO.File.Exists(path))
+				{
+					return path;
+				}
+			}
+			return null;
+		}
 
         public void ActivateWindow(IntPtr handle, string windowName)
         {
