@@ -31,7 +31,7 @@ jobs:
         run: |
           git log --pretty=format:'%d %s' ${GITHUB_REF} | perl -pe 's| \(.*tag: v(\d+.\d+.\d+(-preview\d{3})?)(, .*?)*\)|\n## \1\n|g' 
           # Build everything
-          dotnet publish src\\Eve-O-Preview\\Eve-O-Preview.csproj -c Release -o "Eve-O-Preview-${{ github.event.release.tag_name }}-${{ matrix.platform.name }}" -p:EVEOTARGET="${{matrix.platform.name}}" -p:AssemblyVersion="${{ github.event.release.tag_name }}"
+          dotnet publish src\\Eve-O-Preview\\Eve-O-Preview.csproj -c Release -o "Eve-O-Preview-${{ github.event.release.tag_name }}-${{ matrix.platform.name }}" -p:EVEOTARGET="${{matrix.platform.name}}" -p:AssemblyVersion="${{ github.event.release.tag_name }}" --self-contained false
       - name: Create archive
         run: |
           Compress-Archive -Path "Eve-O-Preview-${{ github.event.release.tag_name }}-${{ matrix.platform.name }}\\*" -Destination "Release-${{ github.event.release.tag_name }}-${{ matrix.platform.name }}.zip"
