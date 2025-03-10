@@ -40,7 +40,12 @@ namespace EveOPreview.Services.Implementation
 		private string FindLinuxBinLocation(string command)
 		{
 			// Check common paths for command
-			string[] paths = { "/run/host/usr/bin", "/bin", "/usr/bin" };
+	        List<string> paths = new List<string> { "/run/host/usr/bin", "/bin", "/usr/bin" };
+	        string searchPaths = Environment.GetEnvironmentVariable("WMCTRL_PATH");
+			if (searchPaths != null) {
+				paths.AddRange(searchPaths.split(":"))
+			}
+			
 			foreach (var path in paths)
 			{
 			    string locationToCheck = $"{path}/{command}";
