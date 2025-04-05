@@ -110,7 +110,8 @@ Mouse gestures are applied to the thumbnail window currently being hovered over.
 | Activate the EVE Online client and bring it to front  | Click the thumbnail |
 | Minimize the EVE Online client | Hold Control key and click the thumbnail |
 | Switch to the last used application that is not an EVE Online client | Hold Control + Shift keys and click any thumbnail |
-| Move thumbnail to a new position | Press right mouse button and move the mouse |
+| Minimize all Eve clients | Press right mouse button (only works when clients are set to Fullscreen) |
+| Move thumbnail to a new position | Move mouse over thumbnail, hold right mouse button and move the thumbnail to the desired position |
 | Adjust thumbnail height | Press both left and right mouse buttons and move the mouse up or down |
 | Adjust thumbnail width | Press both left and right mouse buttons and move the mouse left or right |
 
