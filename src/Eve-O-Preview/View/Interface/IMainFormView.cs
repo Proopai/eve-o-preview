@@ -53,6 +53,8 @@ namespace EveOPreview.View
 		void AddThumbnails(IList<IThumbnailDescription> thumbnails);
 		void RemoveThumbnails(IList<IThumbnailDescription> thumbnails);
 		void RefreshZoomSettings();
+		void ApplyLocalization();
+		void InitializeLanguageControls();
 
 		Action ApplicationExitRequested { get; set; }
 		Action FormActivated { get; set; }

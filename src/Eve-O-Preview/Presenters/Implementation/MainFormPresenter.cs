@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using EveOPreview.Configuration;
+using EveOPreview.Configuration.Implementation;
 using EveOPreview.Mediator.Messages;
+using EveOPreview.Properties;
 using EveOPreview.View;
 using MediatR;
 
@@ -101,7 +103,15 @@ namespace EveOPreview.Presenters
 		private void LoadApplicationSettings()
 		{
 			this._configurationStorage.Load();
-
+			
+			// 先处理语言设置
+			string configLanguage = this._configuration.Language;
+			// 只有当语言不是默认值时才设置语言
+			if (!string.IsNullOrEmpty(configLanguage) && configLanguage != "en-US")
+			{
+				LocalizationManager.SetLanguage(configLanguage);
+			}
+			
 			this.View.MinimizeToTray = this._configuration.MinimizeToTray;
 
 			this.View.ThumbnailOpacity = this._configuration.ThumbnailOpacity;
@@ -110,11 +120,11 @@ namespace EveOPreview.Presenters
 			this.View.HideActiveClientThumbnail = this._configuration.HideActiveClientThumbnail;
 			this.View.MinimizeInactiveClients = this._configuration.MinimizeInactiveClients;
 			this.View.WindowsAnimationStyle = ViewAnimationStyleConverter.Convert(this._configuration.WindowsAnimationStyle);
-			this.View.ShowThumbnailsAlwaysOnTop = this._configuration.ShowThumbnailsAlwaysOnTop;
+
+            this.View.ShowThumbnailsAlwaysOnTop = this._configuration.ShowThumbnailsAlwaysOnTop;
 			this.View.HideThumbnailsOnLostFocus = this._configuration.HideThumbnailsOnLostFocus;
 			this.View.EnablePerClientThumbnailLayouts = this._configuration.EnablePerClientThumbnailLayouts;
 
-			this.View.SetThumbnailSizeLimitations(this._configuration.ThumbnailMinimumSize, this._configuration.ThumbnailMaximumSize);
 			this.View.ThumbnailSize = this._configuration.ThumbnailSize;
 
 			this.View.EnableThumbnailZoom = this._configuration.ThumbnailZoomEnabled;
@@ -124,17 +134,29 @@ namespace EveOPreview.Presenters
 
 			this.View.ShowThumbnailOverlays = this._configuration.ShowThumbnailOverlays;
 			this.View.ShowThumbnailFrames = this._configuration.ShowThumbnailFrames;
-			this.View.LockThumbnailLocation = this._configuration.LockThumbnailLocation;
+            this.View.LockThumbnailLocation = this._configuration.LockThumbnailLocation;
 			this.View.ThumbnailSnapToGrid = this._configuration.ThumbnailSnapToGrid;
 			this.View.ThumbnailSnapToGridSizeX = this._configuration.ThumbnailSnapToGridSizeX;
-			this.View.ThumbnailSnapToGridSizeY = this._configuration.ThumbnailSnapToGridSizeY;
-			this.View.EnableActiveClientHighlight = this._configuration.EnableActiveClientHighlight;
+            this.View.ThumbnailSnapToGridSizeY = this._configuration.ThumbnailSnapToGridSizeY;
+
+            this.View.EnableActiveClientHighlight = this._configuration.EnableActiveClientHighlight;
 			this.View.ActiveClientHighlightColor = this._configuration.ActiveClientHighlightColor;
+
+			this.View.EnablePerClientThumbnailLayouts = this._configuration.EnablePerClientThumbnailLayouts;
+			this.View.EnableClientLayoutTracking = this._configuration.EnableClientLayoutTracking;
+			this.View.HideActiveClientThumbnail = this._configuration.HideActiveClientThumbnail;
+			this.View.MinimizeInactiveClients = this._configuration.MinimizeInactiveClients;
+			this.View.WindowsAnimationStyle = ViewAnimationStyleConverter.Convert(this._configuration.WindowsAnimationStyle); 
+            this.View.ShowThumbnailsAlwaysOnTop = this._configuration.ShowThumbnailsAlwaysOnTop;
+			this.View.HideThumbnailsOnLostFocus = this._configuration.HideThumbnailsOnLostFocus;
 
 			this.View.OverlayLabelColor = this._configuration.OverlayLabelColor;
 			this.View.OverlayLabelSize = this._configuration.OverlayLabelSize;
 
 			this.View.IconName = this._configuration.IconName;
+
+			// Initialize language controls in the view after setting the language
+			this.View.InitializeLanguageControls();
 		}
 
 		private async void SaveApplicationSettings()
@@ -177,6 +199,14 @@ namespace EveOPreview.Presenters
 			this._configuration.OverlayLabelSize = this.View.OverlayLabelSize;
 
 			this._configuration.IconName = this.View.IconName;
+
+			// Save language to configuration only if it has changed
+			string currentLanguage = LocalizationManager.GetCurrentLanguage();
+			if (this._configuration.Language != currentLanguage)
+			{
+				this._configuration.Language = currentLanguage;
+				System.Diagnostics.Debug.WriteLine($"Saving language to config: {this._configuration.Language}");
+			}
 
 			this._configurationStorage.Save();
 
