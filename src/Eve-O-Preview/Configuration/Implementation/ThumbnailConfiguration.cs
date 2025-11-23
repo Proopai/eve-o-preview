@@ -12,6 +12,7 @@ namespace EveOPreview.Configuration.Implementation
 		#region Private fields
 		private bool _enablePerClientThumbnailLayouts;
 		private bool _enableClientLayoutTracking;
+		private string _language; // 私有字段存储语言值
 		#endregion
 
 		public ThumbnailConfiguration()
@@ -134,6 +135,8 @@ namespace EveOPreview.Configuration.Implementation
 			this.IconName = "";
 
 			this.LoginThumbnailLocation = new Point(5, 5);
+			// 不再在构造函数中设置Language的默认值
+			// Language属性将保持null，直到从配置文件加载或被显式设置
 		}
 
 
@@ -400,6 +403,20 @@ namespace EveOPreview.Configuration.Implementation
 		public void ToggleThumbnail(string currentClient, bool isDisabled)
 		{
 			this.DisableThumbnail[currentClient] = isDisabled;
+		}
+
+		[JsonProperty("Language")]
+		public string Language 
+		{ 
+			get 
+			{ 
+				// 如果_language为null，返回默认值"en-US"
+				return _language ?? "en-US"; 
+			} 
+			set 
+			{ 
+				_language = value; 
+			} 
 		}
 
 		/// <summary>

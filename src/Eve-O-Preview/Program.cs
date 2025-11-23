@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Threading;
 using System.Windows.Forms;
 using EveOPreview.Configuration;
@@ -31,6 +32,9 @@ namespace EveOPreview
 				return;
 			}
 
+			// Set the culture for localization
+			SetLanguage();
+
 			ExceptionHandler handler = new ExceptionHandler();
 			handler.SetupExceptionHandlers();
 
@@ -38,6 +42,12 @@ namespace EveOPreview
 
 			Program.InitializeWinForms();
 			controller.Run<MainFormPresenter>();
+		}
+
+		private static void SetLanguage()
+		{
+			// The language will be set by the main form presenter based on configuration
+			// This is just a placeholder, actual language setting happens in MainFormPresenter
 		}
 
 		private static Mutex GetInstanceToken()

@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Windows.Forms;
+using EveOPreview.Properties;
 
 namespace EveOPreview.View
 {
@@ -42,7 +43,7 @@ namespace EveOPreview.View
 			Label label4;
 			TabPage ThumbnailTabPage;
 			Panel ThumbnailSettingsPanel;
-			Label HeigthLabel;
+			Label HeightLabel;
 			Label WidthLabel;
 			Label OpacityLabel;
 			Panel ZoomSettingsPanel;
@@ -125,7 +126,7 @@ namespace EveOPreview.View
 			label4 = new Label();
 			ThumbnailTabPage = new TabPage();
 			ThumbnailSettingsPanel = new Panel();
-			HeigthLabel = new Label();
+			HeightLabel = new Label();
 			WidthLabel = new Label();
 			OpacityLabel = new Label();
 			ZoomSettingsPanel = new Panel();
@@ -142,6 +143,14 @@ namespace EveOPreview.View
 			DocumentationLinkLabel = new Label();
 			DescriptionLabel = new Label();
 			NameLabel = new Label();
+			//
+			//Add a language selection control
+			//
+			LanguageLabel = new Label();
+			LanguageCombo = new ComboBox();
+			LanguageTabPage = new TabPage();
+			LanguageSettingsPanel = new Panel();
+			
 			ContentTabControl.SuspendLayout();
 			GeneralTabPage.SuspendLayout();
 			GeneralSettingsPanel.SuspendLayout();
@@ -171,14 +180,14 @@ namespace EveOPreview.View
 			// 
 			RestoreWindowMenuItem.Name = "RestoreWindowMenuItem";
 			RestoreWindowMenuItem.Size = new Size(201, 32);
-			RestoreWindowMenuItem.Text = "Restore";
+			RestoreWindowMenuItem.Text = LocalizationManager.GetString("RestoreMenuItemText");
 			RestoreWindowMenuItem.Click += RestoreMainForm_Handler;
 			// 
 			// ExitMenuItem
 			// 
 			ExitMenuItem.Name = "ExitMenuItem";
 			ExitMenuItem.Size = new Size(201, 32);
-			ExitMenuItem.Text = "Exit";
+			ExitMenuItem.Text = LocalizationManager.GetString("ExitMenuItemText");
 			ExitMenuItem.Click += ExitMenuItemClick_Handler;
 			// 
 			// TitleMenuItem
@@ -201,6 +210,7 @@ namespace EveOPreview.View
 			ContentTabControl.Controls.Add(ZoomTabPage);
 			ContentTabControl.Controls.Add(OverlayTabPage);
 			ContentTabControl.Controls.Add(ClientsTabPage);
+			ContentTabControl.Controls.Add(LanguageTabPage);
 			ContentTabControl.Controls.Add(AboutTabPage);
 			ContentTabControl.Dock = DockStyle.Fill;
 			ContentTabControl.DrawMode = TabDrawMode.OwnerDrawFixed;
@@ -225,11 +235,12 @@ namespace EveOPreview.View
 			GeneralTabPage.Padding = new Padding(5, 6, 5, 6);
 			GeneralTabPage.Size = new Size(522, 411);
 			GeneralTabPage.TabIndex = 0;
-			GeneralTabPage.Text = "General";
+			GeneralTabPage.Text = LocalizationManager.GetString("GeneralTabText");
 			// 
 			// GeneralSettingsPanel
 			// 
 			GeneralSettingsPanel.BorderStyle = BorderStyle.FixedSingle;
+			// Removed language controls from General tab
 			GeneralSettingsPanel.Controls.Add(label4);
 			GeneralSettingsPanel.Controls.Add(AnimationStyleCombo);
 			GeneralSettingsPanel.Controls.Add(MinimizeInactiveClientsCheckBox);
@@ -247,6 +258,8 @@ namespace EveOPreview.View
 			GeneralSettingsPanel.TabIndex = 18;
 			GeneralSettingsPanel.Paint += GeneralSettingsPanel_Paint;
 			// 
+			// LanguageLabel and LanguageCombo have been moved to LanguageTabPage
+			// 
 			// label4
 			// 
 			label4.AutoSize = true;
@@ -255,7 +268,7 @@ namespace EveOPreview.View
 			label4.Name = "label4";
 			label4.Size = new Size(136, 25);
 			label4.TabIndex = 27;
-			label4.Text = "Animation Style";
+			label4.Text = LocalizationManager.GetString("AnimationStyleLabelText");
 			// 
 			// AnimationStyleCombo
 			// 
@@ -276,7 +289,7 @@ namespace EveOPreview.View
 			MinimizeInactiveClientsCheckBox.Name = "MinimizeInactiveClientsCheckBox";
 			MinimizeInactiveClientsCheckBox.Size = new Size(261, 29);
 			MinimizeInactiveClientsCheckBox.TabIndex = 24;
-			MinimizeInactiveClientsCheckBox.Text = "Minimize inactive EVE clients";
+			MinimizeInactiveClientsCheckBox.Text = LocalizationManager.GetString("MinimizeInactiveClientsCheckBoxText");
 			MinimizeInactiveClientsCheckBox.UseVisualStyleBackColor = true;
 			MinimizeInactiveClientsCheckBox.CheckedChanged += OptionChanged_Handler;
 			// 
@@ -288,7 +301,7 @@ namespace EveOPreview.View
 			EnableClientLayoutTrackingCheckBox.Name = "EnableClientLayoutTrackingCheckBox";
 			EnableClientLayoutTrackingCheckBox.Size = new Size(199, 29);
 			EnableClientLayoutTrackingCheckBox.TabIndex = 19;
-			EnableClientLayoutTrackingCheckBox.Text = "Track client locations";
+			EnableClientLayoutTrackingCheckBox.Text = LocalizationManager.GetString("EnableClientLayoutTrackingCheckBoxText");
 			EnableClientLayoutTrackingCheckBox.UseVisualStyleBackColor = true;
 			EnableClientLayoutTrackingCheckBox.CheckedChanged += OptionChanged_Handler;
 			// 
@@ -302,7 +315,7 @@ namespace EveOPreview.View
 			HideActiveClientThumbnailCheckBox.Name = "HideActiveClientThumbnailCheckBox";
 			HideActiveClientThumbnailCheckBox.Size = new Size(293, 29);
 			HideActiveClientThumbnailCheckBox.TabIndex = 20;
-			HideActiveClientThumbnailCheckBox.Text = "Hide preview of active EVE client";
+			HideActiveClientThumbnailCheckBox.Text = LocalizationManager.GetString("HideActiveClientThumbnailCheckBoxText");
 			HideActiveClientThumbnailCheckBox.UseVisualStyleBackColor = true;
 			HideActiveClientThumbnailCheckBox.CheckedChanged += OptionChanged_Handler;
 			// 
@@ -317,7 +330,7 @@ namespace EveOPreview.View
 			ShowThumbnailsAlwaysOnTopCheckBox.RightToLeft = RightToLeft.No;
 			ShowThumbnailsAlwaysOnTopCheckBox.Size = new Size(222, 29);
 			ShowThumbnailsAlwaysOnTopCheckBox.TabIndex = 21;
-			ShowThumbnailsAlwaysOnTopCheckBox.Text = "Previews always on top";
+			ShowThumbnailsAlwaysOnTopCheckBox.Text = LocalizationManager.GetString("ShowThumbnailsAlwaysOnTopCheckBoxText");
 			ShowThumbnailsAlwaysOnTopCheckBox.UseVisualStyleBackColor = true;
 			ShowThumbnailsAlwaysOnTopCheckBox.CheckedChanged += OptionChanged_Handler;
 			// 
@@ -331,7 +344,7 @@ namespace EveOPreview.View
 			HideThumbnailsOnLostFocusCheckBox.Name = "HideThumbnailsOnLostFocusCheckBox";
 			HideThumbnailsOnLostFocusCheckBox.Size = new Size(375, 29);
 			HideThumbnailsOnLostFocusCheckBox.TabIndex = 22;
-			HideThumbnailsOnLostFocusCheckBox.Text = "Hide previews when EVE client is not active";
+			HideThumbnailsOnLostFocusCheckBox.Text = LocalizationManager.GetString("HideThumbnailsOnLostFocusCheckBoxText");
 			HideThumbnailsOnLostFocusCheckBox.UseVisualStyleBackColor = true;
 			HideThumbnailsOnLostFocusCheckBox.CheckedChanged += OptionChanged_Handler;
 			// 
@@ -345,7 +358,7 @@ namespace EveOPreview.View
 			EnablePerClientThumbnailsLayoutsCheckBox.Name = "EnablePerClientThumbnailsLayoutsCheckBox";
 			EnablePerClientThumbnailsLayoutsCheckBox.Size = new Size(297, 29);
 			EnablePerClientThumbnailsLayoutsCheckBox.TabIndex = 23;
-			EnablePerClientThumbnailsLayoutsCheckBox.Text = "Unique layout for each EVE client";
+			EnablePerClientThumbnailsLayoutsCheckBox.Text = LocalizationManager.GetString("EnablePerClientThumbnailsLayoutsCheckBoxText");
 			EnablePerClientThumbnailsLayoutsCheckBox.UseVisualStyleBackColor = true;
 			EnablePerClientThumbnailsLayoutsCheckBox.CheckedChanged += OptionChanged_Handler;
 			// 
@@ -357,7 +370,7 @@ namespace EveOPreview.View
 			MinimizeToTrayCheckBox.Name = "MinimizeToTrayCheckBox";
 			MinimizeToTrayCheckBox.Size = new Size(229, 29);
 			MinimizeToTrayCheckBox.TabIndex = 18;
-			MinimizeToTrayCheckBox.Text = "Minimize to System Tray";
+			MinimizeToTrayCheckBox.Text = LocalizationManager.GetString("MinimizeToTrayCheckBoxText");
 			MinimizeToTrayCheckBox.UseVisualStyleBackColor = true;
 			MinimizeToTrayCheckBox.CheckedChanged += OptionChanged_Handler;
 			// 
@@ -371,7 +384,7 @@ namespace EveOPreview.View
 			ThumbnailTabPage.Padding = new Padding(5, 6, 5, 6);
 			ThumbnailTabPage.Size = new Size(522, 411);
 			ThumbnailTabPage.TabIndex = 1;
-			ThumbnailTabPage.Text = "Thumbnail";
+			ThumbnailTabPage.Text = LocalizationManager.GetString("ThumbnailTabText");
 			// 
 			// ThumbnailSettingsPanel
 			// 
@@ -382,7 +395,7 @@ namespace EveOPreview.View
 			ThumbnailSettingsPanel.Controls.Add(ThumbnailSnapToGridSizeXNumericEdit);
 			ThumbnailSettingsPanel.Controls.Add(SnapXLabel);
 			ThumbnailSettingsPanel.Controls.Add(LockThumbnailLocationCheckbox);
-			ThumbnailSettingsPanel.Controls.Add(HeigthLabel);
+			ThumbnailSettingsPanel.Controls.Add(HeightLabel);
 			ThumbnailSettingsPanel.Controls.Add(WidthLabel);
 			ThumbnailSettingsPanel.Controls.Add(ThumbnailsWidthNumericEdit);
 			ThumbnailSettingsPanel.Controls.Add(ThumbnailsHeightNumericEdit);
@@ -403,7 +416,7 @@ namespace EveOPreview.View
 			ThumbnailSnapToGridCheckBox.Name = "ThumbnailSnapToGridCheckBox";
 			ThumbnailSnapToGridCheckBox.Size = new Size(226, 29);
 			ThumbnailSnapToGridCheckBox.TabIndex = 32;
-			ThumbnailSnapToGridCheckBox.Text = "Thumbnail Snap to Grid";
+			ThumbnailSnapToGridCheckBox.Text = LocalizationManager.GetString("ThumbnailSnapToGridCheckBoxText");
 			ThumbnailSnapToGridCheckBox.UseVisualStyleBackColor = true;
 			ThumbnailSnapToGridCheckBox.CheckedChanged += OptionChanged_Handler;
 			// 
@@ -465,19 +478,19 @@ namespace EveOPreview.View
 			LockThumbnailLocationCheckbox.Name = "LockThumbnailLocationCheckbox";
 			LockThumbnailLocationCheckbox.Size = new Size(234, 29);
 			LockThumbnailLocationCheckbox.TabIndex = 26;
-			LockThumbnailLocationCheckbox.Text = "Lock Thumbnail Location";
+			LockThumbnailLocationCheckbox.Text = LocalizationManager.GetString("LockThumbnailLocationCheckboxText");
 			LockThumbnailLocationCheckbox.UseVisualStyleBackColor = true;
 			LockThumbnailLocationCheckbox.CheckedChanged += OptionChanged_Handler;
 			// 
-			// HeigthLabel
+			// HeightLabel
 			// 
-			HeigthLabel.AutoSize = true;
-			HeigthLabel.Location = new Point(13, 110);
-			HeigthLabel.Margin = new Padding(5, 0, 5, 0);
-			HeigthLabel.Name = "HeigthLabel";
-			HeigthLabel.Size = new Size(153, 25);
-			HeigthLabel.TabIndex = 24;
-			HeigthLabel.Text = "Thumbnail Height";
+			HeightLabel.AutoSize = true;
+			HeightLabel.Location = new Point(13, 110);
+			HeightLabel.Margin = new Padding(5, 0, 5, 0);
+			HeightLabel.Name = "HeightLabel";
+			HeightLabel.Size = new Size(153, 25);
+			HeightLabel.TabIndex = 24;
+			HeightLabel.Text = LocalizationManager.GetString("ThumbnailHeightLabelText");
 			// 
 			// WidthLabel
 			// 
@@ -487,7 +500,7 @@ namespace EveOPreview.View
 			WidthLabel.Name = "WidthLabel";
 			WidthLabel.Size = new Size(148, 25);
 			WidthLabel.TabIndex = 23;
-			WidthLabel.Text = "Thumbnail Width";
+			WidthLabel.Text = LocalizationManager.GetString("ThumbnailWidthLabelText");
 			// 
 			// ThumbnailsWidthNumericEdit
 			// 
@@ -542,7 +555,7 @@ namespace EveOPreview.View
 			OpacityLabel.Name = "OpacityLabel";
 			OpacityLabel.Size = new Size(73, 25);
 			OpacityLabel.TabIndex = 19;
-			OpacityLabel.Text = "Opacity";
+			OpacityLabel.Text = LocalizationManager.GetString("OpacityLabelText");
 			// 
 			// ZoomTabPage
 			// 
@@ -553,7 +566,7 @@ namespace EveOPreview.View
 			ZoomTabPage.Name = "ZoomTabPage";
 			ZoomTabPage.Size = new Size(522, 411);
 			ZoomTabPage.TabIndex = 2;
-			ZoomTabPage.Text = "Zoom";
+			ZoomTabPage.Text = LocalizationManager.GetString("ZoomTabText");
 			// 
 			// ZoomSettingsPanel
 			// 
@@ -578,7 +591,7 @@ namespace EveOPreview.View
 			ZoomFactorLabel.Name = "ZoomFactorLabel";
 			ZoomFactorLabel.Size = new Size(113, 25);
 			ZoomFactorLabel.TabIndex = 39;
-			ZoomFactorLabel.Text = "Zoom Factor";
+			ZoomFactorLabel.Text = LocalizationManager.GetString("ZoomFactorLabelText");
 			// 
 			// ZoomAnchorPanel
 			// 
@@ -714,7 +727,7 @@ namespace EveOPreview.View
 			ZoomAnchorLabel.Name = "ZoomAnchorLabel";
 			ZoomAnchorLabel.Size = new Size(69, 25);
 			ZoomAnchorLabel.TabIndex = 40;
-			ZoomAnchorLabel.Text = "Anchor";
+			ZoomAnchorLabel.Text = LocalizationManager.GetString("ZoomAnchorLabelText");
 			// 
 			// EnableThumbnailZoomCheckBox
 			// 
@@ -727,7 +740,7 @@ namespace EveOPreview.View
 			EnableThumbnailZoomCheckBox.RightToLeft = RightToLeft.No;
 			EnableThumbnailZoomCheckBox.Size = new Size(162, 29);
 			EnableThumbnailZoomCheckBox.TabIndex = 36;
-			EnableThumbnailZoomCheckBox.Text = "Zoom on hover";
+			EnableThumbnailZoomCheckBox.Text = LocalizationManager.GetString("EnableThumbnailZoomCheckBoxText");
 			EnableThumbnailZoomCheckBox.UseVisualStyleBackColor = true;
 			EnableThumbnailZoomCheckBox.CheckedChanged += OptionChanged_Handler;
 			// 
@@ -754,7 +767,7 @@ namespace EveOPreview.View
 			OverlayTabPage.Name = "OverlayTabPage";
 			OverlayTabPage.Size = new Size(522, 411);
 			OverlayTabPage.TabIndex = 3;
-			OverlayTabPage.Text = "Overlay";
+			OverlayTabPage.Text = LocalizationManager.GetString("OverlayTabText");
 			// 
 			// OverlaySettingsPanel
 			// 
@@ -785,7 +798,7 @@ namespace EveOPreview.View
 			label3.Name = "label3";
 			label3.Size = new Size(75, 25);
 			label3.TabIndex = 43;
-			label3.Text = "Position";
+			label3.Text = LocalizationManager.GetString("PositionLabelText");
 			// 
 			// label2
 			// 
@@ -795,7 +808,7 @@ namespace EveOPreview.View
 			label2.Name = "label2";
 			label2.Size = new Size(55, 25);
 			label2.TabIndex = 42;
-			label2.Text = "Color";
+			label2.Text = LocalizationManager.GetString("ColorLabelText");
 			// 
 			// OverlayLabelColorButton
 			// 
@@ -956,7 +969,7 @@ namespace EveOPreview.View
 			label1.Name = "label1";
 			label1.Size = new Size(89, 25);
 			label1.TabIndex = 30;
-			label1.Text = "Label Size";
+			label1.Text = LocalizationManager.GetString("LabelSizeLabelText");
 			// 
 			// HighlightColorLabel
 			// 
@@ -966,7 +979,7 @@ namespace EveOPreview.View
 			HighlightColorLabel.Name = "HighlightColorLabel";
 			HighlightColorLabel.Size = new Size(55, 25);
 			HighlightColorLabel.TabIndex = 29;
-			HighlightColorLabel.Text = "Color";
+			HighlightColorLabel.Text = LocalizationManager.GetString("HighlightColorLabelText");
 			// 
 			// ActiveClientHighlightColorButton
 			// 
@@ -989,7 +1002,7 @@ namespace EveOPreview.View
 			EnableActiveClientHighlightCheckBox.RightToLeft = RightToLeft.No;
 			EnableActiveClientHighlightCheckBox.Size = new Size(207, 29);
 			EnableActiveClientHighlightCheckBox.TabIndex = 27;
-			EnableActiveClientHighlightCheckBox.Text = "Highlight active client";
+			EnableActiveClientHighlightCheckBox.Text = LocalizationManager.GetString("EnableActiveClientHighlightCheckBoxText");
 			EnableActiveClientHighlightCheckBox.UseVisualStyleBackColor = true;
 			EnableActiveClientHighlightCheckBox.CheckedChanged += OptionChanged_Handler;
 			// 
@@ -1004,7 +1017,7 @@ namespace EveOPreview.View
 			ShowThumbnailOverlaysCheckBox.RightToLeft = RightToLeft.No;
 			ShowThumbnailOverlaysCheckBox.Size = new Size(144, 29);
 			ShowThumbnailOverlaysCheckBox.TabIndex = 25;
-			ShowThumbnailOverlaysCheckBox.Text = "Show overlay";
+			ShowThumbnailOverlaysCheckBox.Text = LocalizationManager.GetString("ShowThumbnailOverlaysCheckBoxText");
 			ShowThumbnailOverlaysCheckBox.UseVisualStyleBackColor = true;
 			ShowThumbnailOverlaysCheckBox.CheckedChanged += OptionChanged_Handler;
 			// 
@@ -1019,7 +1032,7 @@ namespace EveOPreview.View
 			ShowThumbnailFramesCheckBox.RightToLeft = RightToLeft.No;
 			ShowThumbnailFramesCheckBox.Size = new Size(141, 29);
 			ShowThumbnailFramesCheckBox.TabIndex = 26;
-			ShowThumbnailFramesCheckBox.Text = "Show frames";
+			ShowThumbnailFramesCheckBox.Text = LocalizationManager.GetString("ShowThumbnailFramesCheckBoxText");
 			ShowThumbnailFramesCheckBox.UseVisualStyleBackColor = true;
 			ShowThumbnailFramesCheckBox.CheckedChanged += OptionChanged_Handler;
 			// 
@@ -1032,7 +1045,7 @@ namespace EveOPreview.View
 			ClientsTabPage.Name = "ClientsTabPage";
 			ClientsTabPage.Size = new Size(522, 411);
 			ClientsTabPage.TabIndex = 4;
-			ClientsTabPage.Text = "Active Clients";
+			ClientsTabPage.Text = LocalizationManager.GetString("ActiveClientsTabText");
 			// 
 			// ClientsPanel
 			// 
@@ -1069,7 +1082,51 @@ namespace EveOPreview.View
 			ThumbnailsListLabel.Name = "ThumbnailsListLabel";
 			ThumbnailsListLabel.Size = new Size(268, 25);
 			ThumbnailsListLabel.TabIndex = 33;
-			ThumbnailsListLabel.Text = "Thumbnails (check to force hide)";
+			ThumbnailsListLabel.Text = LocalizationManager.GetString("ThumbnailsListLabelText");
+			// 
+			// LanguageTabPage
+			// 
+			LanguageTabPage.BackColor = SystemColors.Control;
+			LanguageTabPage.Controls.Add(LanguageSettingsPanel);
+			LanguageTabPage.Location = new Point(124, 4);
+			LanguageTabPage.Margin = new Padding(5, 6, 5, 6);
+			LanguageTabPage.Name = "LanguageTabPage";
+			LanguageTabPage.Size = new Size(522, 411);
+			LanguageTabPage.TabIndex = 6;
+			LanguageTabPage.Text = LocalizationManager.GetString("LanguageTabText");
+			// 
+			// LanguageSettingsPanel
+			// 
+			LanguageSettingsPanel.BorderStyle = BorderStyle.FixedSingle;
+			LanguageSettingsPanel.Controls.Add(LanguageCombo);
+			LanguageSettingsPanel.Controls.Add(LanguageLabel);
+			LanguageSettingsPanel.Dock = DockStyle.Fill;
+			LanguageSettingsPanel.Location = new Point(5, 6);
+			LanguageSettingsPanel.Margin = new Padding(5, 6, 5, 6);
+			LanguageSettingsPanel.Name = "LanguageSettingsPanel";
+			LanguageSettingsPanel.Size = new Size(512, 399);
+			LanguageSettingsPanel.TabIndex = 19;
+			// 
+			// LanguageLabel
+			// 
+			LanguageLabel.AutoSize = true;
+			LanguageLabel.Location = new Point(23, 31);
+			LanguageLabel.Margin = new Padding(5, 0, 5, 0);
+			LanguageLabel.Name = "LanguageLabel";
+			LanguageLabel.Size = new Size(92, 25);
+			LanguageLabel.TabIndex = 1;
+			LanguageLabel.Text = LocalizationManager.GetString("LanguageLabelText");
+			// 
+			// LanguageCombo
+			// 
+			LanguageCombo.DropDownStyle = ComboBoxStyle.DropDownList;
+			LanguageCombo.FormattingEnabled = true;
+			LanguageCombo.Location = new Point(150, 28);
+			LanguageCombo.Margin = new Padding(5, 6, 5, 6);
+			LanguageCombo.Name = "LanguageCombo";
+			LanguageCombo.Size = new Size(251, 33);
+			LanguageCombo.TabIndex = 0;
+			LanguageCombo.SelectedIndexChanged += LanguageChanged_Handler;
 			// 
 			// AboutTabPage
 			// 
@@ -1080,7 +1137,7 @@ namespace EveOPreview.View
 			AboutTabPage.Name = "AboutTabPage";
 			AboutTabPage.Size = new Size(522, 411);
 			AboutTabPage.TabIndex = 5;
-			AboutTabPage.Text = "About";
+			AboutTabPage.Text = LocalizationManager.GetString("AboutTabText");
 			// 
 			// AboutPanel
 			// 
@@ -1108,7 +1165,7 @@ namespace EveOPreview.View
 			CreditMaintLabel.Padding = new Padding(13, 6, 13, 6);
 			CreditMaintLabel.Size = new Size(435, 37);
 			CreditMaintLabel.TabIndex = 7;
-			CreditMaintLabel.Text = "Credit to previous maintainer: Phrynohyas Tig-Rah";
+			CreditMaintLabel.Text = LocalizationManager.GetString("CreditMaintLabelText");
 			// 
 			// DocumentationLinkLabel
 			// 
@@ -1119,7 +1176,7 @@ namespace EveOPreview.View
 			DocumentationLinkLabel.Padding = new Padding(13, 6, 13, 6);
 			DocumentationLinkLabel.Size = new Size(389, 37);
 			DocumentationLinkLabel.TabIndex = 6;
-			DocumentationLinkLabel.Text = "For more information visit the forum thread:";
+			DocumentationLinkLabel.Text = LocalizationManager.GetString("DocumentationLinkLabelText");
 			// 
 			// DescriptionLabel
 			// 
@@ -1163,7 +1220,7 @@ namespace EveOPreview.View
 			DocumentationLink.Size = new Size(437, 63);
 			DocumentationLink.TabIndex = 2;
 			DocumentationLink.TabStop = true;
-			DocumentationLink.Text = "to be set from prresenter to be set from prresenter to be set from prresenter to be set from prresenter";
+			DocumentationLink.Text = LocalizationManager.GetString("DocumentationLinkText");
 			DocumentationLink.LinkClicked += DocumentationLinkClicked_Handler;
 			// 
 			// NotifyIcon
@@ -1225,6 +1282,9 @@ namespace EveOPreview.View
 			ClientsTabPage.ResumeLayout(false);
 			ClientsPanel.ResumeLayout(false);
 			ClientsPanel.PerformLayout();
+			LanguageTabPage.ResumeLayout(false);
+			LanguageSettingsPanel.ResumeLayout(false);
+			LanguageSettingsPanel.PerformLayout();
 			AboutTabPage.ResumeLayout(false);
 			AboutPanel.ResumeLayout(false);
 			AboutPanel.PerformLayout();
@@ -1289,5 +1349,9 @@ namespace EveOPreview.View
         private RadioButton OverlayLabelSWRadioButton;
         private Label label1;
 		private ComboBox AnimationStyleCombo;
+		private Label LanguageLabel;
+		private ComboBox LanguageCombo;
+		private TabPage LanguageTabPage;
+		private Panel LanguageSettingsPanel;
 	}
 }
