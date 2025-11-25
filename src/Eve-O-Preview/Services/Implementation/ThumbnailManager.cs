@@ -144,7 +144,9 @@ namespace EveOPreview.Services
 				int order = 0;
 				foreach( var x in _thumbnailViews )
 				{
-					_cycleOrder.Add(x.Value.Title, order++);
+					if (!_cycleOrder.ContainsKey(x.Value.Title)) {
+						_cycleOrder.Add(x.Value.Title, order++);
+					}
 				}
 			}
 
