@@ -14,6 +14,7 @@ namespace EveOPreview.View
 		#region Private constants
 		private const double OPACITY_THRESHOLD = 0.9;
 		private const double OPACITY_EPSILON = 0.1;
+		private const int CLICK_DRAG_THRESHOLD = 4;
 		#endregion
 
 		#region Private fields
@@ -31,6 +32,8 @@ namespace EveOPreview.View
 		private bool _isSizeChanged;
 
 		private bool _isCustomMouseModeActive;
+		private bool _isCropPanModeActive;
+		private bool _isCropPanMoved;
 
 		private double _opacity;
 		 
@@ -39,6 +42,11 @@ namespace EveOPreview.View
 		private Point _baseZoomLocation;
 		private Point _baseMousePosition;
 		private Size _baseZoomMaximumSize;
+		private Point _baseCropMousePosition;
+		private Rectangle _baseCropRegion;
+		private Point _rightMouseDownPosition;
+		private bool _rightMouseMoved;
+		private bool _rightClickPending;
 
 		private HotkeyHandler _hotkeyHandler;
 
@@ -70,6 +78,8 @@ namespace EveOPreview.View
 			this._isSizeChanged = true;
 
 			this._isCustomMouseModeActive = false;
+			this._isCropPanModeActive = false;
+			this._isCropPanMoved = false;
 
 			this._opacity = 0.1;
 
@@ -80,7 +90,8 @@ namespace EveOPreview.View
 				this.MouseLeave_Handler,
 				this.MouseDown_Handler,
 				this.MouseUp_Handler,
-				this.MouseMove_Handler
+				this.MouseMove_Handler,
+				this.MouseWheel_Handler
 				);
 
 			SetDefaultBorderColor();
@@ -139,9 +150,12 @@ namespace EveOPreview.View
 		public Action<IntPtr> ThumbnailLostFocus { get; set; }
 
 		public Action<IntPtr> ThumbnailActivated { get; set; }
+		public Action<IntPtr, Point> ThumbnailSingleClicked { get; set; }
+		public Action<IntPtr, Point> ThumbnailSingleRightClicked { get; set; }
 
 		public Action<IntPtr, bool> ThumbnailDeactivated { get; set; }
 		public Action<IntPtr> ThumbnailToggleCycleGroup { get; set; }
+		public Action PreviewCropChanged { get; set; }
 
 		private bool WindowMoved = false;
 
@@ -512,6 +526,101 @@ namespace EveOPreview.View
 			this._suppressResizeEventsTimestamp = DateTime.UtcNow.AddMilliseconds(_config.ThumbnailResizeTimeoutPeriod);
 		}
 
+		private bool IsCropEditEnabled()
+		{
+			return this._config.EnablePreviewCrop && !this.IsPreventPreviews();
+		}
+
+		private Rectangle GetOrCreateCropRegion(Size clientSize)
+		{
+			var configured = this._config.GetPreviewCropRegion(this.Title, Rectangle.Empty);
+			if (configured.Width <= 0 || configured.Height <= 0)
+			{
+				var initialized = new Rectangle(0, 0, clientSize.Width, clientSize.Height);
+				if (!string.IsNullOrEmpty(this.Title))
+				{
+					this._config.SetPreviewCropRegion(this.Title, initialized);
+				}
+				return initialized;
+			}
+
+			return this.ClampCropRegion(configured, clientSize);
+		}
+
+		private Rectangle ClampCropRegion(Rectangle region, Size clientSize)
+		{
+			var width = Math.Max(1, Math.Min(region.Width, clientSize.Width));
+			var height = Math.Max(1, Math.Min(region.Height, clientSize.Height));
+
+			var x = Math.Max(0, Math.Min(region.X, clientSize.Width - width));
+			var y = Math.Max(0, Math.Min(region.Y, clientSize.Height - height));
+
+			return new Rectangle(x, y, width, height);
+		}
+
+		private void ApplyCropRegion(Rectangle region, bool persist)
+		{
+			var clientSize = this.WindowManager.GetClientSize(this.Id);
+			if (clientSize.Width <= 0 || clientSize.Height <= 0)
+			{
+				return;
+			}
+
+			var clamped = this.ClampCropRegion(region, clientSize);
+			if (this._config.GetPreviewCropRegion(this.Title, Rectangle.Empty) == clamped)
+			{
+				return;
+			}
+
+			this._config.SetPreviewCropRegion(this.Title, clamped);
+			this.Refresh(true);
+
+			if (persist)
+			{
+				this.PreviewCropChanged?.Invoke();
+			}
+		}
+
+		private Point MapPreviewToClientPoint(Point previewPoint)
+		{
+			var clientSize = this.WindowManager.GetClientSize(this.Id);
+			if (clientSize.Width <= 0 || clientSize.Height <= 0 || this.ClientSize.Width <= 0 || this.ClientSize.Height <= 0)
+			{
+				return new Point(0, 0);
+			}
+
+			Rectangle viewport = this.GetPreviewViewport();
+			if (viewport.Width <= 0 || viewport.Height <= 0)
+			{
+				viewport = new Rectangle(0, 0, this.ClientSize.Width, this.ClientSize.Height);
+			}
+
+			int px = Math.Max(viewport.Left, Math.Min(previewPoint.X, viewport.Right - 1));
+			int py = Math.Max(viewport.Top, Math.Min(previewPoint.Y, viewport.Bottom - 1));
+
+			int viewX = px - viewport.Left;
+			int viewY = py - viewport.Top;
+
+			Rectangle sourceRegion = this.GetOrCreateCropRegion(clientSize);
+			if (!this._config.EnablePreviewCrop)
+			{
+				sourceRegion = new Rectangle(0, 0, clientSize.Width, clientSize.Height);
+			}
+
+			var clientX = sourceRegion.X + (int)Math.Round(((double)viewX / viewport.Width) * sourceRegion.Width, MidpointRounding.AwayFromZero);
+			var clientY = sourceRegion.Y + (int)Math.Round(((double)viewY / viewport.Height) * sourceRegion.Height, MidpointRounding.AwayFromZero);
+
+			clientX = Math.Max(0, Math.Min(clientX, Math.Max(0, clientSize.Width - 1)));
+			clientY = Math.Max(0, Math.Min(clientY, Math.Max(0, clientSize.Height - 1)));
+
+			return new Point(clientX, clientY);
+		}
+
+		protected virtual Rectangle GetPreviewViewport()
+		{
+			return new Rectangle(0, 0, this.ClientSize.Width, this.ClientSize.Height);
+		}
+
 		#region GUI events
 		protected override CreateParams CreateParams
 		{
@@ -561,6 +670,26 @@ namespace EveOPreview.View
 
 		private void MouseMove_Handler(object sender, MouseEventArgs e)
 		{
+			if (e.Button.HasFlag(MouseButtons.Right) && this._rightClickPending && !this._isCustomMouseModeActive)
+			{
+				this.UpdateRightClickTracking();
+				if (this._rightMouseMoved)
+				{
+					this.EnterCustomMouseMode();
+				}
+			}
+
+			if (this._isCustomMouseModeActive && e.Button.HasFlag(MouseButtons.Right))
+			{
+				this.UpdateRightClickTracking();
+			}
+
+			if (this._isCropPanModeActive && Control.MouseButtons.HasFlag(MouseButtons.Left))
+			{
+				this.ProcessCropPanMode();
+				return;
+			}
+
 			if (this._isCustomMouseModeActive)
 			{
 				this.ProcessCustomMouseMode(e.Button.HasFlag(MouseButtons.Left), e.Button.HasFlag(MouseButtons.Right));
@@ -569,22 +698,81 @@ namespace EveOPreview.View
 
 		private void MouseUp_Handler(object sender, MouseEventArgs e)
 		{
+			if ((e.Button == MouseButtons.Left) && this._isCropPanModeActive)
+			{
+				bool moved = this._isCropPanMoved;
+				this.ExitCropPanMode();
+				if (moved)
+				{
+					this.PreviewCropChanged?.Invoke();
+				}
+				else
+				{
+					this.ActivateThumbnailFromPreview(this.PointToClient(Control.MousePosition), MouseButtons.Left, true);
+				}
+				return;
+			}
+
 			if (e.Button == MouseButtons.Right)
 			{
-				this.ExitCustomMouseMode();
+				this.ExitCropPanMode();
+				this._rightClickPending = false;
 
-				// Snap to Grid on release of mouse (if moved)
-				if (_config.ThumbnailSnapToGrid && this.WindowMoved)
+				if (this._isCustomMouseModeActive)
 				{
-					var x = (int)Math.Round((double)this.Location.X / (double)_config.ThumbnailSnapToGridSizeX) * _config.ThumbnailSnapToGridSizeX;
-                    var y = (int)Math.Round((double)this.Location.Y / (double)_config.ThumbnailSnapToGridSizeY) * _config.ThumbnailSnapToGridSizeY;
-					this.Location = new Point(x, y);
-					this._baseZoomLocation = this.Location;
+					this.ExitCustomMouseMode();
 
-					this.WindowMoved = false;
+					// Snap to Grid on release of mouse (if moved)
+					if (_config.ThumbnailSnapToGrid && this.WindowMoved)
+					{
+						var x = (int)Math.Round((double)this.Location.X / (double)_config.ThumbnailSnapToGridSizeX) * _config.ThumbnailSnapToGridSizeX;
+	                    var y = (int)Math.Round((double)this.Location.Y / (double)_config.ThumbnailSnapToGridSizeY) * _config.ThumbnailSnapToGridSizeY;
+						this.Location = new Point(x, y);
+						this._baseZoomLocation = this.Location;
 
-                }
+						this.WindowMoved = false;
+
+					}
+				}
+				else
+				{
+					this.ActivateThumbnailFromPreview(this.PointToClient(Control.MousePosition), MouseButtons.Right, true);
+				}
+
+				this._rightMouseMoved = false;
 			}
+		}
+
+		private void MouseWheel_Handler(object sender, MouseEventArgs e)
+		{
+			if (!this.IsCropEditEnabled() || (e.Delta == 0))
+			{
+				return;
+			}
+
+			var clientSize = this.WindowManager.GetClientSize(this.Id);
+			if (clientSize.Width <= 1 || clientSize.Height <= 1 || this.ClientSize.Width <= 1 || this.ClientSize.Height <= 1)
+			{
+				return;
+			}
+
+			var currentRegion = this.GetOrCreateCropRegion(clientSize);
+
+			var pointer = this.PointToClient(Control.MousePosition);
+			pointer.X = Math.Max(0, Math.Min(pointer.X, this.ClientSize.Width));
+			pointer.Y = Math.Max(0, Math.Min(pointer.Y, this.ClientSize.Height));
+
+			var sourcePointerX = currentRegion.X + ((double)pointer.X / this.ClientSize.Width) * currentRegion.Width;
+			var sourcePointerY = currentRegion.Y + ((double)pointer.Y / this.ClientSize.Height) * currentRegion.Height;
+
+			var scale = e.Delta > 0 ? 0.9 : 1.1;
+			var targetWidth = Math.Max(64, (int)Math.Round(currentRegion.Width * scale, MidpointRounding.AwayFromZero));
+			var targetHeight = Math.Max(36, (int)Math.Round(currentRegion.Height * scale, MidpointRounding.AwayFromZero));
+
+			var targetX = (int)Math.Round(sourcePointerX - ((double)pointer.X / this.ClientSize.Width) * targetWidth, MidpointRounding.AwayFromZero);
+			var targetY = (int)Math.Round(sourcePointerY - ((double)pointer.Y / this.ClientSize.Height) * targetHeight, MidpointRounding.AwayFromZero);
+
+			this.ApplyCropRegion(new Rectangle(targetX, targetY, targetWidth, targetHeight), true);
 		}
 
 		private void HotkeyPressed_Handler(object sender, HandledEventArgs e)
@@ -625,6 +813,73 @@ namespace EveOPreview.View
 			this._baseMousePosition = Control.MousePosition;
 		}
 
+		private void BeginRightClickTracking()
+		{
+			this._rightMouseDownPosition = Control.MousePosition;
+			this._rightMouseMoved = false;
+			this._rightClickPending = true;
+		}
+
+		private void UpdateRightClickTracking()
+		{
+			if (this._rightMouseMoved)
+			{
+				return;
+			}
+
+			var current = Control.MousePosition;
+			int dx = Math.Abs(current.X - this._rightMouseDownPosition.X);
+			int dy = Math.Abs(current.Y - this._rightMouseDownPosition.Y);
+			if (dx >= CLICK_DRAG_THRESHOLD || dy >= CLICK_DRAG_THRESHOLD)
+			{
+				this._rightMouseMoved = true;
+			}
+		}
+
+		private void EnterCropPanMode()
+		{
+			var clientSize = this.WindowManager.GetClientSize(this.Id);
+			if (clientSize.Width <= 0 || clientSize.Height <= 0)
+			{
+				return;
+			}
+
+			this._isCropPanModeActive = true;
+			this._isCropPanMoved = false;
+			this._baseCropMousePosition = Control.MousePosition;
+			this._baseCropRegion = this.GetOrCreateCropRegion(clientSize);
+		}
+
+		private void ProcessCropPanMode()
+		{
+			var clientSize = this.WindowManager.GetClientSize(this.Id);
+			if (clientSize.Width <= 0 || clientSize.Height <= 0 || this.ClientSize.Width <= 0 || this.ClientSize.Height <= 0)
+			{
+				return;
+			}
+
+			Point mousePosition = Control.MousePosition;
+			int offsetX = mousePosition.X - this._baseCropMousePosition.X;
+			int offsetY = mousePosition.Y - this._baseCropMousePosition.Y;
+
+			var sourceOffsetX = -(int)Math.Round(((double)offsetX / this.ClientSize.Width) * this._baseCropRegion.Width, MidpointRounding.AwayFromZero);
+			var sourceOffsetY = -(int)Math.Round(((double)offsetY / this.ClientSize.Height) * this._baseCropRegion.Height, MidpointRounding.AwayFromZero);
+
+			var movedRegion = new Rectangle(
+				this._baseCropRegion.X + sourceOffsetX,
+				this._baseCropRegion.Y + sourceOffsetY,
+				this._baseCropRegion.Width,
+				this._baseCropRegion.Height
+			);
+
+			if (sourceOffsetX != 0 || sourceOffsetY != 0)
+			{
+				this._isCropPanMoved = true;
+			}
+
+			this.ApplyCropRegion(movedRegion, false);
+		}
+
 		private void ProcessCustomMouseMode(bool leftButton, bool rightButton)
 		{
 			Point mousePosition = Control.MousePosition;
@@ -654,9 +909,37 @@ namespace EveOPreview.View
 		{
 			this._isCustomMouseModeActive = false;
 		}
+
+		private void ExitCropPanMode()
+		{
+			this._isCropPanModeActive = false;
+			this._isCropPanMoved = false;
+		}
 		#endregion
 
 		#region Custom GUI events
+		private void ActivateThumbnailFromPreview(Point previewPoint, MouseButtons clickButton, bool isSingleClick)
+		{
+			var oldWindow = this._thumbnailManager.GetActiveClient();
+			if (isSingleClick)
+			{
+				Point mappedPoint = this.MapPreviewToClientPoint(previewPoint);
+				if (clickButton == MouseButtons.Left)
+				{
+					this.ThumbnailSingleClicked?.Invoke(this.Id, mappedPoint);
+				}
+				else if (clickButton == MouseButtons.Right)
+				{
+					this.ThumbnailSingleRightClicked?.Invoke(this.Id, mappedPoint);
+				}
+			}
+			this.ThumbnailActivated?.Invoke(this.Id);
+			this.SetHighlight();
+			this.Refresh(true);
+
+			oldWindow?.ClearBorder();
+		}
+
 		protected virtual void MouseDownEventHandler(MouseButtons mouseButtons, Keys modifierKeys)
 		{
 			switch (mouseButtons)
@@ -671,14 +954,17 @@ namespace EveOPreview.View
 					this.ThumbnailDeactivated?.Invoke(this.Id, true);
 					break;
 				case MouseButtons.Left:
-					var oldWindow = this._thumbnailManager.GetActiveClient();
-					this.ThumbnailActivated?.Invoke(this.Id);
-					this.SetHighlight();
-					this.Refresh(true);
-
-					oldWindow?.ClearBorder();
+					if (this.IsCropEditEnabled())
+					{
+						this.EnterCropPanMode();
+						break;
+					}
+					this.ActivateThumbnailFromPreview(this.PointToClient(Control.MousePosition), MouseButtons.Left, true);
 					break;
 				case MouseButtons.Right:
+					this.ExitCropPanMode();
+					this.BeginRightClickTracking();
+					break;
 				case MouseButtons.Left | MouseButtons.Right:
 					this.EnterCustomMouseMode();
 					break;

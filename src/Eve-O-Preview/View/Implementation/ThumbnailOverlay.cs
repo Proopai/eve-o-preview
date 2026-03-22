@@ -17,6 +17,7 @@ namespace EveOPreview.View
 		private readonly Action<object, MouseEventArgs> _areaMouseDownAction;
 		private readonly Action<object, MouseEventArgs> _areaMouseUpAction;
 		private readonly Action<object, MouseEventArgs> _areaMouseMoveAction;
+		private readonly Action<object, MouseEventArgs> _areaMouseWheelAction;
 		private bool _showOverlayText = true;
 		#endregion
 
@@ -25,7 +26,8 @@ namespace EveOPreview.View
 			Action<object, EventArgs> areaMouseLeaveAction,
 			Action<object, MouseEventArgs> areaMouseDownAction,
 			Action<object, MouseEventArgs> areaMouseUpAction,
-			Action<object, MouseEventArgs> areaMouseMoveAction
+			Action<object, MouseEventArgs> areaMouseMoveAction,
+			Action<object, MouseEventArgs> areaMouseWheelAction
 			)
 		{
 			this.Owner = owner;
@@ -34,6 +36,7 @@ namespace EveOPreview.View
 			this._areaMouseDownAction = areaMouseDownAction;
 			this._areaMouseUpAction = areaMouseUpAction;
 			this._areaMouseMoveAction = areaMouseMoveAction;
+			this._areaMouseWheelAction = areaMouseWheelAction;
 
 			InitializeComponent();
 		}
@@ -57,6 +60,10 @@ namespace EveOPreview.View
 		private void OverlayArea_MouseMove(object sender, MouseEventArgs e)
 		{
 			this._areaMouseMoveAction(this, e);
+		}
+		private void OverlayArea_MouseWheel(object sender, MouseEventArgs e)
+		{
+			this._areaMouseWheelAction(this, e);
 		}
 
 		public void SetOverlayLabel(string label)

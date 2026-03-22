@@ -84,6 +84,7 @@ namespace EveOPreview.Configuration.Implementation
 			};
 
 			this.PerClientLayout = new Dictionary<string, Dictionary<string, Point>>();
+			this.PerClientPreviewCropRegion = new Dictionary<string, Rectangle>();
 			this.FlatLayout = new Dictionary<string, Point>();
 			this.ClientLayout = new Dictionary<string, ClientLayout>();
 			this.ClientHotkey = new Dictionary<string, string>();
@@ -107,6 +108,8 @@ namespace EveOPreview.Configuration.Implementation
 
 			this.EnableClientLayoutTracking = false;
 			this.HideActiveClientThumbnail = false;
+			this.PropagateSingleClick = true;
+			this.PropagateSingleRightClick = true;
 			this.HideLoginClientThumbnail = false;
 			this.MinimizeInactiveClients = false;
 			this.HideCaptionOnClients = false;
@@ -116,6 +119,8 @@ namespace EveOPreview.Configuration.Implementation
 
 			this.HideThumbnailsOnLostFocus = false;
 			this.PreventPreviews = false;
+			this.EnablePreviewCrop = true;
+			this.PreviewCropRegion = new Rectangle(0, 0, 0, 0);
 			this.HideThumbnailsDelay = 2; // 2 thumbnails refresh cycles (1.0 sec)
 
 			this.ThumbnailSize = new Size(384, 216);
@@ -242,6 +247,10 @@ namespace EveOPreview.Configuration.Implementation
 		}
 
 		public bool HideActiveClientThumbnail { get; set; }
+		[JsonProperty("PropagateSingleClick")]
+		public bool PropagateSingleClick { get; set; }
+		[JsonProperty("PropagateSingleRightClick")]
+		public bool PropagateSingleRightClick { get; set; }
 		public bool HideLoginClientThumbnail { get; set; }
 		public bool MinimizeInactiveClients { get; set; }
 		public bool HideCaptionOnClients { get; set; }
@@ -263,6 +272,10 @@ namespace EveOPreview.Configuration.Implementation
 		}
 
 		public bool PreventPreviews { get; set; }
+		[JsonProperty("EnablePreviewCrop")]
+		public bool EnablePreviewCrop { get; set; }
+		[JsonProperty("PreviewCropRegion")]
+		public Rectangle PreviewCropRegion { get; set; }
 		public bool HideThumbnailsOnLostFocus { get; set; }
 		public int HideThumbnailsDelay { get; set; }
 
@@ -303,6 +316,8 @@ namespace EveOPreview.Configuration.Implementation
 
 		[JsonProperty]
 		private Dictionary<string, Dictionary<string, Point>> PerClientLayout { get; set; }
+		[JsonProperty("PerClientPreviewCropRegion")]
+		private Dictionary<string, Rectangle> PerClientPreviewCropRegion { get; set; }
 		[JsonProperty]
 		private Dictionary<string, Point> FlatLayout { get; set; }
 		[JsonProperty]
@@ -353,6 +368,16 @@ namespace EveOPreview.Configuration.Implementation
 			return this.PerClientZoomAnchor.TryGetValue(currentClient, out zoomAnchor) ? zoomAnchor : defaultZoomAnchor;
 		}
 
+		public Rectangle GetPreviewCropRegion(string currentClient, Rectangle defaultRegion)
+		{
+			if (!string.IsNullOrEmpty(currentClient) && this.PerClientPreviewCropRegion.TryGetValue(currentClient, out Rectangle region))
+			{
+				return region;
+			}
+
+			return defaultRegion;
+		}
+
 		public void SetThumbnailLocation(string currentClient, string activeClient, Point location)
 		{
 			Dictionary<string, Point> layoutSource;
@@ -376,6 +401,17 @@ namespace EveOPreview.Configuration.Implementation
 			}
 
 			layoutSource[currentClient] = location;
+		}
+
+		public void SetPreviewCropRegion(string currentClient, Rectangle region)
+		{
+			if (string.IsNullOrEmpty(currentClient))
+			{
+				this.PreviewCropRegion = region;
+				return;
+			}
+
+			this.PerClientPreviewCropRegion[currentClient] = region;
 		}
 
 		public ClientLayout GetClientLayout(string currentClient)

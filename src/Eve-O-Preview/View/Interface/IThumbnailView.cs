@@ -44,8 +44,11 @@ namespace EveOPreview.View
 		Action<IntPtr> ThumbnailLostFocus { get; set; }
 
 		Action<IntPtr> ThumbnailActivated { get; set; }
+		Action<IntPtr, Point> ThumbnailSingleClicked { get; set; }
+		Action<IntPtr, Point> ThumbnailSingleRightClicked { get; set; }
 		Action<IntPtr, bool> ThumbnailDeactivated { get; set; }
 		Action<IntPtr> ThumbnailToggleCycleGroup { get; set; }
+		Action PreviewCropChanged { get; set; }
 
 		IWindowManager WindowManager { get; }
 		void SetDefaultBorderColor();

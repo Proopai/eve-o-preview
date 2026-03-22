@@ -76,12 +76,20 @@ CCP Grimmi wrote:
 | Minimize to System Tray | Determines whether the main window form be minimized to windows tray when it is closed |
 | Track client locations | Determines whether the client's window position should be restored when it is activated or started |
 | Hide preview of active EVE client | Determines whether the thumbnail corresponding to the active EVE client is not displayed |
+| Propagate single left-click | If enabled, a single left-click on a preview is forwarded to the EVE client after activation |
+| Propagate single right-click | If enabled, a single right-click on a preview is forwarded to the EVE client after activation |
 | Minimize inactive EVE clients | Allows to auto-minimize inactive EVE clients to save CPU and GPU |
 | Animation Style | Use original animation style (0) or No Animation style (1). You may find Original is cleaner with fixed window mode and No Animation is cleaner with windowed mode. Especially when using minimize inactive clients.
 | Hide caption bar on clients | Hides (or shows) caption bar on eve clients |
 | Previews always on top | Determines whether EVE client thumbnails should stay on top of all other windows |
 | Hide previews when EVE client is not active | Determines whether all thumbnails should be visible only when an EVE client is active |
 | Unique layout for each EVE client | Determines whether thumbnails positions are different depending on the EVE client being active |
+| Use preview crop region | Enables cropping the preview source to a configured rectangle (see `PreviewCropRegion` below) |
+
+When `Use preview crop region` is enabled:
+* Mouse wheel over a thumbnail zooms the crop region in/out (toward cursor position)
+* Left-click + drag on a thumbnail pans the crop region
+* Right-click drag keeps moving/resizing thumbnail windows as usual
 
 #### **Thumbnail** Tab
 | Option | Description |
@@ -147,9 +155,13 @@ Some of the application options are not exposed in the GUI. They can be adjusted
 | --- | --- |
 | **ActiveClientHighlightThickness** | <div style="font-size: small">Thickness of the border used to highlight the active client's thumbnail.<br />Allowed values are **1**...**6**.<br />The default value is **3**<br />For example: **"ActiveClientHighlightThickness": 3**</div> |
 | **CompatibilityMode** | <div style="font-size: small">Enables the alternative render mode (see below)<br />The default value is **false**<br />For example: **"CompatibilityMode": true**</div> |
+| **EnablePreviewCrop** | <div style="font-size: small">Enable cropping of the source area shown in thumbnails.<br />The default value is **false**.<br />For example: **"EnablePreviewCrop": true**</div> |
+| **PreviewCropRegion** | <div style="font-size: small">Rectangle inside each client window to capture, using pixels and format `{ "X": 0, "Y": 0, "Width": 800, "Height": 450 }`.<br />If Width/Height are invalid, full client area is used.<br />For example: **"PreviewCropRegion": { "X": 0, "Y": 0, "Width": 800, "Height": 450 }**</div> |
 | **EnableThumbnailSnap** | <div style="font-size: small">Allows to disable thumbnails snap feature by setting its value to **false**<br />The default value is **true**<br />For example: **"EnableThumbnailSnap": true**</div> |
 | **HideThumbnailsDelay** | <div style="font-size: small">Delay before thumbnails are hidden if the **General** -> **Hide previews when EVE client is not active** option is enabled<br />The delay is measured in thumbnail refresh periods<br />The default value is **2** (corresponds to 1 second delay)<br />For example: **"HideThumbnailsDelay": 2**</div> |
 | **HideLoginClientThumbnail** | <div style="font-size: small">Hide EVE login window clients. If an Eve online client is sat at character selection screen - hide the preview window for this client<br />The default value is **false**<br />For example: **"HideLoginClientThumbnail": false**</div> |
+| **PropagateSingleClick** | <div style="font-size: small">Enable forwarding of single left-click on a preview to the target client after activation.<br />The default value is **false**.<br />For example: **"PropagateSingleClick": true**</div> |
+| **PropagateSingleRightClick** | <div style="font-size: small">Enable forwarding of single right-click on a preview to the target client after activation.<br />The default value is **false**.<br />For example: **"PropagateSingleRightClick": true**</div> |
 | **PriorityClients** | <div style="font-size: small">Allows to set a list of clients that are not auto-minimized on inactivity even if the **Minimize inactive EVE clients** option is enabled. Listed clients still can be minimized using Windows hotkeys or via _Ctrl+Click_ on the corresponding thumbnail<br />The default value is empty list **[]**<br />For example: **"PriorityClients": [ "EVE - Phrynohyas Tig-Rah", "EVE - Ondatra Patrouette" ]**</div> |
 | **ThumbnailMinimumSize** | <div style="font-size: small">Minimum thumbnail size that can be set either via GUI or by resizing a thumbnail window. Value is written in the form "width, height"<br />The default value is **"100, 80"**.<br />For example: **"ThumbnailMinimumSize": "100, 80"**</div> |
 | **ThumbnailMaximumSize** | <div style="font-size: small">Maximum thumbnail size that can be set either via GUI or by resizing a thumbnail window. Value is written in the form "width, height"<br />The default value is **"640, 400"**.<br />For example: **"ThumbnailMaximumSize": "640, 400"**</div> |

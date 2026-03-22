@@ -34,7 +34,9 @@ namespace EveOPreview.View
 				return;
 			}
 
-			var thumbnail = this.WindowManager.GetStaticThumbnail(this.Id);
+			var thumbnail = this._config.EnablePreviewCrop
+				? this.WindowManager.GetStaticThumbnail(this.Id, this.GetConfiguredSourceRectangle())
+				: this.WindowManager.GetStaticThumbnail(this.Id);
 			if (thumbnail != null)
 			{
 				var oldImage = this._thumbnail.Image;
@@ -68,6 +70,16 @@ namespace EveOPreview.View
 		private bool IsSizeUpdateRequired(Size currentSize, int width, int height)
 		{
 			return (currentSize.Width != width) || (currentSize.Height != height);
+		}
+
+		protected override Rectangle GetPreviewViewport()
+		{
+			return new Rectangle(this._thumbnail.Location, this._thumbnail.Size);
+		}
+
+		private Rectangle GetConfiguredSourceRectangle()
+		{
+			return this._config.GetPreviewCropRegion(this.Title, Rectangle.Empty);
 		}
 	}
 }

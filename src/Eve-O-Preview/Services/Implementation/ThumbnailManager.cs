@@ -11,6 +11,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Reflection.Metadata;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Forms;
@@ -47,6 +48,10 @@ namespace EveOPreview.Services
 
 		private bool _ignoreViewEvents;
 		private bool _isHoverEffectActive;
+		private readonly object _pendingSingleClicksSyncRoot;
+		private readonly Dictionary<IntPtr, Point> _pendingSingleClicks;
+		private readonly object _pendingSingleRightClicksSyncRoot;
+		private readonly Dictionary<IntPtr, Point> _pendingSingleRightClicks;
 
 		private int _refreshCycleCount;
 		private int _hideThumbnailsDelay;
@@ -70,6 +75,10 @@ namespace EveOPreview.Services
 			this._refreshCycleCount = 0;
 			this._locationChangeNotificationSyncRoot = new object();
 			this._enqueuedLocationChangeNotification = (IntPtr.Zero, null, null, Point.Empty, -1);
+			this._pendingSingleClicksSyncRoot = new object();
+			this._pendingSingleClicks = new Dictionary<IntPtr, Point>();
+			this._pendingSingleRightClicksSyncRoot = new object();
+			this._pendingSingleRightClicks = new Dictionary<IntPtr, Point>();
 
 			this._thumbnailViews = new Dictionary<IntPtr, IThumbnailView>();
 
@@ -329,7 +338,10 @@ namespace EveOPreview.Services
 				view.ThumbnailFocused = this.ThumbnailViewFocused;
 				view.ThumbnailLostFocus = this.ThumbnailViewLostFocus;
 				view.ThumbnailActivated = this.ThumbnailActivated;
+				view.ThumbnailSingleClicked = this.ThumbnailSingleClicked;
+				view.ThumbnailSingleRightClicked = this.ThumbnailSingleRightClicked;
 				view.ThumbnailDeactivated = this.ThumbnailDeactivated;
+				view.PreviewCropChanged = this.PreviewCropChanged;
 
 				view.ThumbnailToggleCycleGroup = this.ThumbnailToggleCycleGroup;
 
@@ -373,6 +385,14 @@ namespace EveOPreview.Services
 				IThumbnailView view = this._thumbnailViews[process.Handle];
 
 				this._thumbnailViews.Remove(view.Id);
+				lock (this._pendingSingleClicksSyncRoot)
+				{
+					this._pendingSingleClicks.Remove(view.Id);
+				}
+				lock (this._pendingSingleRightClicksSyncRoot)
+				{
+					this._pendingSingleRightClicks.Remove(view.Id);
+				}
 				if (view.Title != ThumbnailManager.DEFAULT_CLIENT_TITLE)
 				{
 					viewsRemoved.Add(view.Title);
@@ -385,7 +405,10 @@ namespace EveOPreview.Services
 				view.ThumbnailFocused = null;
 				view.ThumbnailLostFocus = null;
 				view.ThumbnailActivated = null;
+				view.ThumbnailSingleClicked = null;
+				view.ThumbnailSingleRightClicked = null;
 				view.ThumbnailToggleCycleGroup = null;
+				view.PreviewCropChanged = null;
 
 				view.Close();
 			}
@@ -654,6 +677,11 @@ namespace EveOPreview.Services
 			}
 		}
 
+		private async void PreviewCropChanged()
+		{
+			await this._mediator.Send(new SaveConfiguration());
+		}
+
 		private void ThumbnailViewLostFocus(IntPtr id)
 		{
 			if (!this._isHoverEffectActive)
@@ -676,6 +704,26 @@ namespace EveOPreview.Services
 		private void ThumbnailActivated(IntPtr id)
 		{
 			IThumbnailView view = this._thumbnailViews[id];
+			bool propagateClick = false;
+			Point clientPoint = Point.Empty;
+			bool propagateRightClick = false;
+			Point rightClientPoint = Point.Empty;
+			lock (this._pendingSingleClicksSyncRoot)
+			{
+				if (this._pendingSingleClicks.TryGetValue(id, out clientPoint))
+				{
+					propagateClick = this._configuration.PropagateSingleClick;
+					this._pendingSingleClicks.Remove(id);
+				}
+			}
+			lock (this._pendingSingleRightClicksSyncRoot)
+			{
+				if (this._pendingSingleRightClicks.TryGetValue(id, out rightClientPoint))
+				{
+					propagateRightClick = this._configuration.PropagateSingleRightClick;
+					this._pendingSingleRightClicks.Remove(id);
+				}
+			}
 
 			Task.Run(() =>
 				{
@@ -684,6 +732,16 @@ namespace EveOPreview.Services
 #else
 					this._windowManager.ActivateWindow(view.Id, this._configuration.WindowsAnimationStyle);
 #endif
+					if (propagateClick)
+					{
+						Thread.Sleep(40);
+						this._windowManager.PropagateLeftClick(view.Id, clientPoint);
+					}
+					if (propagateRightClick)
+					{
+						Thread.Sleep(40);
+						this._windowManager.PropagateRightClick(view.Id, rightClientPoint);
+					}
 				})
 				.ContinueWith((task) =>
 				{
@@ -692,6 +750,22 @@ namespace EveOPreview.Services
 					this.UpdateClientLayouts();
 					this.RefreshThumbnails();
 				}, TaskScheduler.FromCurrentSynchronizationContext());
+		}
+
+		private void ThumbnailSingleClicked(IntPtr id, Point clientPoint)
+		{
+			lock (this._pendingSingleClicksSyncRoot)
+			{
+				this._pendingSingleClicks[id] = clientPoint;
+			}
+		}
+
+		private void ThumbnailSingleRightClicked(IntPtr id, Point clientPoint)
+		{
+			lock (this._pendingSingleRightClicksSyncRoot)
+			{
+				this._pendingSingleRightClicks[id] = clientPoint;
+			}
 		}
 
 		private void ThumbnailDeactivated(IntPtr id, bool switchOut)

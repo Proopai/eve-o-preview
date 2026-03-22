@@ -30,6 +30,24 @@ namespace EveOPreview.Services.Interop
 		public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
 
 		[DllImport("user32.dll", SetLastError = true)]
+		public static extern bool PostMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+
+		[DllImport("user32.dll")]
+		public static extern bool ClientToScreen(IntPtr hWnd, ref POINT lpPoint);
+
+		[DllImport("user32.dll", SetLastError = true)]
+		public static extern bool LogicalToPhysicalPointForPerMonitorDPI(IntPtr hWnd, ref POINT lpPoint);
+
+		[DllImport("user32.dll")]
+		public static extern bool GetCursorPos(out POINT lpPoint);
+
+		[DllImport("user32.dll")]
+		public static extern bool SetCursorPos(int x, int y);
+
+		[DllImport("user32.dll", SetLastError = true)]
+		public static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint dwData, UIntPtr dwExtraInfo);
+
+		[DllImport("user32.dll", SetLastError = true)]
 		public static extern UInt32 GetWindowLong(IntPtr hWnd, int nIndex);
 
 		[DllImport("user32.dll")]

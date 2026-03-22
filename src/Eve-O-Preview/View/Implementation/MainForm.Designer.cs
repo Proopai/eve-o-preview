@@ -40,6 +40,8 @@ namespace EveOPreview.View
 			TabPage GeneralTabPage;
 			Panel GeneralSettingsPanel;
 			Label label4;
+			TabPage ExtendedTabPage;
+			Panel ExtendedSettingsPanel;
 			TabPage ThumbnailTabPage;
 			Panel ThumbnailSettingsPanel;
 			Label HeigthLabel;
@@ -65,9 +67,12 @@ namespace EveOPreview.View
 			MinimizeInactiveClientsCheckBox = new CheckBox();
 			EnableClientLayoutTrackingCheckBox = new CheckBox();
 			HideActiveClientThumbnailCheckBox = new CheckBox();
+			PropagateSingleClickCheckBox = new CheckBox();
+			PropagateSingleRightClickCheckBox = new CheckBox();
 			ShowThumbnailsAlwaysOnTopCheckBox = new CheckBox();
 			HideThumbnailsOnLostFocusCheckBox = new CheckBox();
 			EnablePerClientThumbnailsLayoutsCheckBox = new CheckBox();
+			EnablePreviewCropCheckBox = new CheckBox();
 			MinimizeToTrayCheckBox = new CheckBox();
 			label1 = new Label();
 			PreventPreviewColorButton = new Panel();
@@ -138,6 +143,8 @@ namespace EveOPreview.View
 			GeneralTabPage = new TabPage();
 			GeneralSettingsPanel = new Panel();
 			label4 = new Label();
+			ExtendedTabPage = new TabPage();
+			ExtendedSettingsPanel = new Panel();
 			ThumbnailTabPage = new TabPage();
 			ThumbnailSettingsPanel = new Panel();
 			HeigthLabel = new Label();
@@ -160,6 +167,8 @@ namespace EveOPreview.View
 			ContentTabControl.SuspendLayout();
 			GeneralTabPage.SuspendLayout();
 			GeneralSettingsPanel.SuspendLayout();
+			ExtendedTabPage.SuspendLayout();
+			ExtendedSettingsPanel.SuspendLayout();
 			ThumbnailTabPage.SuspendLayout();
 			ThumbnailSettingsPanel.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)ThumbnailSnapToGridSizeYNumericEdit).BeginInit();
@@ -216,6 +225,7 @@ namespace EveOPreview.View
 			ContentTabControl.Controls.Add(ZoomTabPage);
 			ContentTabControl.Controls.Add(OverlayTabPage);
 			ContentTabControl.Controls.Add(ClientsTabPage);
+			ContentTabControl.Controls.Add(ExtendedTabPage);
 			ContentTabControl.Controls.Add(AboutTabPage);
 			ContentTabControl.Dock = DockStyle.Fill;
 			ContentTabControl.DrawMode = TabDrawMode.OwnerDrawFixed;
@@ -333,6 +343,30 @@ namespace EveOPreview.View
 			HideActiveClientThumbnailCheckBox.UseVisualStyleBackColor = true;
 			HideActiveClientThumbnailCheckBox.CheckedChanged += OptionChanged_Handler;
 			// 
+			// PropagateSingleClickCheckBox
+			// 
+			PropagateSingleClickCheckBox.AutoSize = true;
+			PropagateSingleClickCheckBox.Location = new Point(9, 34);
+			PropagateSingleClickCheckBox.Margin = new Padding(4);
+			PropagateSingleClickCheckBox.Name = "PropagateSingleClickCheckBox";
+			PropagateSingleClickCheckBox.Size = new Size(218, 19);
+			PropagateSingleClickCheckBox.TabIndex = 30;
+			PropagateSingleClickCheckBox.Text = "Propagate single left-click to client";
+			PropagateSingleClickCheckBox.UseVisualStyleBackColor = true;
+			PropagateSingleClickCheckBox.CheckedChanged += OptionChanged_Handler;
+			// 
+			// PropagateSingleRightClickCheckBox
+			// 
+			PropagateSingleRightClickCheckBox.AutoSize = true;
+			PropagateSingleRightClickCheckBox.Location = new Point(9, 60);
+			PropagateSingleRightClickCheckBox.Margin = new Padding(4);
+			PropagateSingleRightClickCheckBox.Name = "PropagateSingleRightClickCheckBox";
+			PropagateSingleRightClickCheckBox.Size = new Size(225, 19);
+			PropagateSingleRightClickCheckBox.TabIndex = 31;
+			PropagateSingleRightClickCheckBox.Text = "Propagate single right-click to client";
+			PropagateSingleRightClickCheckBox.UseVisualStyleBackColor = true;
+			PropagateSingleRightClickCheckBox.CheckedChanged += OptionChanged_Handler;
+			// 
 			// ShowThumbnailsAlwaysOnTopCheckBox
 			// 
 			ShowThumbnailsAlwaysOnTopCheckBox.AutoSize = true;
@@ -376,6 +410,18 @@ namespace EveOPreview.View
 			EnablePerClientThumbnailsLayoutsCheckBox.UseVisualStyleBackColor = true;
 			EnablePerClientThumbnailsLayoutsCheckBox.CheckedChanged += OptionChanged_Handler;
 			// 
+			// EnablePreviewCropCheckBox
+			// 
+			EnablePreviewCropCheckBox.AutoSize = true;
+			EnablePreviewCropCheckBox.Location = new Point(9, 8);
+			EnablePreviewCropCheckBox.Margin = new Padding(4);
+			EnablePreviewCropCheckBox.Name = "EnablePreviewCropCheckBox";
+			EnablePreviewCropCheckBox.Size = new Size(180, 19);
+			EnablePreviewCropCheckBox.TabIndex = 29;
+			EnablePreviewCropCheckBox.Text = "Use preview crop region";
+			EnablePreviewCropCheckBox.UseVisualStyleBackColor = true;
+			EnablePreviewCropCheckBox.CheckedChanged += OptionChanged_Handler;
+			// 
 			// MinimizeToTrayCheckBox
 			// 
 			MinimizeToTrayCheckBox.AutoSize = true;
@@ -387,6 +433,31 @@ namespace EveOPreview.View
 			MinimizeToTrayCheckBox.Text = "Minimize to System Tray";
 			MinimizeToTrayCheckBox.UseVisualStyleBackColor = true;
 			MinimizeToTrayCheckBox.CheckedChanged += OptionChanged_Handler;
+			// 
+			// ExtendedTabPage
+			// 
+			ExtendedTabPage.BackColor = SystemColors.Control;
+			ExtendedTabPage.Controls.Add(ExtendedSettingsPanel);
+			ExtendedTabPage.Location = new Point(124, 4);
+			ExtendedTabPage.Margin = new Padding(4);
+			ExtendedTabPage.Name = "ExtendedTabPage";
+			ExtendedTabPage.Padding = new Padding(4);
+			ExtendedTabPage.Size = new Size(327, 243);
+			ExtendedTabPage.TabIndex = 6;
+			ExtendedTabPage.Text = "Extended";
+			// 
+			// ExtendedSettingsPanel
+			// 
+			ExtendedSettingsPanel.BorderStyle = BorderStyle.FixedSingle;
+			ExtendedSettingsPanel.Controls.Add(PropagateSingleRightClickCheckBox);
+			ExtendedSettingsPanel.Controls.Add(PropagateSingleClickCheckBox);
+			ExtendedSettingsPanel.Controls.Add(EnablePreviewCropCheckBox);
+			ExtendedSettingsPanel.Dock = DockStyle.Fill;
+			ExtendedSettingsPanel.Location = new Point(4, 4);
+			ExtendedSettingsPanel.Margin = new Padding(4);
+			ExtendedSettingsPanel.Name = "ExtendedSettingsPanel";
+			ExtendedSettingsPanel.Size = new Size(319, 235);
+			ExtendedSettingsPanel.TabIndex = 0;
 			// 
 			// ThumbnailTabPage
 			// 
@@ -402,6 +473,7 @@ namespace EveOPreview.View
 			// 
 			// ThumbnailSettingsPanel
 			// 
+			ThumbnailSettingsPanel.AutoScroll = true;
 			ThumbnailSettingsPanel.BorderStyle = BorderStyle.FixedSingle;
 			ThumbnailSettingsPanel.Controls.Add(label1);
 			ThumbnailSettingsPanel.Controls.Add(PreventPreviewColorButton);
@@ -1398,6 +1470,9 @@ namespace EveOPreview.View
 			GeneralTabPage.ResumeLayout(false);
 			GeneralSettingsPanel.ResumeLayout(false);
 			GeneralSettingsPanel.PerformLayout();
+			ExtendedTabPage.ResumeLayout(false);
+			ExtendedSettingsPanel.ResumeLayout(false);
+			ExtendedSettingsPanel.PerformLayout();
 			ThumbnailTabPage.ResumeLayout(false);
 			ThumbnailSettingsPanel.ResumeLayout(false);
 			ThumbnailSettingsPanel.PerformLayout();
@@ -1436,9 +1511,12 @@ namespace EveOPreview.View
 		private TabPage ZoomTabPage;
 		private CheckBox EnableClientLayoutTrackingCheckBox;
 		private CheckBox HideActiveClientThumbnailCheckBox;
+		private CheckBox PropagateSingleClickCheckBox;
+		private CheckBox PropagateSingleRightClickCheckBox;
 		private CheckBox ShowThumbnailsAlwaysOnTopCheckBox;
 		private CheckBox HideThumbnailsOnLostFocusCheckBox;
 		private CheckBox EnablePerClientThumbnailsLayoutsCheckBox;
+		private CheckBox EnablePreviewCropCheckBox;
 		private CheckBox MinimizeToTrayCheckBox;
 		private NumericUpDown ThumbnailsWidthNumericEdit;
 		private NumericUpDown ThumbnailsHeightNumericEdit;

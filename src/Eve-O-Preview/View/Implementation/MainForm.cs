@@ -81,7 +81,7 @@ namespace EveOPreview.View
 						this.NotifyIcon.Icon = this.Icon;
 					}
 				}
-				catch (Exception ex)
+				catch (Exception)
 				{
 					// Log ?
 				}
@@ -124,6 +124,18 @@ namespace EveOPreview.View
 			set => this.HideActiveClientThumbnailCheckBox.Checked = value;
 		}
 
+		public bool PropagateSingleClick
+		{
+			get => this.PropagateSingleClickCheckBox.Checked;
+			set => this.PropagateSingleClickCheckBox.Checked = value;
+		}
+
+		public bool PropagateSingleRightClick
+		{
+			get => this.PropagateSingleRightClickCheckBox.Checked;
+			set => this.PropagateSingleRightClickCheckBox.Checked = value;
+		}
+
 		public bool MinimizeInactiveClients
 		{
 			get => this.MinimizeInactiveClientsCheckBox.Checked;
@@ -149,6 +161,12 @@ namespace EveOPreview.View
 		{
 			get => this.PreventPreviewsCheckBox.Checked;
 			set => this.PreventPreviewsCheckBox.Checked = value;
+		}
+
+		public bool EnablePreviewCrop
+		{
+			get => this.EnablePreviewCropCheckBox.Checked;
+			set => this.EnablePreviewCropCheckBox.Checked = value;
 		}
 
 		public bool HideThumbnailsOnLostFocus

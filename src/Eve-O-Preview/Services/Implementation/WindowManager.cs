@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using EveOPreview.Configuration;
 using EveOPreview.Services.Interop;
 
@@ -15,9 +16,11 @@ namespace EveOPreview.Services.Implementation
 		#endregion
 
 		#region Private fields
+#if LINUX
 		private readonly bool _enableWineCompatabilityMode;
 		private string _bashLocation;
 		private string _wmctrlLocation;
+#endif
 		private const string EXCEPTION_DUMP_FILE_NAME = "EVE-O-Preview.log";
 		#endregion
 
@@ -274,9 +277,43 @@ namespace EveOPreview.Services.Implementation
 			return (windowRectangle.Left, windowRectangle.Top, windowRectangle.Right, windowRectangle.Bottom);
 		}
 
+		public Size GetClientSize(IntPtr handle)
+		{
+			User32NativeMethods.GetClientRect(handle, out RECT windowRect);
+			return new Size(windowRect.Right - windowRect.Left, windowRect.Bottom - windowRect.Top);
+		}
+
 		public bool IsWindowMaximized(IntPtr handle)
 		{
 			return User32NativeMethods.IsZoomed(handle);
+		}
+
+		public void PropagateLeftClick(IntPtr handle, Point clientPoint)
+		{
+			this.PropagateMouseClick(handle, clientPoint, InteropConstants.MOUSEEVENTF_LEFTDOWN, InteropConstants.MOUSEEVENTF_LEFTUP);
+		}
+
+		public void PropagateRightClick(IntPtr handle, Point clientPoint)
+		{
+			this.PropagateMouseClick(handle, clientPoint, InteropConstants.MOUSEEVENTF_RIGHTDOWN, InteropConstants.MOUSEEVENTF_RIGHTUP);
+		}
+
+		private void PropagateMouseClick(IntPtr handle, Point clientPoint, uint downFlag, uint upFlag)
+		{
+			POINT screenPoint = new POINT(Math.Max(0, clientPoint.X), Math.Max(0, clientPoint.Y));
+			if (!User32NativeMethods.ClientToScreen(handle, ref screenPoint))
+			{
+				return;
+			}
+
+			User32NativeMethods.GetCursorPos(out POINT originalCursorPoint);
+
+			User32NativeMethods.SetCursorPos(screenPoint.X, screenPoint.Y);
+			User32NativeMethods.mouse_event(downFlag, 0, 0, 0, UIntPtr.Zero);
+			Thread.Sleep(8);
+			User32NativeMethods.mouse_event(upFlag, 0, 0, 0, UIntPtr.Zero);
+			Thread.Sleep(8);
+			User32NativeMethods.SetCursorPos(originalCursorPoint.X, originalCursorPoint.Y);
 		}
 
 		public bool IsWindowMinimized(IntPtr handle)
@@ -294,12 +331,42 @@ namespace EveOPreview.Services.Implementation
 
 		public Image GetStaticThumbnail(IntPtr source)
 		{
+			return this.GetStaticThumbnail(source, Rectangle.Empty);
+		}
+
+		public Image GetStaticThumbnail(IntPtr source, Rectangle sourceRect)
+		{
 			var sourceContext = User32NativeMethods.GetDC(source);
 
 			User32NativeMethods.GetClientRect(source, out RECT windowRect);
 
-			var width = windowRect.Right - windowRect.Left;
-			var height = windowRect.Bottom - windowRect.Top;
+			var maxWidth = windowRect.Right - windowRect.Left;
+			var maxHeight = windowRect.Bottom - windowRect.Top;
+
+			int left = sourceRect.Left;
+			int top = sourceRect.Top;
+			int width = sourceRect.Width;
+			int height = sourceRect.Height;
+
+			if ((width <= 0) || (height <= 0))
+			{
+				left = 0;
+				top = 0;
+				width = maxWidth;
+				height = maxHeight;
+			}
+
+			left = Math.Max(0, left);
+			top = Math.Max(0, top);
+
+			if (left >= maxWidth || top >= maxHeight)
+			{
+				User32NativeMethods.ReleaseDC(source, sourceContext);
+				return null;
+			}
+
+			width = Math.Min(width, maxWidth - left);
+			height = Math.Min(height, maxHeight - top);
 
 			// Check if there is anything to make thumbnail of
 			if ((width < WINDOW_SIZE_THRESHOLD) || (height < WINDOW_SIZE_THRESHOLD))
@@ -313,7 +380,7 @@ namespace EveOPreview.Services.Implementation
 			var bitmap = Gdi32NativeMethods.CreateCompatibleBitmap(sourceContext, width, height);
 
 			var oldBitmap = Gdi32NativeMethods.SelectObject(destContext, bitmap);
-			Gdi32NativeMethods.BitBlt(destContext, 0, 0, width, height, sourceContext, 0, 0, Gdi32NativeMethods.SRCCOPY);
+			Gdi32NativeMethods.BitBlt(destContext, 0, 0, width, height, sourceContext, left, top, Gdi32NativeMethods.SRCCOPY);
 			Gdi32NativeMethods.SelectObject(destContext, oldBitmap);
 			Gdi32NativeMethods.DeleteDC(destContext);
 			User32NativeMethods.ReleaseDC(source, sourceContext);

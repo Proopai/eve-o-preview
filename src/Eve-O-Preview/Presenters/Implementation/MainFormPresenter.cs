@@ -108,11 +108,14 @@ namespace EveOPreview.Presenters
 
 			this.View.EnableClientLayoutTracking = this._configuration.EnableClientLayoutTracking;
 			this.View.HideActiveClientThumbnail = this._configuration.HideActiveClientThumbnail;
+			this.View.PropagateSingleClick = this._configuration.PropagateSingleClick;
+			this.View.PropagateSingleRightClick = this._configuration.PropagateSingleRightClick;
 			this.View.MinimizeInactiveClients = this._configuration.MinimizeInactiveClients;
 			this.View.HideCaptionOnClients = this._configuration.HideCaptionOnClients;
 			this.View.WindowsAnimationStyle = ViewAnimationStyleConverter.Convert(this._configuration.WindowsAnimationStyle);
 			this.View.ShowThumbnailsAlwaysOnTop = this._configuration.ShowThumbnailsAlwaysOnTop;
 			this.View.PreventPreviews = this._configuration.PreventPreviews;
+			this.View.EnablePreviewCrop = this._configuration.EnablePreviewCrop;
 			this.View.HideThumbnailsOnLostFocus = this._configuration.HideThumbnailsOnLostFocus;
 			this.View.EnablePerClientThumbnailLayouts = this._configuration.EnablePerClientThumbnailLayouts;
 
@@ -150,6 +153,8 @@ namespace EveOPreview.Presenters
 
 			this._configuration.EnableClientLayoutTracking = this.View.EnableClientLayoutTracking;
 			this._configuration.HideActiveClientThumbnail = this.View.HideActiveClientThumbnail;
+			this._configuration.PropagateSingleClick = this.View.PropagateSingleClick;
+			this._configuration.PropagateSingleRightClick = this.View.PropagateSingleRightClick;
 			this._configuration.MinimizeInactiveClients = this.View.MinimizeInactiveClients;
 
 			if (this._configuration.HideCaptionOnClients != this.View.HideCaptionOnClients ) {
@@ -162,6 +167,12 @@ namespace EveOPreview.Presenters
 			if (this._configuration.PreventPreviews != this.View.PreventPreviews)
 			{
 				this._configuration.PreventPreviews = this.View.PreventPreviews;
+				await this._mediator.Publish(new ThumbnailFrameSettingsUpdated());
+			}
+
+			if (this._configuration.EnablePreviewCrop != this.View.EnablePreviewCrop)
+			{
+				this._configuration.EnablePreviewCrop = this.View.EnablePreviewCrop;
 				await this._mediator.Publish(new ThumbnailFrameSettingsUpdated());
 			}
 

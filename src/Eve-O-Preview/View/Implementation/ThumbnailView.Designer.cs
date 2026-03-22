@@ -39,6 +39,7 @@ namespace EveOPreview.View
 			this.MouseEnter += new System.EventHandler(this.MouseEnter_Handler);
 			this.MouseLeave += new System.EventHandler(this.MouseLeave_Handler);
 			this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MouseMove_Handler);
+			this.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.MouseWheel_Handler);
 			this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MouseUp_Handler);
 			this.Move += new System.EventHandler(this.Move_Handler);
 			this.Resize += new System.EventHandler(this.Resize_Handler);

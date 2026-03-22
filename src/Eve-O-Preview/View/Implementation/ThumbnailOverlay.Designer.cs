@@ -51,6 +51,7 @@
 			OverlayAreaPictureBox.MouseEnter += OverlayArea_MouseEnter;
 			OverlayAreaPictureBox.MouseLeave += OverlayArea_MouseLeave;
 			OverlayAreaPictureBox.MouseMove += OverlayArea_MouseMove;
+			OverlayAreaPictureBox.MouseWheel += OverlayArea_MouseWheel;
 			OverlayAreaPictureBox.MouseUp += OverlayArea_MouseUp;
 			// 
 			// OverlayLabel
@@ -69,6 +70,7 @@
 			OverlayLabel.MouseEnter += OverlayArea_MouseEnter;
 			OverlayLabel.MouseLeave += OverlayArea_MouseLeave;
 			OverlayLabel.MouseMove += OverlayArea_MouseMove;
+			OverlayLabel.MouseWheel += OverlayArea_MouseWheel;
 			OverlayLabel.MouseUp += OverlayArea_MouseUp;
 			// 
 			// CycleGroupIndicator
@@ -86,6 +88,7 @@
 			CycleGroupIndicator.MouseEnter += OverlayArea_MouseEnter;
 			CycleGroupIndicator.MouseLeave += OverlayArea_MouseLeave;
 			CycleGroupIndicator.MouseMove += OverlayArea_MouseMove;
+			CycleGroupIndicator.MouseWheel += OverlayArea_MouseWheel;
 			CycleGroupIndicator.MouseUp += OverlayArea_MouseUp;
 			// 
 			// ThumbnailOverlay
@@ -106,6 +109,7 @@
 			SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
 			Text = "PreviewOverlay";
 			TransparencyKey = System.Drawing.Color.FromArgb(0, 0, 1);
+			MouseWheel += OverlayArea_MouseWheel;
 			((System.ComponentModel.ISupportInitialize)OverlayAreaPictureBox).EndInit();
 			((System.ComponentModel.ISupportInitialize)CycleGroupIndicator).EndInit();
 			ResumeLayout(false);

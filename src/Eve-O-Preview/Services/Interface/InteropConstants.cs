@@ -63,6 +63,13 @@ namespace EveOPreview.Services
 
 		public const int WM_SIZE = 5;
 		public const int WM_SYSCOMMAND = 0x0112;
+		public const int WM_LBUTTONDOWN = 0x0201;
+		public const int WM_LBUTTONUP = 0x0202;
+		public const int MK_LBUTTON = 0x0001;
+		public const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
+		public const uint MOUSEEVENTF_LEFTUP = 0x0004;
+		public const uint MOUSEEVENTF_RIGHTDOWN = 0x0008;
+		public const uint MOUSEEVENTF_RIGHTUP = 0x0010;
 
 		public const int SC_MINIMIZE = 0xf020;
 

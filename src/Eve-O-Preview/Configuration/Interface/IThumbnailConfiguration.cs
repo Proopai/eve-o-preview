@@ -41,6 +41,8 @@ namespace EveOPreview.Configuration
 
 		bool EnableClientLayoutTracking { get; set; }
 		bool HideActiveClientThumbnail { get; set; }
+		bool PropagateSingleClick { get; set; }
+		bool PropagateSingleRightClick { get; set; }
 		bool HideLoginClientThumbnail { get; set; }
 		bool MinimizeInactiveClients { get; set; }
 		bool HideCaptionOnClients { get; set; }
@@ -49,6 +51,8 @@ namespace EveOPreview.Configuration
 		bool EnablePerClientThumbnailLayouts { get; set; }
 
 		bool PreventPreviews { get; set; }
+		bool EnablePreviewCrop { get; set; }
+		Rectangle PreviewCropRegion { get; set; }
 		bool HideThumbnailsOnLostFocus { get; set; }
 		int HideThumbnailsDelay { get; set; }
 
@@ -86,7 +90,9 @@ namespace EveOPreview.Configuration
 		Point GetThumbnailLocation(string currentClient, string activeClient, Point defaultLocation);
 		Size GetThumbnailSize(string currentClient, string activeClient, Size defaultSize);
 		ZoomAnchor GetZoomAnchor(string currentClient, ZoomAnchor defaultZoomAnchor);
+		Rectangle GetPreviewCropRegion(string currentClient, Rectangle defaultRegion);
 		void SetThumbnailLocation(string currentClient, string activeClient, Point location);
+		void SetPreviewCropRegion(string currentClient, Rectangle region);
 
 		ClientLayout GetClientLayout(string currentClient);
 		void SetClientLayout(string currentClient, ClientLayout layout);
