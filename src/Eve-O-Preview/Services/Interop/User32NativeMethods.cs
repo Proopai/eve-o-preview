@@ -11,6 +11,27 @@ namespace EveOPreview.Services.Interop
 		[DllImport("user32.dll")]
 		public static extern IntPtr GetForegroundWindow();
 
+		public const uint EVENT_SYSTEM_FOREGROUND = 0x0003;
+
+		public const uint WINEVENT_OUTOFCONTEXT = 0x0000;
+
+		public delegate void WinEventProc(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsTimeStamp);
+
+		[DllImport("user32.dll")]
+		public static extern IntPtr SetWinEventHook(uint eventMin, uint eventMax, IntPtr hmodWinEventProc, WinEventProc lpfnWinEventProc, uint idProcess, uint idThread, uint dwFlags);
+
+		[DllImport("user32.dll")]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool UnhookWinEvent(IntPtr hWinEventHook);
+
+		public const uint GA_ROOT = 2;
+
+		[DllImport("user32.dll")]
+		public static extern IntPtr GetAncestor(IntPtr hwnd, uint gaFlags);
+
+		[DllImport("user32.dll")]
+		public static extern IntPtr GetParent(IntPtr hwnd);
+
 		[DllImport("user32.dll")]
 		public static extern bool SetForegroundWindow(IntPtr window);
 

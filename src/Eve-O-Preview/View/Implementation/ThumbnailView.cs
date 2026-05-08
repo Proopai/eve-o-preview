@@ -85,7 +85,7 @@ namespace EveOPreview.View
 
 			SetDefaultBorderColor();
 			SetPreventPreviews();
-			this._overlay.EnableFakePreview(this._preventPreviews.Value, false, 0, SystemColors.Control);
+			this._overlay.EnableFakePreview(this._preventPreviews.Value, false, 0, 0, 0, 0, SystemColors.Control);
 			this._thumbnailManager = thumbnailManager;
 		}
 
@@ -103,7 +103,7 @@ namespace EveOPreview.View
 				this._overlay.SetPropertiesOverlayLabel(_config.OverlayLabelFont, _config.OverlayLabelColor, _config.OverlayLabelAnchor);
 				SetDefaultBorderColor();
 				SetPreventPreviews();
-				this._overlay.EnableFakePreview(this._preventPreviews.Value, false, 0, SystemColors.Control);
+				this._overlay.EnableFakePreview(this._preventPreviews.Value, false, 0, 0, 0, 0, SystemColors.Control);
 				this._overlay.SetCycleGroupIndicator(this.IsExcludedFromCycleGroup , _config.CycleGroupIndicatorAnchor);
 			}
 		}
@@ -454,7 +454,7 @@ namespace EveOPreview.View
 			{
 				//No highlighting enabled, so no math required
 				this.ResizeThumbnail(baseWidth, baseHeight, 0, 0, 0, 0);
-				this._overlay.EnableFakePreview(this._preventPreviews.Value,false, 0, this._preventPreviewColor.Value);
+				this._overlay.EnableFakePreview(this._preventPreviews.Value, false, 0, 0, 0, 0, this._preventPreviewColor.Value);
 				return;
 			}
 
@@ -466,7 +466,7 @@ namespace EveOPreview.View
 			int highlightWidthLeft = (baseWidth - actualWidth) / 2;
 			int highlightWidthRight = baseWidth - actualWidth - highlightWidthLeft;
 
-			this._overlay.EnableFakePreview(this._preventPreviews.Value, true, this._highlightWidth, this._preventPreviewColor.Value);
+			this._overlay.EnableFakePreview(this._preventPreviews.Value, true, this._highlightWidth, highlightWidthRight, this._highlightWidth, highlightWidthLeft, this._preventPreviewColor.Value);
 			this.ResizeThumbnail(this.ClientSize.Width, this.ClientSize.Height, this._highlightWidth, highlightWidthRight, this._highlightWidth, highlightWidthLeft);
 		}
 

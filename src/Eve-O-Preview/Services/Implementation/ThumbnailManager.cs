@@ -52,6 +52,10 @@ namespace EveOPreview.Services
 		private int _hideThumbnailsDelay;
 
 		private List<HotkeyHandler> _cycleClientHotkeyHandlers = new List<HotkeyHandler>();
+		private List<HotkeyHandler> _minimizeAllHotkeyHandlers = new List<HotkeyHandler>();
+		private bool _cycleHotkeysRegistered;
+		private IntPtr _foregroundWinEventHook;
+		private User32NativeMethods.WinEventProc _foregroundWinEventDelegate;
 		#endregion
 
 		public ThumbnailManager(IMediator mediator, IThumbnailConfiguration configuration, IProcessMonitor processMonitor, IWindowManager windowManager, IThumbnailViewFactory factory)
@@ -251,10 +255,124 @@ namespace EveOPreview.Services
 					e.Handled = true;
 				};
 
-				newHandler.Register();
 				this._cycleClientHotkeyHandlers.Add(newHandler);
 			}
 		}
+
+		/// <summary>
+		/// True when keyboard focus belongs to (or is under) one of our tracked EVE main windows.
+		/// Cycle hotkeys are registered with the OS only while this is true so keys (e.g. backtick) reach other apps.
+		/// </summary>
+		private bool IsForegroundATrackedEveClientWindow()
+		{
+			IntPtr foreground = this._windowManager.GetForegroundWindowHandle();
+			if (foreground == IntPtr.Zero)
+			{
+				return false;
+			}
+
+			// Treat EVE clients and their thumbnail/overlay windows as "in focus" for cycle hotkeys.
+			if (this.IsClientWindowActive(foreground) || this.IsMainWindowActive(foreground))
+			{
+				return true;
+			}
+
+			IntPtr root = User32NativeMethods.GetAncestor(foreground, User32NativeMethods.GA_ROOT);
+			if (root != IntPtr.Zero && (this.IsClientWindowActive(root) || this.IsMainWindowActive(root)))
+			{
+				return true;
+			}
+
+			for (IntPtr h = foreground; h != IntPtr.Zero; h = User32NativeMethods.GetParent(h))
+			{
+				if (this.IsClientWindowActive(h) || this.IsMainWindowActive(h))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		private void UpdateCycleHotkeyRegistration()
+		{
+			bool shouldRegister = !this._configuration.OnlyRegisterCycleHotkeysWhenEveFocused
+				|| this.IsForegroundATrackedEveClientWindow();
+			if (shouldRegister == this._cycleHotkeysRegistered)
+			{
+				return;
+			}
+
+			if (shouldRegister)
+			{
+				foreach (HotkeyHandler handler in this._cycleClientHotkeyHandlers)
+				{
+					handler.Register();
+				}
+
+				this._cycleHotkeysRegistered = true;
+			}
+			else
+			{
+				foreach (HotkeyHandler handler in this._cycleClientHotkeyHandlers)
+				{
+					handler.Unregister();
+				}
+
+				this._cycleHotkeysRegistered = false;
+			}
+		}
+
+		private void UnregisterCycleHotkeysForced()
+		{
+			foreach (HotkeyHandler handler in this._cycleClientHotkeyHandlers)
+			{
+				handler.Unregister();
+			}
+
+			this._cycleHotkeysRegistered = false;
+		}
+
+		private void AttachForegroundChangeHook()
+		{
+			if (this._foregroundWinEventHook != IntPtr.Zero)
+			{
+				return;
+			}
+
+			this._foregroundWinEventDelegate = this.OnForegroundWinEvent;
+			this._foregroundWinEventHook = User32NativeMethods.SetWinEventHook(
+				User32NativeMethods.EVENT_SYSTEM_FOREGROUND,
+				User32NativeMethods.EVENT_SYSTEM_FOREGROUND,
+				IntPtr.Zero,
+				this._foregroundWinEventDelegate,
+				0,
+				0,
+				User32NativeMethods.WINEVENT_OUTOFCONTEXT);
+		}
+
+		private void DetachForegroundChangeHook()
+		{
+			if (this._foregroundWinEventHook == IntPtr.Zero)
+			{
+				return;
+			}
+
+			User32NativeMethods.UnhookWinEvent(this._foregroundWinEventHook);
+			this._foregroundWinEventHook = IntPtr.Zero;
+			this._foregroundWinEventDelegate = null;
+		}
+
+		private void OnForegroundWinEvent(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsTimeStamp)
+		{
+			if (eventType != User32NativeMethods.EVENT_SYSTEM_FOREGROUND)
+			{
+				return;
+			}
+
+			this.UpdateCycleHotkeyRegistration();
+		}
+
 		public void RegisterMinimizeAllClientsHotkey(IEnumerable<Keys> keys)
 		{
 			foreach (var hotkey in keys)
@@ -272,26 +390,30 @@ namespace EveOPreview.Services
 				};
 
 				newHandler.Register();
-				this._cycleClientHotkeyHandlers.Add(newHandler);
+				this._minimizeAllHotkeyHandlers.Add(newHandler);
 			}
 		}
 
 		public void Start()
 		{
 			this._thumbnailUpdateTimer.Start();
-
+			this.AttachForegroundChangeHook();
 			this.RefreshThumbnails();
+			this.UpdateCycleHotkeyRegistration();
 		}
 
 		public void Stop()
 		{
 			this._thumbnailUpdateTimer.Stop();
+			this.UnregisterCycleHotkeysForced();
+			this.DetachForegroundChangeHook();
 		}
 
 		private void ThumbnailUpdateTimerTick(object sender, EventArgs e)
 		{
 			this.UpdateThumbnailsList();
 			this.RefreshThumbnails();
+			this.UpdateCycleHotkeyRegistration();
 		}
 
 		private async void UpdateThumbnailsList()

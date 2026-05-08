@@ -4,7 +4,6 @@ using System;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Windows.Forms;
-using System.Windows.Shapes;
 using Rectangle = System.Drawing.Rectangle;
 
 namespace EveOPreview.View
@@ -65,63 +64,103 @@ namespace EveOPreview.View
 		}
 		public void SetCycleGroupIndicator(bool displayCycleGroup, ZoomAnchor anchor)
 		{
-			if (displayCycleGroup)
+			if (!displayCycleGroup)
 			{
-				this.CycleGroupIndicator.Visible = true;
-				int margin = 2;
-				int size = Math.Min(Math.Min(this.Height - margin, this.Width - margin), 40);
+				this.CycleGroupIndicator.Visible = false;
+				return;
+			}
 
-				this.CycleGroupIndicator.BackColor = this.OverlayAreaPictureBox.BackColor;
+			this.SuspendLayout();
+			try
+			{
+				// Child of the preview surface so Left/Top are in the same space as the live thumbnail (no form vs. box drift).
+				PictureBox host = this.OverlayAreaPictureBox;
+				if (this.CycleGroupIndicator.Parent != host)
+				{
+					this.CycleGroupIndicator.Parent?.Controls.Remove(this.CycleGroupIndicator);
+					host.Controls.Add(this.CycleGroupIndicator);
+				}
+
+				this.CycleGroupIndicator.BringToFront();
+				this.CycleGroupIndicator.Visible = true;
+
+				this.PerformLayout();
+				host.PerformLayout();
+
+				int margin = 2;
+				int cw = host.ClientSize.Width;
+				int ch = host.ClientSize.Height;
+				int innerW = Math.Max(0, cw - 2 * margin);
+				int innerH = Math.Max(0, ch - 2 * margin);
+				int size = Math.Max(16, Math.Min(innerW, innerH));
+
+				this.CycleGroupIndicator.BackColor = host.BackColor;
 				this.CycleGroupIndicator.Width = size;
 				this.CycleGroupIndicator.Height = size;
 
-				this.CycleGroupIndicator.Top = 1;
-				this.CycleGroupIndicator.Left = this.Width - size - 2;
-				switch (anchor)
+				// Center on the character-name label so a large badge stays on the text (config “corner”
+				// anchors were designed for a small icon and read as horizontally shifted otherwise).
+				Rectangle labelInHost = new Rectangle(
+					this.OverlayLabel.Left - host.Left,
+					this.OverlayLabel.Top - host.Top,
+					this.OverlayLabel.Width,
+					this.OverlayLabel.Height);
+				bool labelOk = !string.IsNullOrEmpty(this.OverlayLabel.Text)
+					&& labelInHost.Width > 0 && labelInHost.Height > 0;
+
+				if (labelOk)
 				{
-					case ZoomAnchor.NW:
-						this.CycleGroupIndicator.Left = margin;
-						this.CycleGroupIndicator.Top = margin;
-						break;
-					case ZoomAnchor.N:
-						this.CycleGroupIndicator.Left = (this.Width / 2) - (this.CycleGroupIndicator.Width / 2);
-						this.CycleGroupIndicator.Top = margin;
-						break;
-					case ZoomAnchor.NE:
-						this.CycleGroupIndicator.Left = this.Width - this.CycleGroupIndicator.Width - margin;
-						this.CycleGroupIndicator.Top = margin;
-						break;
-					case ZoomAnchor.W:
-						this.CycleGroupIndicator.Left = margin;
-						this.CycleGroupIndicator.Top = (this.Height / 2) - (this.CycleGroupIndicator.Height / 2);
-						break;
-					case ZoomAnchor.C:
-						this.CycleGroupIndicator.Left = (this.Width / 2) - (this.CycleGroupIndicator.Width / 2);
-						this.CycleGroupIndicator.Top = (this.Height / 2) - (this.CycleGroupIndicator.Height / 2);
-						break;
-					case ZoomAnchor.E:
-						this.CycleGroupIndicator.Left = this.Width - this.CycleGroupIndicator.Width - margin;
-						this.CycleGroupIndicator.Top = (this.Height / 2) - (this.CycleGroupIndicator.Height / 2);
-						break;
-					case ZoomAnchor.SW:
-						this.CycleGroupIndicator.Left = margin;
-						this.CycleGroupIndicator.Top = this.Height - this.CycleGroupIndicator.Height - margin;
-						break;
-					case ZoomAnchor.S:
-						this.CycleGroupIndicator.Left = (this.Width / 2) - (this.CycleGroupIndicator.Width / 2);
-						this.CycleGroupIndicator.Top = this.Height - this.CycleGroupIndicator.Height - margin;
-						break;
-					case ZoomAnchor.SE:
-						this.CycleGroupIndicator.Left = this.Width - this.CycleGroupIndicator.Width - margin;
-						this.CycleGroupIndicator.Top = this.Height - this.CycleGroupIndicator.Height - margin;
-						break;
+					int left = labelInHost.Left + (labelInHost.Width - size) / 2;
+					int top = labelInHost.Top + (labelInHost.Height - size) / 2;
+					this.CycleGroupIndicator.Left = Math.Max(0, Math.Min(left, cw - size));
+					this.CycleGroupIndicator.Top = Math.Max(0, Math.Min(top, ch - size));
 				}
-
-
+				else
+				{
+					switch (anchor)
+					{
+						case ZoomAnchor.NW:
+							this.CycleGroupIndicator.Left = margin;
+							this.CycleGroupIndicator.Top = margin;
+							break;
+						case ZoomAnchor.N:
+							this.CycleGroupIndicator.Left = (cw - size) / 2;
+							this.CycleGroupIndicator.Top = margin;
+							break;
+						case ZoomAnchor.NE:
+							this.CycleGroupIndicator.Left = cw - size - margin;
+							this.CycleGroupIndicator.Top = margin;
+							break;
+						case ZoomAnchor.W:
+							this.CycleGroupIndicator.Left = margin;
+							this.CycleGroupIndicator.Top = (ch - size) / 2;
+							break;
+						case ZoomAnchor.C:
+							this.CycleGroupIndicator.Left = (cw - size) / 2;
+							this.CycleGroupIndicator.Top = (ch - size) / 2;
+							break;
+						case ZoomAnchor.E:
+							this.CycleGroupIndicator.Left = cw - size - margin;
+							this.CycleGroupIndicator.Top = (ch - size) / 2;
+							break;
+						case ZoomAnchor.SW:
+							this.CycleGroupIndicator.Left = margin;
+							this.CycleGroupIndicator.Top = ch - size - margin;
+							break;
+						case ZoomAnchor.S:
+							this.CycleGroupIndicator.Left = (cw - size) / 2;
+							this.CycleGroupIndicator.Top = ch - size - margin;
+							break;
+						case ZoomAnchor.SE:
+							this.CycleGroupIndicator.Left = cw - size - margin;
+							this.CycleGroupIndicator.Top = ch - size - margin;
+							break;
+					}
+				}
 			}
-			else
+			finally
 			{
-				this.CycleGroupIndicator.Visible = false;
+				this.ResumeLayout(performLayout: false);
 			}
 		}
 
@@ -195,7 +234,7 @@ namespace EveOPreview.View
 			//this.OverlayLabel.Visible = enable;
 			this._showOverlayText = enable;
 		}
-		public void EnableFakePreview(bool enable, bool resizeForHighlight, int highlightSize, Color bgColor)
+		public void EnableFakePreview(bool enable, bool resizeForHighlight, int insetTop, int insetRight, int insetBottom, int insetLeft, Color bgColor)
 		{
 			bool IsLocationUpdateRequired(Point currentLocation, int left, int top)
 			{
@@ -207,28 +246,35 @@ namespace EveOPreview.View
 				return (currentSize.Width != width) || (currentSize.Height != height);
 			}
 
-
 			if (!enable)
 			{
 				OverlayAreaPictureBox.BackColor = Color.Transparent;
 				OverlayLabel.BackColor = Color.Transparent;
-				OverlayAreaPictureBox.Dock = DockStyle.Fill;
 			}
 			else
 			{
 				OverlayAreaPictureBox.BackColor = bgColor;
 				OverlayLabel.BackColor = Color.Transparent;
-				OverlayAreaPictureBox.Dock = DockStyle.None;
 			}
 
-			var left = 0 + highlightSize;
-			var top = 0 + highlightSize;
+			if (!resizeForHighlight)
+			{
+				OverlayAreaPictureBox.Dock = DockStyle.Fill;
+				return;
+			}
+
+			OverlayAreaPictureBox.Dock = DockStyle.None;
+
+			var left = insetLeft;
+			var top = insetTop;
+			var width = Math.Max(0, this.ClientSize.Width - insetLeft - insetRight);
+			var height = Math.Max(0, this.ClientSize.Height - insetTop - insetBottom);
+
 			if (IsLocationUpdateRequired(OverlayAreaPictureBox.Location, left, top))
 			{
 				OverlayAreaPictureBox.Location = new Point(left, top);
 			}
-			var width = this.ClientSize.Width - (highlightSize * 2);
-			var height = this.ClientSize.Height - (highlightSize * 2);
+
 			if (IsSizeUpdateRequired(OverlayAreaPictureBox.Size, width, height))
 			{
 				OverlayAreaPictureBox.Size = new Size(width, height);
@@ -243,7 +289,10 @@ namespace EveOPreview.View
 
 			e.Graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
 
-			TextRenderer.DrawText(e.Graphics, l.Text, l.Font, new Rectangle(l.Left, l.Top, l.Width, l.Height), l.ForeColor, flags);
+			// Label is positioned on the form; paint uses picturebox graphics (letterboxed preview).
+			var pb = this.OverlayAreaPictureBox;
+			var textRect = new Rectangle(l.Left - pb.Left, l.Top - pb.Top, l.Width, l.Height);
+			TextRenderer.DrawText(e.Graphics, l.Text, l.Font, textRect, l.ForeColor, flags);
 		}
 
 		private void OverlayAreaPictureBox_Paint(object sender, PaintEventArgs e)

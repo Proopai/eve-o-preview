@@ -67,6 +67,7 @@ namespace EveOPreview.View
 			HideActiveClientThumbnailCheckBox = new CheckBox();
 			ShowThumbnailsAlwaysOnTopCheckBox = new CheckBox();
 			HideThumbnailsOnLostFocusCheckBox = new CheckBox();
+			OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox = new CheckBox();
 			EnablePerClientThumbnailsLayoutsCheckBox = new CheckBox();
 			MinimizeToTrayCheckBox = new CheckBox();
 			label1 = new Label();
@@ -253,6 +254,7 @@ namespace EveOPreview.View
 			GeneralSettingsPanel.Controls.Add(HideActiveClientThumbnailCheckBox);
 			GeneralSettingsPanel.Controls.Add(ShowThumbnailsAlwaysOnTopCheckBox);
 			GeneralSettingsPanel.Controls.Add(HideThumbnailsOnLostFocusCheckBox);
+			GeneralSettingsPanel.Controls.Add(OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox);
 			GeneralSettingsPanel.Controls.Add(EnablePerClientThumbnailsLayoutsCheckBox);
 			GeneralSettingsPanel.Controls.Add(MinimizeToTrayCheckBox);
 			GeneralSettingsPanel.Dock = DockStyle.Fill;
@@ -362,16 +364,30 @@ namespace EveOPreview.View
 			HideThumbnailsOnLostFocusCheckBox.UseVisualStyleBackColor = true;
 			HideThumbnailsOnLostFocusCheckBox.CheckedChanged += OptionChanged_Handler;
 			// 
+			// OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox
+			// 
+			OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox.AutoSize = true;
+			OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox.Checked = true;
+			OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox.CheckState = CheckState.Checked;
+			OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox.Location = new Point(9, 184);
+			OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox.Margin = new Padding(4);
+			OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox.Name = "OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox";
+			OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox.Size = new Size(262, 19);
+			OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox.TabIndex = 23;
+			OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox.Text = "Only register cycle hotkeys when EVE is active";
+			OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox.UseVisualStyleBackColor = true;
+			OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox.CheckedChanged += OptionChanged_Handler;
+			// 
 			// EnablePerClientThumbnailsLayoutsCheckBox
 			// 
 			EnablePerClientThumbnailsLayoutsCheckBox.AutoSize = true;
 			EnablePerClientThumbnailsLayoutsCheckBox.Checked = true;
 			EnablePerClientThumbnailsLayoutsCheckBox.CheckState = CheckState.Checked;
-			EnablePerClientThumbnailsLayoutsCheckBox.Location = new Point(9, 185);
+			EnablePerClientThumbnailsLayoutsCheckBox.Location = new Point(9, 205);
 			EnablePerClientThumbnailsLayoutsCheckBox.Margin = new Padding(4);
 			EnablePerClientThumbnailsLayoutsCheckBox.Name = "EnablePerClientThumbnailsLayoutsCheckBox";
 			EnablePerClientThumbnailsLayoutsCheckBox.Size = new Size(200, 19);
-			EnablePerClientThumbnailsLayoutsCheckBox.TabIndex = 23;
+			EnablePerClientThumbnailsLayoutsCheckBox.TabIndex = 24;
 			EnablePerClientThumbnailsLayoutsCheckBox.Text = "Unique layout for each EVE client";
 			EnablePerClientThumbnailsLayoutsCheckBox.UseVisualStyleBackColor = true;
 			EnablePerClientThumbnailsLayoutsCheckBox.CheckedChanged += OptionChanged_Handler;
@@ -1438,6 +1454,7 @@ namespace EveOPreview.View
 		private CheckBox HideActiveClientThumbnailCheckBox;
 		private CheckBox ShowThumbnailsAlwaysOnTopCheckBox;
 		private CheckBox HideThumbnailsOnLostFocusCheckBox;
+		private CheckBox OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox;
 		private CheckBox EnablePerClientThumbnailsLayoutsCheckBox;
 		private CheckBox MinimizeToTrayCheckBox;
 		private NumericUpDown ThumbnailsWidthNumericEdit;

@@ -157,6 +157,12 @@ namespace EveOPreview.View
 			set => this.HideThumbnailsOnLostFocusCheckBox.Checked = value;
 		}
 
+		public bool OnlyRegisterCycleHotkeysWhenEveFocused
+		{
+			get => this.OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox.Checked;
+			set => this.OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox.Checked = value;
+		}
+
 		public bool EnablePerClientThumbnailLayouts
 		{
 			get => this.EnablePerClientThumbnailsLayoutsCheckBox.Checked;

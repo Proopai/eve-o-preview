@@ -115,6 +115,7 @@ namespace EveOPreview.Configuration.Implementation
 			this.EnablePerClientThumbnailLayouts = false;
 
 			this.HideThumbnailsOnLostFocus = false;
+			this.OnlyRegisterCycleHotkeysWhenEveFocused = true;
 			this.PreventPreviews = false;
 			this.HideThumbnailsDelay = 2; // 2 thumbnails refresh cycles (1.0 sec)
 
@@ -264,6 +265,8 @@ namespace EveOPreview.Configuration.Implementation
 
 		public bool PreventPreviews { get; set; }
 		public bool HideThumbnailsOnLostFocus { get; set; }
+		[JsonProperty("OnlyRegisterCycleHotkeysWhenEveFocused")]
+		public bool OnlyRegisterCycleHotkeysWhenEveFocused { get; set; }
 		public int HideThumbnailsDelay { get; set; }
 
 		public Size ThumbnailSize { get; set; }
