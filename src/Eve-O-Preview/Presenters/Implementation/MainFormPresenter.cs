@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Windows.Forms;
 using EveOPreview.Configuration;
 using EveOPreview.Mediator.Messages;
+using EveOPreview.Services;
 using EveOPreview.View;
 using MediatR;
 
@@ -19,18 +21,20 @@ namespace EveOPreview.Presenters
 		private readonly IMediator _mediator;
 		private readonly IThumbnailConfiguration _configuration;
 		private readonly IConfigurationStorage _configurationStorage;
+		private readonly IProcessMonitor _processMonitor;
 		private readonly IDictionary<string, IThumbnailDescription> _descriptionsCache;
 		private bool _suppressSizeNotifications;
 
 		private bool _exitApplication;
 		#endregion
 
-		public MainFormPresenter(IApplicationController controller, IMainFormView view, IMediator mediator, IThumbnailConfiguration configuration, IConfigurationStorage configurationStorage)
+		public MainFormPresenter(IApplicationController controller, IMainFormView view, IMediator mediator, IThumbnailConfiguration configuration, IConfigurationStorage configurationStorage, IProcessMonitor processMonitor)
 			: base(controller, view)
 		{
 			this._mediator = mediator;
 			this._configuration = configuration;
 			this._configurationStorage = configurationStorage;
+			this._processMonitor = processMonitor;
 
 			this._descriptionsCache = new Dictionary<string, IThumbnailDescription>();
 
@@ -45,6 +49,7 @@ namespace EveOPreview.Presenters
 			this.View.ThumbnailStateChanged = this.UpdateThumbnailState;
 			this.View.DocumentationLinkActivated = this.OpenDocumentationLink;
 			this.View.ApplicationExitRequested = this.ExitApplication;
+			this.View.CloseAllEveClientsRequested = this.CloseAllEveClients;
 
 			this.View.IconName = this._configuration.IconName;
 		}
@@ -52,16 +57,24 @@ namespace EveOPreview.Presenters
 		private void Activate()
 		{
 			this._suppressSizeNotifications = true;
-			this.LoadApplicationSettings();
-			this.View.SetDocumentationUrl(MainFormPresenter.FORUM_URL);
-			this.View.SetVersionInfo(this.GetApplicationVersion());
-			if (this._configuration.MinimizeToTray)
+			this.View.BeginLoadSettings();
+			try
 			{
-				this.View.Minimize();
-			}
+				this.LoadApplicationSettings();
+				this.View.SetDocumentationUrl(MainFormPresenter.FORUM_URL);
+				this.View.SetVersionInfo(this.GetApplicationVersion());
+				if (this._configuration.MinimizeToTray)
+				{
+					this.View.Minimize();
+				}
 
-			this._mediator.Send(new StartService());
-			this._suppressSizeNotifications = false;
+				this._mediator.Send(new StartService());
+			}
+			finally
+			{
+				this.View.EndLoadSettings();
+				this._suppressSizeNotifications = false;
+			}
 		}
 
 		private void Minimize()
@@ -119,6 +132,8 @@ namespace EveOPreview.Presenters
 
 			this.View.SetThumbnailSizeLimitations(this._configuration.ThumbnailMinimumSize, this._configuration.ThumbnailMaximumSize);
 			this.View.ThumbnailSize = this._configuration.ThumbnailSize;
+			this.View.FocusedThumbnailSize = this._configuration.FocusedThumbnailSize;
+			this.View.FocusedThumbnailLocation = this._configuration.FocusedThumbnailLocation;
 
 			this.View.EnableThumbnailZoom = this._configuration.ThumbnailZoomEnabled;
 			this.View.ThumbnailZoomFactor = this._configuration.ThumbnailZoomFactor;
@@ -171,6 +186,8 @@ namespace EveOPreview.Presenters
 			this._configuration.EnablePerClientThumbnailLayouts = this.View.EnablePerClientThumbnailLayouts;
 
 			this._configuration.ThumbnailSize = this.View.ThumbnailSize;
+			this._configuration.FocusedThumbnailSize = this.View.FocusedThumbnailSize;
+			this._configuration.FocusedThumbnailLocation = this.View.FocusedThumbnailLocation;
 
 			this._configuration.ThumbnailZoomEnabled = this.View.EnableThumbnailZoom;
 			this._configuration.ThumbnailZoomFactor = this.View.ThumbnailZoomFactor;
@@ -309,6 +326,24 @@ namespace EveOPreview.Presenters
 		{
 			this._exitApplication = true;
 			this.View.Close();
+		}
+
+		private void CloseAllEveClients()
+		{
+			Form owner = this.View as Form;
+			DialogResult confirm = MessageBox.Show(
+				owner,
+				"This will close all eve online windows are you sure?",
+				"Close all EVE clients",
+				MessageBoxButtons.YesNo,
+				MessageBoxIcon.Warning,
+				MessageBoxDefaultButton.Button2);
+			if (confirm != DialogResult.Yes)
+			{
+				return;
+			}
+
+			this._processMonitor.CloseAllMonitoredClients();
 		}
 	}
 }

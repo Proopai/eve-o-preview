@@ -54,6 +54,8 @@ namespace EveOPreview.Configuration
 		int HideThumbnailsDelay { get; set; }
 
 		Size ThumbnailSize { get; set; }
+		Size FocusedThumbnailSize { get; set; }
+		Point FocusedThumbnailLocation { get; set; }
 		Size ThumbnailMinimumSize { get; set; }
 		Size ThumbnailMaximumSize { get; set; }
 

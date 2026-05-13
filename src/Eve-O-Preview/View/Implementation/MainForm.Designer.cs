@@ -33,6 +33,7 @@ namespace EveOPreview.View
 		{
 			components = new System.ComponentModel.Container();
 			ToolStripMenuItem RestoreWindowMenuItem;
+			ToolStripMenuItem CloseAllEveClientsMenuItem;
 			ToolStripMenuItem ExitMenuItem;
 			ToolStripMenuItem TitleMenuItem;
 			ToolStripSeparator SeparatorMenuItem;
@@ -70,6 +71,7 @@ namespace EveOPreview.View
 			OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox = new CheckBox();
 			EnablePerClientThumbnailsLayoutsCheckBox = new CheckBox();
 			MinimizeToTrayCheckBox = new CheckBox();
+			CloseAllEveClientsButton = new Button();
 			label1 = new Label();
 			PreventPreviewColorButton = new Panel();
 			PreventPreviewsCheckBox = new CheckBox();
@@ -81,6 +83,14 @@ namespace EveOPreview.View
 			LockThumbnailLocationCheckbox = new CheckBox();
 			ThumbnailsWidthNumericEdit = new NumericUpDown();
 			ThumbnailsHeightNumericEdit = new NumericUpDown();
+			OverwatchWidthLabel = new Label();
+			OverwatchHeightLabel = new Label();
+			FocusedThumbnailWidthNumericEdit = new NumericUpDown();
+			FocusedThumbnailHeightNumericEdit = new NumericUpDown();
+			OverwatchPosXLabel = new Label();
+			OverwatchPosYLabel = new Label();
+			FocusedThumbnailLocationXNumericEdit = new NumericUpDown();
+			FocusedThumbnailLocationYNumericEdit = new NumericUpDown();
 			ThumbnailOpacityTrackBar = new TrackBar();
 			ZoomTabPage = new TabPage();
 			ZoomAnchorPanel = new Panel();
@@ -132,6 +142,7 @@ namespace EveOPreview.View
 			NotifyIcon = new NotifyIcon(components);
 			TrayMenu = new ContextMenuStrip(components);
 			RestoreWindowMenuItem = new ToolStripMenuItem();
+			CloseAllEveClientsMenuItem = new ToolStripMenuItem();
 			ExitMenuItem = new ToolStripMenuItem();
 			TitleMenuItem = new ToolStripMenuItem();
 			SeparatorMenuItem = new ToolStripSeparator();
@@ -167,6 +178,10 @@ namespace EveOPreview.View
 			((System.ComponentModel.ISupportInitialize)ThumbnailSnapToGridSizeXNumericEdit).BeginInit();
 			((System.ComponentModel.ISupportInitialize)ThumbnailsWidthNumericEdit).BeginInit();
 			((System.ComponentModel.ISupportInitialize)ThumbnailsHeightNumericEdit).BeginInit();
+			((System.ComponentModel.ISupportInitialize)FocusedThumbnailWidthNumericEdit).BeginInit();
+			((System.ComponentModel.ISupportInitialize)FocusedThumbnailHeightNumericEdit).BeginInit();
+			((System.ComponentModel.ISupportInitialize)FocusedThumbnailLocationXNumericEdit).BeginInit();
+			((System.ComponentModel.ISupportInitialize)FocusedThumbnailLocationYNumericEdit).BeginInit();
 			((System.ComponentModel.ISupportInitialize)ThumbnailOpacityTrackBar).BeginInit();
 			ZoomTabPage.SuspendLayout();
 			ZoomSettingsPanel.SuspendLayout();
@@ -189,6 +204,13 @@ namespace EveOPreview.View
 			RestoreWindowMenuItem.Size = new Size(153, 22);
 			RestoreWindowMenuItem.Text = "Restore";
 			RestoreWindowMenuItem.Click += RestoreMainForm_Handler;
+			// 
+			// CloseAllEveClientsMenuItem
+			// 
+			CloseAllEveClientsMenuItem.Name = "CloseAllEveClientsMenuItem";
+			CloseAllEveClientsMenuItem.Size = new Size(153, 22);
+			CloseAllEveClientsMenuItem.Text = "Close all EVE clients";
+			CloseAllEveClientsMenuItem.Click += CloseAllEveClients_Handler;
 			// 
 			// ExitMenuItem
 			// 
@@ -226,7 +248,7 @@ namespace EveOPreview.View
 			ContentTabControl.Multiline = true;
 			ContentTabControl.Name = "ContentTabControl";
 			ContentTabControl.SelectedIndex = 0;
-			ContentTabControl.Size = new Size(455, 251);
+			ContentTabControl.Size = new Size(455, 340);
 			ContentTabControl.SizeMode = TabSizeMode.Fixed;
 			ContentTabControl.TabIndex = 6;
 			ContentTabControl.DrawItem += ContentTabControl_DrawItem;
@@ -239,7 +261,7 @@ namespace EveOPreview.View
 			GeneralTabPage.Margin = new Padding(4);
 			GeneralTabPage.Name = "GeneralTabPage";
 			GeneralTabPage.Padding = new Padding(4);
-			GeneralTabPage.Size = new Size(327, 243);
+			GeneralTabPage.Size = new Size(327, 332);
 			GeneralTabPage.TabIndex = 0;
 			GeneralTabPage.Text = "General";
 			// 
@@ -257,11 +279,12 @@ namespace EveOPreview.View
 			GeneralSettingsPanel.Controls.Add(OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox);
 			GeneralSettingsPanel.Controls.Add(EnablePerClientThumbnailsLayoutsCheckBox);
 			GeneralSettingsPanel.Controls.Add(MinimizeToTrayCheckBox);
+			GeneralSettingsPanel.Controls.Add(CloseAllEveClientsButton);
 			GeneralSettingsPanel.Dock = DockStyle.Fill;
 			GeneralSettingsPanel.Location = new Point(4, 4);
 			GeneralSettingsPanel.Margin = new Padding(4);
 			GeneralSettingsPanel.Name = "GeneralSettingsPanel";
-			GeneralSettingsPanel.Size = new Size(319, 235);
+			GeneralSettingsPanel.Size = new Size(319, 270);
 			GeneralSettingsPanel.TabIndex = 18;
 			// 
 			// HideCaptionOnClientsCheckBox
@@ -404,6 +427,17 @@ namespace EveOPreview.View
 			MinimizeToTrayCheckBox.UseVisualStyleBackColor = true;
 			MinimizeToTrayCheckBox.CheckedChanged += OptionChanged_Handler;
 			// 
+			// CloseAllEveClientsButton
+			// 
+			CloseAllEveClientsButton.Location = new Point(9, 232);
+			CloseAllEveClientsButton.Margin = new Padding(4);
+			CloseAllEveClientsButton.Name = "CloseAllEveClientsButton";
+			CloseAllEveClientsButton.Size = new Size(280, 28);
+			CloseAllEveClientsButton.TabIndex = 29;
+			CloseAllEveClientsButton.Text = "Close all EVE clients";
+			CloseAllEveClientsButton.UseVisualStyleBackColor = true;
+			CloseAllEveClientsButton.Click += CloseAllEveClients_Handler;
+			// 
 			// ThumbnailTabPage
 			// 
 			ThumbnailTabPage.BackColor = SystemColors.Control;
@@ -412,13 +446,21 @@ namespace EveOPreview.View
 			ThumbnailTabPage.Margin = new Padding(4);
 			ThumbnailTabPage.Name = "ThumbnailTabPage";
 			ThumbnailTabPage.Padding = new Padding(4);
-			ThumbnailTabPage.Size = new Size(327, 243);
+			ThumbnailTabPage.Size = new Size(327, 332);
 			ThumbnailTabPage.TabIndex = 1;
 			ThumbnailTabPage.Text = "Thumbnail";
 			// 
 			// ThumbnailSettingsPanel
 			// 
 			ThumbnailSettingsPanel.BorderStyle = BorderStyle.FixedSingle;
+			ThumbnailSettingsPanel.Controls.Add(OverwatchPosYLabel);
+			ThumbnailSettingsPanel.Controls.Add(FocusedThumbnailLocationYNumericEdit);
+			ThumbnailSettingsPanel.Controls.Add(OverwatchPosXLabel);
+			ThumbnailSettingsPanel.Controls.Add(FocusedThumbnailLocationXNumericEdit);
+			ThumbnailSettingsPanel.Controls.Add(OverwatchHeightLabel);
+			ThumbnailSettingsPanel.Controls.Add(FocusedThumbnailHeightNumericEdit);
+			ThumbnailSettingsPanel.Controls.Add(OverwatchWidthLabel);
+			ThumbnailSettingsPanel.Controls.Add(FocusedThumbnailWidthNumericEdit);
 			ThumbnailSettingsPanel.Controls.Add(label1);
 			ThumbnailSettingsPanel.Controls.Add(PreventPreviewColorButton);
 			ThumbnailSettingsPanel.Controls.Add(PreventPreviewsCheckBox);
@@ -438,13 +480,13 @@ namespace EveOPreview.View
 			ThumbnailSettingsPanel.Location = new Point(4, 4);
 			ThumbnailSettingsPanel.Margin = new Padding(4);
 			ThumbnailSettingsPanel.Name = "ThumbnailSettingsPanel";
-			ThumbnailSettingsPanel.Size = new Size(319, 235);
+			ThumbnailSettingsPanel.Size = new Size(319, 324);
 			ThumbnailSettingsPanel.TabIndex = 19;
 			// 
 			// label1
 			// 
 			label1.AutoSize = true;
-			label1.Location = new Point(175, 169);
+			label1.Location = new Point(175, 253);
 			label1.Margin = new Padding(4, 0, 4, 0);
 			label1.Name = "label1";
 			label1.Size = new Size(36, 15);
@@ -454,7 +496,7 @@ namespace EveOPreview.View
 			// PreventPreviewColorButton
 			// 
 			PreventPreviewColorButton.BorderStyle = BorderStyle.FixedSingle;
-			PreventPreviewColorButton.Location = new Point(218, 168);
+			PreventPreviewColorButton.Location = new Point(218, 252);
 			PreventPreviewColorButton.Margin = new Padding(4);
 			PreventPreviewColorButton.Name = "PreventPreviewColorButton";
 			PreventPreviewColorButton.Size = new Size(58, 19);
@@ -464,7 +506,7 @@ namespace EveOPreview.View
 			// PreventPreviewsCheckBox
 			// 
 			PreventPreviewsCheckBox.AutoSize = true;
-			PreventPreviewsCheckBox.Location = new Point(13, 168);
+			PreventPreviewsCheckBox.Location = new Point(13, 252);
 			PreventPreviewsCheckBox.Margin = new Padding(4);
 			PreventPreviewsCheckBox.Name = "PreventPreviewsCheckBox";
 			PreventPreviewsCheckBox.Size = new Size(151, 19);
@@ -476,7 +518,7 @@ namespace EveOPreview.View
 			// ThumbnailSnapToGridCheckBox
 			// 
 			ThumbnailSnapToGridCheckBox.AutoSize = true;
-			ThumbnailSnapToGridCheckBox.Location = new Point(13, 120);
+			ThumbnailSnapToGridCheckBox.Location = new Point(13, 204);
 			ThumbnailSnapToGridCheckBox.Margin = new Padding(4);
 			ThumbnailSnapToGridCheckBox.Name = "ThumbnailSnapToGridCheckBox";
 			ThumbnailSnapToGridCheckBox.Size = new Size(152, 19);
@@ -491,7 +533,7 @@ namespace EveOPreview.View
 			ThumbnailSnapToGridSizeYNumericEdit.BorderStyle = BorderStyle.FixedSingle;
 			ThumbnailSnapToGridSizeYNumericEdit.CausesValidation = false;
 			ThumbnailSnapToGridSizeYNumericEdit.Increment = new decimal(new int[] { 10, 0, 0, 0 });
-			ThumbnailSnapToGridSizeYNumericEdit.Location = new Point(152, 141);
+			ThumbnailSnapToGridSizeYNumericEdit.Location = new Point(152, 225);
 			ThumbnailSnapToGridSizeYNumericEdit.Margin = new Padding(4);
 			ThumbnailSnapToGridSizeYNumericEdit.Maximum = new decimal(new int[] { 999999, 0, 0, 0 });
 			ThumbnailSnapToGridSizeYNumericEdit.Name = "ThumbnailSnapToGridSizeYNumericEdit";
@@ -503,7 +545,7 @@ namespace EveOPreview.View
 			// SnapYLabel
 			// 
 			SnapYLabel.AutoSize = true;
-			SnapYLabel.Location = new Point(128, 143);
+			SnapYLabel.Location = new Point(128, 227);
 			SnapYLabel.Margin = new Padding(4, 0, 4, 0);
 			SnapYLabel.Name = "SnapYLabel";
 			SnapYLabel.Size = new Size(14, 15);
@@ -516,7 +558,7 @@ namespace EveOPreview.View
 			ThumbnailSnapToGridSizeXNumericEdit.BorderStyle = BorderStyle.FixedSingle;
 			ThumbnailSnapToGridSizeXNumericEdit.CausesValidation = false;
 			ThumbnailSnapToGridSizeXNumericEdit.Increment = new decimal(new int[] { 10, 0, 0, 0 });
-			ThumbnailSnapToGridSizeXNumericEdit.Location = new Point(65, 141);
+			ThumbnailSnapToGridSizeXNumericEdit.Location = new Point(65, 225);
 			ThumbnailSnapToGridSizeXNumericEdit.Margin = new Padding(4);
 			ThumbnailSnapToGridSizeXNumericEdit.Maximum = new decimal(new int[] { 999999, 0, 0, 0 });
 			ThumbnailSnapToGridSizeXNumericEdit.Name = "ThumbnailSnapToGridSizeXNumericEdit";
@@ -528,7 +570,7 @@ namespace EveOPreview.View
 			// SnapXLabel
 			// 
 			SnapXLabel.AutoSize = true;
-			SnapXLabel.Location = new Point(9, 143);
+			SnapXLabel.Location = new Point(9, 227);
 			SnapXLabel.Margin = new Padding(4, 0, 4, 0);
 			SnapXLabel.Name = "SnapXLabel";
 			SnapXLabel.Size = new Size(43, 15);
@@ -538,7 +580,7 @@ namespace EveOPreview.View
 			// LockThumbnailLocationCheckbox
 			// 
 			LockThumbnailLocationCheckbox.AutoSize = true;
-			LockThumbnailLocationCheckbox.Location = new Point(13, 94);
+			LockThumbnailLocationCheckbox.Location = new Point(13, 178);
 			LockThumbnailLocationCheckbox.Margin = new Padding(4);
 			LockThumbnailLocationCheckbox.Name = "LockThumbnailLocationCheckbox";
 			LockThumbnailLocationCheckbox.Size = new Size(161, 19);
@@ -596,6 +638,106 @@ namespace EveOPreview.View
 			ThumbnailsHeightNumericEdit.TabIndex = 22;
 			ThumbnailsHeightNumericEdit.Value = new decimal(new int[] { 70, 0, 0, 0 });
 			ThumbnailsHeightNumericEdit.ValueChanged += ThumbnailSizeChanged_Handler;
+			// 
+			// OverwatchWidthLabel
+			// 
+			OverwatchWidthLabel.AutoSize = true;
+			OverwatchWidthLabel.Location = new Point(9, 94);
+			OverwatchWidthLabel.Margin = new Padding(4, 0, 4, 0);
+			OverwatchWidthLabel.Name = "OverwatchWidthLabel";
+			OverwatchWidthLabel.Size = new Size(95, 15);
+			OverwatchWidthLabel.TabIndex = 40;
+			OverwatchWidthLabel.Text = "Overwatch width";
+			// 
+			// FocusedThumbnailWidthNumericEdit
+			// 
+			FocusedThumbnailWidthNumericEdit.BackColor = SystemColors.Window;
+			FocusedThumbnailWidthNumericEdit.BorderStyle = BorderStyle.FixedSingle;
+			FocusedThumbnailWidthNumericEdit.CausesValidation = false;
+			FocusedThumbnailWidthNumericEdit.Increment = new decimal(new int[] { 10, 0, 0, 0 });
+			FocusedThumbnailWidthNumericEdit.Location = new Point(122, 92);
+			FocusedThumbnailWidthNumericEdit.Margin = new Padding(4);
+			FocusedThumbnailWidthNumericEdit.Maximum = new decimal(new int[] { 999999, 0, 0, 0 });
+			FocusedThumbnailWidthNumericEdit.Name = "FocusedThumbnailWidthNumericEdit";
+			FocusedThumbnailWidthNumericEdit.Size = new Size(56, 23);
+			FocusedThumbnailWidthNumericEdit.TabIndex = 41;
+			FocusedThumbnailWidthNumericEdit.Value = new decimal(new int[] { 960, 0, 0, 0 });
+			FocusedThumbnailWidthNumericEdit.ValueChanged += OptionChanged_Handler;
+			// 
+			// OverwatchHeightLabel
+			// 
+			OverwatchHeightLabel.AutoSize = true;
+			OverwatchHeightLabel.Location = new Point(9, 122);
+			OverwatchHeightLabel.Margin = new Padding(4, 0, 4, 0);
+			OverwatchHeightLabel.Name = "OverwatchHeightLabel";
+			OverwatchHeightLabel.Size = new Size(99, 15);
+			OverwatchHeightLabel.TabIndex = 42;
+			OverwatchHeightLabel.Text = "Overwatch height";
+			// 
+			// FocusedThumbnailHeightNumericEdit
+			// 
+			FocusedThumbnailHeightNumericEdit.BackColor = SystemColors.Window;
+			FocusedThumbnailHeightNumericEdit.BorderStyle = BorderStyle.FixedSingle;
+			FocusedThumbnailHeightNumericEdit.CausesValidation = false;
+			FocusedThumbnailHeightNumericEdit.Increment = new decimal(new int[] { 10, 0, 0, 0 });
+			FocusedThumbnailHeightNumericEdit.Location = new Point(122, 120);
+			FocusedThumbnailHeightNumericEdit.Margin = new Padding(4);
+			FocusedThumbnailHeightNumericEdit.Maximum = new decimal(new int[] { 99999999, 0, 0, 0 });
+			FocusedThumbnailHeightNumericEdit.Name = "FocusedThumbnailHeightNumericEdit";
+			FocusedThumbnailHeightNumericEdit.Size = new Size(56, 23);
+			FocusedThumbnailHeightNumericEdit.TabIndex = 43;
+			FocusedThumbnailHeightNumericEdit.Value = new decimal(new int[] { 540, 0, 0, 0 });
+			FocusedThumbnailHeightNumericEdit.ValueChanged += OptionChanged_Handler;
+			// 
+			// OverwatchPosXLabel
+			// 
+			OverwatchPosXLabel.AutoSize = true;
+			OverwatchPosXLabel.Location = new Point(9, 150);
+			OverwatchPosXLabel.Margin = new Padding(4, 0, 4, 0);
+			OverwatchPosXLabel.Name = "OverwatchPosXLabel";
+			OverwatchPosXLabel.Size = new Size(86, 15);
+			OverwatchPosXLabel.TabIndex = 44;
+			OverwatchPosXLabel.Text = "Overwatch X";
+			// 
+			// FocusedThumbnailLocationXNumericEdit
+			// 
+			FocusedThumbnailLocationXNumericEdit.BackColor = SystemColors.Window;
+			FocusedThumbnailLocationXNumericEdit.BorderStyle = BorderStyle.FixedSingle;
+			FocusedThumbnailLocationXNumericEdit.CausesValidation = false;
+			FocusedThumbnailLocationXNumericEdit.Location = new Point(122, 148);
+			FocusedThumbnailLocationXNumericEdit.Margin = new Padding(4);
+			FocusedThumbnailLocationXNumericEdit.Maximum = new decimal(50000);
+			FocusedThumbnailLocationXNumericEdit.Minimum = new decimal(-50000);
+			FocusedThumbnailLocationXNumericEdit.Name = "FocusedThumbnailLocationXNumericEdit";
+			FocusedThumbnailLocationXNumericEdit.Size = new Size(56, 23);
+			FocusedThumbnailLocationXNumericEdit.TabIndex = 45;
+			FocusedThumbnailLocationXNumericEdit.Value = new decimal(new int[] { 100, 0, 0, 0 });
+			FocusedThumbnailLocationXNumericEdit.ValueChanged += OptionChanged_Handler;
+			// 
+			// OverwatchPosYLabel
+			// 
+			OverwatchPosYLabel.AutoSize = true;
+			OverwatchPosYLabel.Location = new Point(188, 150);
+			OverwatchPosYLabel.Margin = new Padding(4, 0, 4, 0);
+			OverwatchPosYLabel.Name = "OverwatchPosYLabel";
+			OverwatchPosYLabel.Size = new Size(14, 15);
+			OverwatchPosYLabel.TabIndex = 46;
+			OverwatchPosYLabel.Text = "Y";
+			// 
+			// FocusedThumbnailLocationYNumericEdit
+			// 
+			FocusedThumbnailLocationYNumericEdit.BackColor = SystemColors.Window;
+			FocusedThumbnailLocationYNumericEdit.BorderStyle = BorderStyle.FixedSingle;
+			FocusedThumbnailLocationYNumericEdit.CausesValidation = false;
+			FocusedThumbnailLocationYNumericEdit.Location = new Point(210, 148);
+			FocusedThumbnailLocationYNumericEdit.Margin = new Padding(4);
+			FocusedThumbnailLocationYNumericEdit.Maximum = new decimal(50000);
+			FocusedThumbnailLocationYNumericEdit.Minimum = new decimal(-50000);
+			FocusedThumbnailLocationYNumericEdit.Name = "FocusedThumbnailLocationYNumericEdit";
+			FocusedThumbnailLocationYNumericEdit.Size = new Size(56, 23);
+			FocusedThumbnailLocationYNumericEdit.TabIndex = 47;
+			FocusedThumbnailLocationYNumericEdit.Value = new decimal(new int[] { 100, 0, 0, 0 });
+			FocusedThumbnailLocationYNumericEdit.ValueChanged += OptionChanged_Handler;
 			// 
 			// ThumbnailOpacityTrackBar
 			// 
@@ -1389,16 +1531,16 @@ namespace EveOPreview.View
 			// TrayMenu
 			// 
 			TrayMenu.ImageScalingSize = new Size(24, 24);
-			TrayMenu.Items.AddRange(new ToolStripItem[] { TitleMenuItem, RestoreWindowMenuItem, SeparatorMenuItem, ExitMenuItem });
+			TrayMenu.Items.AddRange(new ToolStripItem[] { TitleMenuItem, RestoreWindowMenuItem, CloseAllEveClientsMenuItem, SeparatorMenuItem, ExitMenuItem });
 			TrayMenu.Name = "contextMenuStrip1";
-			TrayMenu.Size = new Size(154, 76);
+			TrayMenu.Size = new Size(154, 99);
 			// 
 			// MainForm
 			// 
 			AutoScaleDimensions = new SizeF(7F, 15F);
 			AutoScaleMode = AutoScaleMode.Font;
 			BackColor = SystemColors.Control;
-			ClientSize = new Size(455, 251);
+			ClientSize = new Size(455, 340);
 			Controls.Add(ContentTabControl);
 			FormBorderStyle = FormBorderStyle.FixedSingle;
 			Icon = (Icon)resources.GetObject("$this.Icon");
@@ -1421,6 +1563,10 @@ namespace EveOPreview.View
 			((System.ComponentModel.ISupportInitialize)ThumbnailSnapToGridSizeXNumericEdit).EndInit();
 			((System.ComponentModel.ISupportInitialize)ThumbnailsWidthNumericEdit).EndInit();
 			((System.ComponentModel.ISupportInitialize)ThumbnailsHeightNumericEdit).EndInit();
+			((System.ComponentModel.ISupportInitialize)FocusedThumbnailWidthNumericEdit).EndInit();
+			((System.ComponentModel.ISupportInitialize)FocusedThumbnailHeightNumericEdit).EndInit();
+			((System.ComponentModel.ISupportInitialize)FocusedThumbnailLocationXNumericEdit).EndInit();
+			((System.ComponentModel.ISupportInitialize)FocusedThumbnailLocationYNumericEdit).EndInit();
 			((System.ComponentModel.ISupportInitialize)ThumbnailOpacityTrackBar).EndInit();
 			ZoomTabPage.ResumeLayout(false);
 			ZoomSettingsPanel.ResumeLayout(false);
@@ -1457,8 +1603,17 @@ namespace EveOPreview.View
 		private CheckBox OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox;
 		private CheckBox EnablePerClientThumbnailsLayoutsCheckBox;
 		private CheckBox MinimizeToTrayCheckBox;
+		private Button CloseAllEveClientsButton;
 		private NumericUpDown ThumbnailsWidthNumericEdit;
 		private NumericUpDown ThumbnailsHeightNumericEdit;
+		private Label OverwatchWidthLabel;
+		private Label OverwatchHeightLabel;
+		private NumericUpDown FocusedThumbnailWidthNumericEdit;
+		private NumericUpDown FocusedThumbnailHeightNumericEdit;
+		private Label OverwatchPosXLabel;
+		private Label OverwatchPosYLabel;
+		private NumericUpDown FocusedThumbnailLocationXNumericEdit;
+		private NumericUpDown FocusedThumbnailLocationYNumericEdit;
 		private TrackBar ThumbnailOpacityTrackBar;
 		private Panel ZoomAnchorPanel;
 		private RadioButton ZoomAanchorNWRadioButton;

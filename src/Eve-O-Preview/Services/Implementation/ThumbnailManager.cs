@@ -47,6 +47,8 @@ namespace EveOPreview.Services
 
 		private bool _ignoreViewEvents;
 		private bool _isHoverEffectActive;
+		private IntPtr _hoverZoomThumbnailId;
+		private IntPtr _focusedOverwatchThumbnailId;
 
 		private int _refreshCycleCount;
 		private int _hideThumbnailsDelay;
@@ -452,6 +454,7 @@ namespace EveOPreview.Services
 				view.ThumbnailLostFocus = this.ThumbnailViewLostFocus;
 				view.ThumbnailActivated = this.ThumbnailActivated;
 				view.ThumbnailDeactivated = this.ThumbnailDeactivated;
+				view.ThumbnailFocusedOverwatchToggle = this.ThumbnailToggleFocusedOverwatch;
 
 				view.ThumbnailToggleCycleGroup = this.ThumbnailToggleCycleGroup;
 
@@ -507,7 +510,14 @@ namespace EveOPreview.Services
 				view.ThumbnailFocused = null;
 				view.ThumbnailLostFocus = null;
 				view.ThumbnailActivated = null;
+				view.ThumbnailDeactivated = null;
+				view.ThumbnailFocusedOverwatchToggle = null;
 				view.ThumbnailToggleCycleGroup = null;
+
+				if (process.Handle == this._focusedOverwatchThumbnailId)
+				{
+					this._focusedOverwatchThumbnailId = IntPtr.Zero;
+				}
 
 				view.Close();
 			}
@@ -624,7 +634,7 @@ namespace EveOPreview.Services
 					continue;
 				}
 
-				if (this._configuration.HideActiveClientThumbnail && (view.Id == this._activeClient.Handle))
+				if (this._configuration.HideActiveClientThumbnail && (view.Id == this._activeClient.Handle) && view.Id != this._focusedOverwatchThumbnailId)
 				{
 					if (view.IsActive)
 					{
@@ -645,15 +655,35 @@ namespace EveOPreview.Services
 				// No need to update Thumbnails while one of them is highlighted
 				if (!this._isHoverEffectActive)
 				{
+					bool isFocusedOverwatch = this._focusedOverwatchThumbnailId != IntPtr.Zero && view.Id == this._focusedOverwatchThumbnailId;
+
 					// Do not even move thumbnails with default caption
-					if (this.IsManageableThumbnail(view))
+					if (this.IsManageableThumbnail(view) && !isFocusedOverwatch)
 					{
+						view.SetSizeLimitations(this._configuration.ThumbnailMinimumSize, this._configuration.ThumbnailMaximumSize);
 						view.ThumbnailLocation = this._configuration.GetThumbnailLocation(view.Title, this._activeClient.Title, view.ThumbnailLocation);
 						view.ThumbnailSize = this._configuration.GetThumbnailSize(view.Title, this._activeClient.Title, view.ThumbnailSize);
 					}
+					else if (isFocusedOverwatch)
+					{
+						Size overwatchMaximumClient = ThumbnailManager.MaximumClientSizeForFocusedOverwatch(
+							this._configuration.ThumbnailMaximumSize,
+							this._configuration.FocusedThumbnailSize);
+						view.SetSizeLimitations(this._configuration.ThumbnailMinimumSize, overwatchMaximumClient);
+						view.ThumbnailLocation = this._configuration.FocusedThumbnailLocation;
+						view.ThumbnailSize = this._configuration.FocusedThumbnailSize;
+					}
 
 					view.SetOpacity(this._configuration.ThumbnailOpacity);
-					view.SetTopMost(this._configuration.ShowThumbnailsAlwaysOnTop);
+
+					if (this._focusedOverwatchThumbnailId != IntPtr.Zero)
+					{
+						view.SetTopMost(view.Id == this._focusedOverwatchThumbnailId);
+					}
+					else
+					{
+						view.SetTopMost(this._configuration.ShowThumbnailsAlwaysOnTop);
+					}
 				}
 
 				view.IsOverlayEnabled = this._configuration.ShowThumbnailOverlays;
@@ -703,6 +733,11 @@ namespace EveOPreview.Services
 
 			foreach (KeyValuePair<IntPtr, IThumbnailView> entry in this._thumbnailViews)
 			{
+				if (this._focusedOverwatchThumbnailId != IntPtr.Zero && entry.Key == this._focusedOverwatchThumbnailId)
+				{
+					continue;
+				}
+
 				entry.Value.ThumbnailSize = size;
 				entry.Value.Refresh(false);
 			}
@@ -758,12 +793,18 @@ namespace EveOPreview.Services
 
 		private void ThumbnailViewFocused(IntPtr id)
 		{
+			if (this._focusedOverwatchThumbnailId != IntPtr.Zero)
+			{
+				return;
+			}
+
 			if (this._isHoverEffectActive)
 			{
 				return;
 			}
 
 			this._isHoverEffectActive = true;
+			this._hoverZoomThumbnailId = id;
 
 			IThumbnailView view = this._thumbnailViews[id];
 
@@ -793,6 +834,36 @@ namespace EveOPreview.Services
 			view.SetOpacity(this._configuration.ThumbnailOpacity);
 
 			this._isHoverEffectActive = false;
+			this._hoverZoomThumbnailId = IntPtr.Zero;
+		}
+
+		private void ThumbnailToggleFocusedOverwatch(IntPtr id)
+		{
+			if (!this._thumbnailViews.TryGetValue(id, out IThumbnailView view))
+			{
+				return;
+			}
+
+			if (!this.IsManageableThumbnail(view))
+			{
+				return;
+			}
+
+			if (this._isHoverEffectActive && this._hoverZoomThumbnailId != IntPtr.Zero)
+			{
+				this.ThumbnailViewLostFocus(this._hoverZoomThumbnailId);
+			}
+
+			if (this._focusedOverwatchThumbnailId == id)
+			{
+				this._focusedOverwatchThumbnailId = IntPtr.Zero;
+			}
+			else
+			{
+				this._focusedOverwatchThumbnailId = id;
+			}
+
+			this.RefreshThumbnails();
 		}
 
 		private void ThumbnailActivated(IntPtr id)
@@ -860,6 +931,12 @@ namespace EveOPreview.Services
 
 			IThumbnailView view = this._thumbnailViews[id];
 
+			if (this._focusedOverwatchThumbnailId != IntPtr.Zero)
+			{
+				view.Refresh(false);
+				return;
+			}
+
 			this.SetThumbnailsSize(view.ThumbnailSize);
 
 			view.Refresh(false);
@@ -871,6 +948,12 @@ namespace EveOPreview.Services
 		{
 			if (this._ignoreViewEvents)
 			{
+				return;
+			}
+
+			if (this._focusedOverwatchThumbnailId == id)
+			{
+				this._thumbnailViews[id].Refresh(false);
 				return;
 			}
 
@@ -1159,6 +1242,14 @@ namespace EveOPreview.Services
 			}
 
 			await this._mediator.Send(new SaveConfiguration());
+		}
+
+		// WinForms caps Form.ClientSize to MaximumSize; thumbnail views are created with ThumbnailMaximumSize, so overwatch must raise the cap before applying FocusedThumbnailSize.
+		private static Size MaximumClientSizeForFocusedOverwatch(Size thumbnailMaximumClient, Size focusedClientSize)
+		{
+			return new Size(
+				Math.Max(thumbnailMaximumClient.Width, focusedClientSize.Width),
+				Math.Max(thumbnailMaximumClient.Height, focusedClientSize.Height));
 		}
 
 		// We shouldn't manage some thumbnails (like thumbnail of the EVE client sitting on the login screen)

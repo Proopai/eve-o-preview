@@ -179,6 +179,26 @@ namespace EveOPreview.View
 			}
 		}
 
+		public Size FocusedThumbnailSize
+		{
+			get => new Size((int)this.FocusedThumbnailWidthNumericEdit.Value, (int)this.FocusedThumbnailHeightNumericEdit.Value);
+			set
+			{
+				this.FocusedThumbnailWidthNumericEdit.Value = value.Width;
+				this.FocusedThumbnailHeightNumericEdit.Value = value.Height;
+			}
+		}
+
+		public Point FocusedThumbnailLocation
+		{
+			get => new Point((int)this.FocusedThumbnailLocationXNumericEdit.Value, (int)this.FocusedThumbnailLocationYNumericEdit.Value);
+			set
+			{
+				this.FocusedThumbnailLocationXNumericEdit.Value = value.X;
+				this.FocusedThumbnailLocationYNumericEdit.Value = value.Y;
+			}
+		}
+
 		public bool EnableThumbnailZoom
 		{
 			get => this.EnableThumbnailZoomCheckBox.Checked;
@@ -379,10 +399,27 @@ namespace EveOPreview.View
 			Application.Run(this._context);
 		}
 
+		public void BeginLoadSettings()
+		{
+			this._suppressEvents = true;
+		}
+
+		public void EndLoadSettings()
+		{
+			this._suppressEvents = false;
+		}
+
 		public void SetThumbnailSizeLimitations(Size minimumSize, Size maximumSize)
 		{
 			this._minimumSize = minimumSize;
 			this._maximumSize = maximumSize;
+
+			// Gate overwatch can be larger than normal preview caps; keep UI limits generous so values are not clipped to ThumbnailMaximumSize.
+			const int focusedMaxDimension = 16384;
+			this.FocusedThumbnailWidthNumericEdit.Minimum = minimumSize.Width;
+			this.FocusedThumbnailWidthNumericEdit.Maximum = Math.Max(maximumSize.Width, focusedMaxDimension);
+			this.FocusedThumbnailHeightNumericEdit.Minimum = minimumSize.Height;
+			this.FocusedThumbnailHeightNumericEdit.Maximum = Math.Max(maximumSize.Height, focusedMaxDimension);
 		}
 
 		public void Minimize()
@@ -447,7 +484,14 @@ namespace EveOPreview.View
 
 		public Action DocumentationLinkActivated { get; set; }
 
+		public Action CloseAllEveClientsRequested { get; set; }
+
 		#region UI events
+		private void CloseAllEveClients_Handler(object sender, EventArgs e)
+		{
+			this.CloseAllEveClientsRequested?.Invoke();
+		}
+
 		private void ContentTabControl_DrawItem(object sender, DrawItemEventArgs e)
 		{
 			TabControl control = (TabControl)sender;

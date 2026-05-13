@@ -26,6 +26,8 @@ namespace EveOPreview.View
 		bool EnablePerClientThumbnailLayouts { get; set; }
 
 		Size ThumbnailSize { get; set; }
+		Size FocusedThumbnailSize { get; set; }
+		Point FocusedThumbnailLocation { get; set; }
 
 		bool EnableThumbnailZoom { get; set; }
 		int ThumbnailZoomFactor { get; set; }
@@ -51,6 +53,8 @@ namespace EveOPreview.View
 
 		void SetDocumentationUrl(string url);
 		void SetVersionInfo(string version);
+		void BeginLoadSettings();
+		void EndLoadSettings();
 		void SetThumbnailSizeLimitations(Size minimumSize, Size maximumSize);
 
 		void Minimize();
@@ -67,5 +71,6 @@ namespace EveOPreview.View
 		Action ThumbnailsSizeChanged { get; set; }
 		Action<string> ThumbnailStateChanged { get; set; }
 		Action DocumentationLinkActivated { get; set; }
+		Action CloseAllEveClientsRequested { get; set; }
 	}
 }

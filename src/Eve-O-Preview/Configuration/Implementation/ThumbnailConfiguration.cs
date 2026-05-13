@@ -9,6 +9,8 @@ namespace EveOPreview.Configuration.Implementation
 {
 	sealed class ThumbnailConfiguration : IThumbnailConfiguration
 	{
+		private const int FocusedThumbnailMaxDimension = 16384;
+
 		#region Private fields
 		private bool _enablePerClientThumbnailLayouts;
 		private bool _enableClientLayoutTracking;
@@ -120,6 +122,8 @@ namespace EveOPreview.Configuration.Implementation
 			this.HideThumbnailsDelay = 2; // 2 thumbnails refresh cycles (1.0 sec)
 
 			this.ThumbnailSize = new Size(384, 216);
+			this.FocusedThumbnailSize = new Size(960, 540);
+			this.FocusedThumbnailLocation = new Point(100, 100);
 			this.ThumbnailMinimumSize = new Size(192, 108);
 			this.ThumbnailMaximumSize = new Size(960, 540);
 
@@ -270,6 +274,13 @@ namespace EveOPreview.Configuration.Implementation
 		public int HideThumbnailsDelay { get; set; }
 
 		public Size ThumbnailSize { get; set; }
+
+		[JsonProperty("FocusedThumbnailSize")]
+		public Size FocusedThumbnailSize { get; set; }
+
+		[JsonProperty("FocusedThumbnailLocation")]
+		public Point FocusedThumbnailLocation { get; set; }
+
 		public Size ThumbnailMaximumSize { get; set; }
 		public Size ThumbnailMinimumSize { get; set; }
 
@@ -450,6 +461,8 @@ namespace EveOPreview.Configuration.Implementation
 			this.ThumbnailResizeTimeoutPeriod = ThumbnailConfiguration.ApplyRestrictions(this.ThumbnailResizeTimeoutPeriod, 200, 5000);
 			this.ThumbnailSize = new Size(ThumbnailConfiguration.ApplyRestrictions(this.ThumbnailSize.Width, this.ThumbnailMinimumSize.Width, this.ThumbnailMaximumSize.Width),
 				ThumbnailConfiguration.ApplyRestrictions(this.ThumbnailSize.Height, this.ThumbnailMinimumSize.Height, this.ThumbnailMaximumSize.Height));
+			this.FocusedThumbnailSize = new Size(ThumbnailConfiguration.ApplyRestrictions(this.FocusedThumbnailSize.Width, this.ThumbnailMinimumSize.Width, FocusedThumbnailMaxDimension),
+				ThumbnailConfiguration.ApplyRestrictions(this.FocusedThumbnailSize.Height, this.ThumbnailMinimumSize.Height, FocusedThumbnailMaxDimension));
 			this.ThumbnailOpacity = ThumbnailConfiguration.ApplyRestrictions((int)(this.ThumbnailOpacity * 100.00), 20, 100) / 100.00;
 			this.ThumbnailZoomFactor = ThumbnailConfiguration.ApplyRestrictions(this.ThumbnailZoomFactor, 2, 10);
 			this.ActiveClientHighlightThickness = ThumbnailConfiguration.ApplyRestrictions(this.ActiveClientHighlightThickness, 1, 6);

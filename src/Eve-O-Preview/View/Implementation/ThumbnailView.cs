@@ -141,6 +141,7 @@ namespace EveOPreview.View
 		public Action<IntPtr> ThumbnailActivated { get; set; }
 
 		public Action<IntPtr, bool> ThumbnailDeactivated { get; set; }
+		public Action<IntPtr> ThumbnailFocusedOverwatchToggle { get; set; }
 		public Action<IntPtr> ThumbnailToggleCycleGroup { get; set; }
 
 		private bool WindowMoved = false;
@@ -661,14 +662,17 @@ namespace EveOPreview.View
 		{
 			switch (mouseButtons)
 			{
-				case MouseButtons.Left when modifierKeys == Keys.Control:
+				case MouseButtons.Left when modifierKeys == (Keys.Control | Keys.Shift):
+					this.ThumbnailDeactivated?.Invoke(this.Id, true);
+					break;
+				case MouseButtons.Left when modifierKeys == (Keys.Control | Keys.Alt):
 					this.ThumbnailDeactivated?.Invoke(this.Id, false);
+					break;
+				case MouseButtons.Left when modifierKeys == Keys.Control:
+					this.ThumbnailFocusedOverwatchToggle?.Invoke(this.Id);
 					break;
 				case MouseButtons.Left when modifierKeys == Keys.Shift:
 					this.ThumbnailToggleCycleGroup?.Invoke(this.Id);
-					break;
-				case MouseButtons.Left when modifierKeys == (Keys.Control | Keys.Shift):
-					this.ThumbnailDeactivated?.Invoke(this.Id, true);
 					break;
 				case MouseButtons.Left:
 					var oldWindow = this._thumbnailManager.GetActiveClient();
