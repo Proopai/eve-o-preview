@@ -18,11 +18,11 @@ cd "c:\Users\cmatt\Documents\Code\eve-o-preview"
 .\deploy.bat
 ```
 
-`deploy.bat` builds Release, publishes the single-file exe, stops any running `EVE-O-Preview.exe`, copies to `C:\Eve\EVE-O-Preview.exe`, and starts it.
+`deploy.bat` builds Release, publishes the single-file exe, stops any running `EVE-F-Preview.exe`, copies to `C:\Eve\EVE-F-Preview.exe`, and starts it.
 
 Report success or errors. On success, mention:
 
-- Published: `c:\Users\cmatt\Documents\Code\eve-o-preview\bin\net8.0-windows8.0\win-x64\publish\EVE-O-Preview.exe`
-- Deployed: `C:\Eve\EVE-O-Preview.exe`
+- Published: `c:\Users\cmatt\Documents\Code\eve-o-preview\bin\net8.0-windows8.0\win-x64\publish\EVE-F-Preview.exe`
+- Deployed: `C:\Eve\EVE-F-Preview.exe`
 
 If a turn only answers questions and touches no files, skip deploy. If you made code changes but the user did not ask to deploy, say the change is ready and they can run `deploy.bat` when they want to test.

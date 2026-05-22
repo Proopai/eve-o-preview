@@ -12,8 +12,8 @@ namespace EveOPreview
 	// So this dumb and non elegant approach is used
 	sealed class ExceptionHandler
 	{
-		private const string EXCEPTION_DUMP_FILE_NAME = "EVE-O-Preview.log";
-		private const string EXCEPTION_MESSAGE = "EVE-O-Preview has encountered a problem and needs to close. Additional information has been saved in the crash log file.";
+		private const string EXCEPTION_DUMP_FILE_NAME = "EVE-F-Preview.log";
+		private const string EXCEPTION_MESSAGE = "EVE-F-Preview has encountered a problem and needs to close. Additional information has been saved in the crash log file.";
 
 		public void SetupExceptionHandlers()
 		{
@@ -41,7 +41,7 @@ namespace EveOPreview
 				String exceptionMessage = exception.ToString();
 				File.WriteAllText(ExceptionHandler.EXCEPTION_DUMP_FILE_NAME, exceptionMessage);
 
-				MessageBox.Show(ExceptionHandler.EXCEPTION_MESSAGE, @"EVE-O-Preview", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show(ExceptionHandler.EXCEPTION_MESSAGE, @"EVE-F-Preview", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 			catch
 			{

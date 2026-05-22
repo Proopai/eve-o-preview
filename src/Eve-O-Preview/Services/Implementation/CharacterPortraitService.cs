@@ -21,7 +21,7 @@ namespace EveOPreview.Services.Implementation
 		private const string DefaultClientTitle = "EVE";
 		private const string ThumbsFolderName = "thumbs";
 		private const string PortraitLogFileName = "portrait-fetch.log";
-		private const string UserAgent = "EVE-O-Preview/8.0 (character portrait cache; contact via GitHub eve-o-preview)";
+		private const string UserAgent = "EVE-F-Preview/8.0 (character portrait cache; fork of eve-o-preview)";
 		private const int MaxParallelDownloads = 6;
 
 		private static readonly HttpClient SharedHttpClient = CreateHttpClient();

@@ -6,7 +6,7 @@
 	  <PublishSingleFile>true</PublishSingleFile>
 	  <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
 	  <RootNamespace>EveOPreview</RootNamespace>
-    <AssemblyName>EVE-O-Preview</AssemblyName>
+    <AssemblyName>EVE-F-Preview</AssemblyName>
 	  <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>

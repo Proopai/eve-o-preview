@@ -2,9 +2,10 @@
 setlocal EnableExtensions
 
 rem ============================================================================
-rem  Configuration — edit DEPLOY_DIR to change where EVE-O-Preview.exe is copied
+rem  Configuration — edit DEPLOY_DIR to change where EVE-F-Preview.exe is copied
 rem ============================================================================
 set "DEPLOY_DIR=C:\Eve"
+rem Deployed exe name: %DEPLOY_DIR%\EVE-F-Preview.exe
 
 rem ============================================================================
 rem  Build and deploy (paths are relative to this repo root)
@@ -12,7 +13,7 @@ rem ============================================================================
 set "REPO_ROOT=%~dp0"
 cd /d "%REPO_ROOT%"
 
-set "PUBLISH_EXE=bin\net8.0-windows8.0\win-x64\publish\EVE-O-Preview.exe"
+set "PUBLISH_EXE=bin\net8.0-windows8.0\win-x64\publish\EVE-F-Preview.exe"
 
 echo Building solution...
 dotnet build "src\EVE-O-Preview.sln" -c Release --no-incremental
@@ -29,9 +30,10 @@ if not exist "%PUBLISH_EXE%" (
 
 if not exist "%DEPLOY_DIR%\" mkdir "%DEPLOY_DIR%"
 
-set "DEPLOY_EXE=%DEPLOY_DIR%\EVE-O-Preview.exe"
+set "DEPLOY_EXE=%DEPLOY_DIR%\EVE-F-Preview.exe"
 
-echo Stopping EVE-O-Preview...
+echo Stopping EVE-F-Preview...
+taskkill /IM EVE-F-Preview.exe /F >nul 2>&1
 taskkill /IM EVE-O-Preview.exe /F >nul 2>&1
 timeout /t 1 /nobreak >nul
 
@@ -39,8 +41,8 @@ echo Copying to %DEPLOY_DIR%...
 copy /Y "%PUBLISH_EXE%" "%DEPLOY_EXE%"
 if errorlevel 1 goto :failed
 
-echo Starting EVE-O-Preview...
-rem /D sets working directory so EVE-O-Preview.json next to the exe is found
+echo Starting EVE-F-Preview...
+rem /D sets working directory so EVE-F-Preview.json next to the exe is found
 start "" /D "%DEPLOY_DIR%" "%DEPLOY_EXE%"
 
 echo.

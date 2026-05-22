@@ -18,7 +18,7 @@ namespace EveOPreview.Services.Implementation
 		private readonly bool _enableWineCompatabilityMode;
 		private string _bashLocation;
 		private string _wmctrlLocation;
-		private const string EXCEPTION_DUMP_FILE_NAME = "EVE-O-Preview.log";
+		private const string EXCEPTION_DUMP_FILE_NAME = "EVE-F-Preview.log";
 		#endregion
 
 

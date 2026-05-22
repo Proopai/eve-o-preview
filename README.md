@@ -1,3 +1,25 @@
+## EVE-F-Preview (this fork)
+
+**EVE-F-Preview** is a community fork of [EVE-O Preview](https://bitbucket.org/ulph/eve-o-preview-git). The executable is `EVE-F-Preview.exe`. Settings are stored as `EVE-F-Preview.json` next to the executable; an existing **`EVE-O-Preview.json`** is still loaded automatically on first run (the next save writes the new filename).
+
+Repository: **eve-F-preview**
+
+### Features added in this fork
+
+| Feature | Description |
+| --- | --- |
+| **Character portrait thumbnails** | When **Do not display previews** is enabled, thumbnails show cached EVE character portraits (via ESI) and the character name instead of a live DWM capture. |
+| **Portrait cache** | PNGs are stored under a `thumbs` folder beside the executable (`ClientPortraitPaths` in config maps window titles to files). |
+| **Refresh portraits** | Button on the **Thumbnail** tab re-fetches portraits for configured clients. |
+| **Lighter “no preview” mode** | With prevent-preview enabled, live DWM thumbnails are unregistered so the game client is not composited into each preview window (lower GPU/CPU use). |
+| **Active-client highlight (portrait mode)** | Highlight border is drawn opaquely around portraits without transparency bleed or edge artifacts. |
+| **Cycle hotkey reliability** | Cycle hotkeys register on the main app window, run on the UI thread, and respect “only when EVE is focused”; hovering a thumbnail updates the active client for cycling. |
+| **Overwatch mode** | Optional enlarged focused preview (Ctrl+click a thumbnail) with separate size/position settings. |
+
+Build and deploy locally with `deploy.bat` from the repo root (publishes `bin\net8.0-windows8.0\win-x64\publish\EVE-F-Preview.exe`).
+
+---
+
 ## Overview
 
 The purpose of this application is to provide a simple way to keep an eye on several simultaneously running EVE Online clients and to easily switch between them. While running it shows a set of live thumbnails for each of the active EVE Online clients. These thumbnails allow fast switch to the corresponding EVE Online client either using mouse or configurable hotkeys.
@@ -26,8 +48,8 @@ If you have find out that some of the features or their combination of EVE-O Pre
 ## How To Install & Use
 
 1. Download and extract the contents of the .zip archive to a location of your choice (ie: Desktop, CCP folder, etc)
-..* **Note**: Please do not install the application into the *Program Files* or *Program files (x86)* folders. These folders in general do not allow applications to write anything there while EVE-O Preview now stores its configuration file next to its executable, thus requiring the write access to the folder it is installed into.
-2. Start up both EVE-O Preview and your EVE Clients (the order does not matter)
+..* **Note**: Please do not install the application into the *Program Files* or *Program files (x86)* folders. These folders in general do not allow applications to write anything there while EVE-F-Preview stores its configuration file next to its executable, thus requiring write access to the folder it is installed into.
+2. Start up both **EVE-F-Preview** and your EVE clients (the order does not matter)
 3. Adjust settings as you see fit. Program options are described below
 
 Video Guides:
@@ -92,8 +114,10 @@ CCP Grimmi wrote:
 | Lock Thumbnail Location | Lock position of thumbnails, preventing misclicks moving your thumbnails |
 | Thumbnail Snap to Grid | Force Thumbnails to snap to defined grid when moved |
 | Snap X / Snap Y | X/Y grid Pixels |
-| Do not display previews | Prevent previews to show of clients - unless overridden by PerClient settings |
-| Do not display previews background color | Background colour to use for preview windows if not showing preview (and not overridden by PerClient settings). Do NOT select #000001 else you will be clashing with Transparency settings. |
+| Do not display previews | Hides live DWM previews; in this fork, shows **character portraits** and name overlays instead (unless overridden per client). |
+| Do not display previews background color | Background colour behind the portrait overlay. Shown beside the checkbox on the Thumbnail tab. Do **not** use `#000001` (clashes with overlay transparency in live-preview mode). |
+| Refresh portraits | Re-downloads character portraits from ESI for clients listed in config (also runs in the background for missing cache files). |
+| Enable overwatch mode (Ctrl+click a preview) | Pin one thumbnail enlarged at a fixed screen position for focused monitoring. |
 
 #### **Zoom** Tab
 | Option | Description |
@@ -141,7 +165,7 @@ Mouse gestures are applied to the thumbnail window currently being hovered over.
 
 Some of the application options are not exposed in the GUI. They can be adjusted directly in the configuration file.
 
-**Note:** Do any changes to the configuration file only while the EVE-O Preview itself is closed. Otherwise the changes you made might be lost.
+**Note:** Change the configuration file only while **EVE-F-Preview** is closed. Otherwise your edits may be overwritten on exit. Default filename: `EVE-F-Preview.json` (legacy `EVE-O-Preview.json` is still read if the new file is absent).
 
 | Option | Description |
 | --- | --- |

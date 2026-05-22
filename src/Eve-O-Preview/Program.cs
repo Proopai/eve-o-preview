@@ -11,7 +11,7 @@ namespace EveOPreview
 {
 	static class Program
 	{
-		private static string MUTEX_NAME = "EVE-O-Preview Single Instance Mutex";
+		private static string MUTEX_NAME = "EVE-F-Preview Single Instance Mutex";
 
 		private static Mutex _singleInstanceMutex;
 
