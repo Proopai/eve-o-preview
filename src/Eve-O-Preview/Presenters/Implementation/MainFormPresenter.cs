@@ -22,19 +22,24 @@ namespace EveOPreview.Presenters
 		private readonly IThumbnailConfiguration _configuration;
 		private readonly IConfigurationStorage _configurationStorage;
 		private readonly IProcessMonitor _processMonitor;
+		private readonly IThumbnailManager _thumbnailManager;
+		private readonly ICharacterPortraitService _characterPortraitService;
 		private readonly IDictionary<string, IThumbnailDescription> _descriptionsCache;
 		private bool _suppressSizeNotifications;
 
 		private bool _exitApplication;
+		private bool _portraitRefreshInProgress;
 		#endregion
 
-		public MainFormPresenter(IApplicationController controller, IMainFormView view, IMediator mediator, IThumbnailConfiguration configuration, IConfigurationStorage configurationStorage, IProcessMonitor processMonitor)
+		public MainFormPresenter(IApplicationController controller, IMainFormView view, IMediator mediator, IThumbnailConfiguration configuration, IConfigurationStorage configurationStorage, IProcessMonitor processMonitor, IThumbnailManager thumbnailManager, ICharacterPortraitService characterPortraitService)
 			: base(controller, view)
 		{
 			this._mediator = mediator;
 			this._configuration = configuration;
 			this._configurationStorage = configurationStorage;
 			this._processMonitor = processMonitor;
+			this._thumbnailManager = thumbnailManager;
+			this._characterPortraitService = characterPortraitService;
 
 			this._descriptionsCache = new Dictionary<string, IThumbnailDescription>();
 
@@ -45,11 +50,16 @@ namespace EveOPreview.Presenters
 			this.View.FormMinimized = this.Minimize;
 			this.View.FormCloseRequested = this.Close;
 			this.View.ApplicationSettingsChanged = this.SaveApplicationSettings;
+			this.View.GlobalShortcutSettingsChanged = this.SaveGlobalShortcutSettings;
 			this.View.ThumbnailsSizeChanged = this.UpdateThumbnailsSize;
 			this.View.ThumbnailStateChanged = this.UpdateThumbnailState;
 			this.View.DocumentationLinkActivated = this.OpenDocumentationLink;
 			this.View.ApplicationExitRequested = this.ExitApplication;
 			this.View.CloseAllEveClientsRequested = this.CloseAllEveClients;
+			this.View.ConfigureShortcutHotkeyRecording(
+				this._thumbnailManager.SuspendGlobalHotkeys,
+				this._thumbnailManager.ResumeGlobalHotkeys);
+			this.View.RefreshPortraitsRequested = this.RefreshPortraits;
 
 			this.View.IconName = this._configuration.IconName;
 		}
@@ -69,11 +79,32 @@ namespace EveOPreview.Presenters
 				}
 
 				this._mediator.Send(new StartService());
+				this._characterPortraitService.SyncMissingPortraitsFromConfiguration();
 			}
 			finally
 			{
 				this.View.EndLoadSettings();
 				this._suppressSizeNotifications = false;
+			}
+		}
+
+		private async void RefreshPortraits()
+		{
+			if (this._portraitRefreshInProgress)
+			{
+				return;
+			}
+
+			this._portraitRefreshInProgress = true;
+			this.View.SetRefreshPortraitsEnabled(false);
+			try
+			{
+				await this._characterPortraitService.RefreshAllConfiguredPortraitsAsync().ConfigureAwait(true);
+			}
+			finally
+			{
+				this._portraitRefreshInProgress = false;
+				this.View.SetRefreshPortraitsEnabled(true);
 			}
 		}
 
@@ -133,6 +164,7 @@ namespace EveOPreview.Presenters
 
 			this.View.SetThumbnailSizeLimitations(this._configuration.ThumbnailMinimumSize, this._configuration.ThumbnailMaximumSize);
 			this.View.ThumbnailSize = this._configuration.ThumbnailSize;
+			this.View.EnableOverwatchMode = this._configuration.EnableOverwatchMode;
 			this.View.FocusedThumbnailSize = this._configuration.FocusedThumbnailSize;
 			this.View.FocusedThumbnailLocation = this._configuration.FocusedThumbnailLocation;
 
@@ -148,6 +180,7 @@ namespace EveOPreview.Presenters
 			this.View.ThumbnailSnapToGrid = this._configuration.ThumbnailSnapToGrid;
 			this.View.ThumbnailSnapToGridSizeX = this._configuration.ThumbnailSnapToGridSizeX;
 			this.View.ThumbnailSnapToGridSizeY = this._configuration.ThumbnailSnapToGridSizeY;
+			this.View.ThumbnailSnapToEdges = this._configuration.ThumbnailSnapToEdges;
 			this.View.EnableActiveClientHighlight = this._configuration.EnableActiveClientHighlight;
 			this.View.ActiveClientHighlightColor = this._configuration.ActiveClientHighlightColor;
 			this.View.PreventPreviewColor = this._configuration.PreventPreviewColor;
@@ -157,6 +190,70 @@ namespace EveOPreview.Presenters
 
 
 			this.View.IconName = this._configuration.IconName;
+			this.View.SetGlobalShortcutSettings(this.CreateGlobalShortcutSettingsFromConfiguration());
+		}
+
+		private GlobalShortcutSettings CreateGlobalShortcutSettingsFromConfiguration()
+		{
+			return new GlobalShortcutSettings
+			{
+				CycleGroup1Forward = this.GetHotkeyDisplay(this._configuration.CycleGroup1ForwardHotkeys),
+				CycleGroup1Backward = this.GetHotkeyDisplay(this._configuration.CycleGroup1BackwardHotkeys),
+				CycleGroup2Forward = this.GetHotkeyDisplay(this._configuration.CycleGroup2ForwardHotkeys),
+				CycleGroup2Backward = this.GetHotkeyDisplay(this._configuration.CycleGroup2BackwardHotkeys),
+				CycleGroup3Forward = this.GetHotkeyDisplay(this._configuration.CycleGroup3ForwardHotkeys),
+				CycleGroup3Backward = this.GetHotkeyDisplay(this._configuration.CycleGroup3BackwardHotkeys),
+				CycleGroup4Forward = this.GetHotkeyDisplay(this._configuration.CycleGroup4ForwardHotkeys),
+				CycleGroup4Backward = this.GetHotkeyDisplay(this._configuration.CycleGroup4BackwardHotkeys),
+				CycleGroup5Forward = this.GetHotkeyDisplay(this._configuration.CycleGroup5ForwardHotkeys),
+				CycleGroup5Backward = this.GetHotkeyDisplay(this._configuration.CycleGroup5BackwardHotkeys),
+				DynamicCycleForward = this.GetHotkeyDisplay(this._configuration.DynamicCycleForwardHotkeys),
+				DynamicCycleBackward = this.GetHotkeyDisplay(this._configuration.DynamicCycleBackwardHotkeys),
+				MinimizeAllClients = this.GetHotkeyDisplay(this._configuration.MinimizeAllClientsHotkeys)
+			};
+		}
+
+		private string GetHotkeyDisplay(List<string> hotkeys)
+		{
+			string raw = HotkeyFormatting.GetPrimaryHotkey(hotkeys);
+			if (string.IsNullOrWhiteSpace(raw))
+			{
+				return string.Empty;
+			}
+
+			Keys keys = this._configuration.StringToKey(raw);
+			if (keys == Keys.None)
+			{
+				return raw.Trim();
+			}
+
+			string formatted = HotkeyFormatting.ToDisplayString(keys);
+			return string.IsNullOrEmpty(formatted) ? raw.Trim() : formatted;
+		}
+
+		private void ApplyGlobalShortcutSettingsToConfiguration(GlobalShortcutSettings settings)
+		{
+			HotkeyFormatting.SetPrimaryHotkey(this._configuration.CycleGroup1ForwardHotkeys, settings.CycleGroup1Forward);
+			HotkeyFormatting.SetPrimaryHotkey(this._configuration.CycleGroup1BackwardHotkeys, settings.CycleGroup1Backward);
+			HotkeyFormatting.SetPrimaryHotkey(this._configuration.CycleGroup2ForwardHotkeys, settings.CycleGroup2Forward);
+			HotkeyFormatting.SetPrimaryHotkey(this._configuration.CycleGroup2BackwardHotkeys, settings.CycleGroup2Backward);
+			HotkeyFormatting.SetPrimaryHotkey(this._configuration.CycleGroup3ForwardHotkeys, settings.CycleGroup3Forward);
+			HotkeyFormatting.SetPrimaryHotkey(this._configuration.CycleGroup3BackwardHotkeys, settings.CycleGroup3Backward);
+			HotkeyFormatting.SetPrimaryHotkey(this._configuration.CycleGroup4ForwardHotkeys, settings.CycleGroup4Forward);
+			HotkeyFormatting.SetPrimaryHotkey(this._configuration.CycleGroup4BackwardHotkeys, settings.CycleGroup4Backward);
+			HotkeyFormatting.SetPrimaryHotkey(this._configuration.CycleGroup5ForwardHotkeys, settings.CycleGroup5Forward);
+			HotkeyFormatting.SetPrimaryHotkey(this._configuration.CycleGroup5BackwardHotkeys, settings.CycleGroup5Backward);
+			HotkeyFormatting.SetPrimaryHotkey(this._configuration.DynamicCycleForwardHotkeys, settings.DynamicCycleForward);
+			HotkeyFormatting.SetPrimaryHotkey(this._configuration.DynamicCycleBackwardHotkeys, settings.DynamicCycleBackward);
+			HotkeyFormatting.SetPrimaryHotkey(this._configuration.MinimizeAllClientsHotkeys, settings.MinimizeAllClients);
+		}
+
+		private async void SaveGlobalShortcutSettings()
+		{
+			this.ApplyGlobalShortcutSettingsToConfiguration(this.View.GetGlobalShortcutSettings());
+			this._configurationStorage.Save();
+			await this._mediator.Publish(new ThumbnailHotkeysUpdated());
+			await this._mediator.Send(new SaveConfiguration());
 		}
 
 		private async void SaveApplicationSettings()
@@ -188,6 +285,14 @@ namespace EveOPreview.Presenters
 			this._configuration.EnablePerClientThumbnailLayouts = this.View.EnablePerClientThumbnailLayouts;
 
 			this._configuration.ThumbnailSize = this.View.ThumbnailSize;
+
+			bool overwatchModeChanged = this._configuration.EnableOverwatchMode != this.View.EnableOverwatchMode;
+			this._configuration.EnableOverwatchMode = this.View.EnableOverwatchMode;
+			if (overwatchModeChanged)
+			{
+				await this._mediator.Publish(new ThumbnailOverwatchSettingsUpdated());
+			}
+
 			this._configuration.FocusedThumbnailSize = this.View.FocusedThumbnailSize;
 			this._configuration.FocusedThumbnailLocation = this.View.FocusedThumbnailLocation;
 
@@ -213,6 +318,7 @@ namespace EveOPreview.Presenters
 			this._configuration.ThumbnailSnapToGrid = this.View.ThumbnailSnapToGrid;
 			this._configuration.ThumbnailSnapToGridSizeX = this.View.ThumbnailSnapToGridSizeX;
             this._configuration.ThumbnailSnapToGridSizeY = this.View.ThumbnailSnapToGridSizeY;
+			this._configuration.ThumbnailSnapToEdges = this.View.ThumbnailSnapToEdges;
 
             this._configuration.EnableActiveClientHighlight = this.View.EnableActiveClientHighlight;
 			this._configuration.ActiveClientHighlightColor = this.View.ActiveClientHighlightColor;

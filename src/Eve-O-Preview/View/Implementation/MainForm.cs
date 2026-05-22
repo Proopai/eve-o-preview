@@ -47,6 +47,59 @@ namespace EveOPreview.View
 			this.InitFormSize();
 
 			this.AnimationStyleCombo.DataSource = Enum.GetValues(typeof(AnimationStyle));
+
+			this.InitShortcutsTab();
+		}
+
+		private void InitShortcutsTab()
+		{
+			var tabControl = (TabControl)this.Controls.Find("ContentTabControl", true).First();
+			var shortcutsTabPage = tabControl.TabPages.Cast<TabPage>().First(page => page.Name == "ShortcutsTabPage");
+
+			this.ShortcutsSettingsControl = new ShortcutsSettingsControl
+			{
+				Dock = DockStyle.Fill
+			};
+			shortcutsTabPage.Controls.Add(this.ShortcutsSettingsControl);
+			this.ShortcutsSettingsControl.SettingsChanged += this.ShortcutsSettingsChanged_Handler;
+		}
+
+		public GlobalShortcutSettings GetGlobalShortcutSettings()
+		{
+			return this.ShortcutsSettingsControl.GetSettings();
+		}
+
+		public void SetGlobalShortcutSettings(GlobalShortcutSettings settings)
+		{
+			if (this.ShortcutsSettingsControl == null || settings == null)
+			{
+				return;
+			}
+
+			this.ShortcutsSettingsControl.SetSettings(settings);
+		}
+
+		public void ConfigureShortcutHotkeyRecording(Action suspendGlobalHotkeys, Action resumeGlobalHotkeys)
+		{
+			if (this.ShortcutsSettingsControl == null)
+			{
+				return;
+			}
+
+			this.ShortcutsSettingsControl.SuspendGlobalHotkeys = suspendGlobalHotkeys;
+			this.ShortcutsSettingsControl.ResumeGlobalHotkeys = resumeGlobalHotkeys;
+		}
+
+		public Action GlobalShortcutSettingsChanged { get; set; }
+
+		private void ShortcutsSettingsChanged_Handler()
+		{
+			if (this._suppressEvents)
+			{
+				return;
+			}
+
+			this.GlobalShortcutSettingsChanged?.Invoke();
 		}
 
 		public bool MinimizeToTray
@@ -183,6 +236,12 @@ namespace EveOPreview.View
 				this.ThumbnailsWidthNumericEdit.Value = value.Width;
 				this.ThumbnailsHeightNumericEdit.Value = value.Height;
 			}
+		}
+
+		public bool EnableOverwatchMode
+		{
+			get => this.EnableOverwatchModeCheckBox.Checked;
+			set => this.EnableOverwatchModeCheckBox.Checked = value;
 		}
 
 		public Size FocusedThumbnailSize
@@ -327,6 +386,12 @@ namespace EveOPreview.View
 			get => this.LockThumbnailLocationCheckbox.Checked;
 			set => this.LockThumbnailLocationCheckbox.Checked = value;
 		}
+		public bool ThumbnailSnapToEdges
+		{
+			get => this.ThumbnailSnapToEdgesCheckBox.Checked;
+			set => this.ThumbnailSnapToEdgesCheckBox.Checked = value;
+		}
+
 		public bool ThumbnailSnapToGrid
 		{
 			get => this.ThumbnailSnapToGridCheckBox.Checked;
@@ -412,6 +477,13 @@ namespace EveOPreview.View
 
 		public void EndLoadSettings()
 		{
+			if (this.ThumbnailSnapToEdgesCheckBox.Checked)
+			{
+				this.ThumbnailSnapToGridCheckBox.Checked = false;
+			}
+
+			this.UpdateThumbnailSnapControlsState();
+			this.UpdateOverwatchControlsState();
 			this._suppressEvents = false;
 		}
 
@@ -491,6 +563,17 @@ namespace EveOPreview.View
 		public Action DocumentationLinkActivated { get; set; }
 
 		public Action CloseAllEveClientsRequested { get; set; }
+		public Action RefreshPortraitsRequested { get; set; }
+
+		public void SetRefreshPortraitsEnabled(bool enabled)
+		{
+			if (this.RefreshPortraitsButton == null)
+			{
+				return;
+			}
+
+			this.RefreshPortraitsButton.Enabled = enabled;
+		}
 
 		#region UI events
 		private void CloseAllEveClients_Handler(object sender, EventArgs e)
@@ -531,6 +614,82 @@ namespace EveOPreview.View
 			}
 
 			this.ApplicationSettingsChanged?.Invoke();
+		}
+
+		private void RefreshPortraitsButton_Click(object sender, EventArgs e)
+		{
+			this.RefreshPortraitsRequested?.Invoke();
+		}
+
+		private void ThumbnailSnapToEdgesCheckBox_CheckedChanged(object sender, EventArgs e)
+		{
+			if (this._suppressEvents)
+			{
+				return;
+			}
+
+			if (this.ThumbnailSnapToEdgesCheckBox.Checked)
+			{
+				this._suppressEvents = true;
+				this.ThumbnailSnapToGridCheckBox.Checked = false;
+				this._suppressEvents = false;
+			}
+
+			this.UpdateThumbnailSnapControlsState();
+			this.OptionChanged_Handler(sender, e);
+		}
+
+		private void ThumbnailSnapToGridCheckBox_CheckedChanged(object sender, EventArgs e)
+		{
+			if (this._suppressEvents)
+			{
+				return;
+			}
+
+			if (this.ThumbnailSnapToGridCheckBox.Checked)
+			{
+				this._suppressEvents = true;
+				this.ThumbnailSnapToEdgesCheckBox.Checked = false;
+				this._suppressEvents = false;
+			}
+
+			this.UpdateThumbnailSnapControlsState();
+			this.OptionChanged_Handler(sender, e);
+		}
+
+		private void EnableOverwatchModeCheckBox_CheckedChanged(object sender, EventArgs e)
+		{
+			if (this._suppressEvents)
+			{
+				return;
+			}
+
+			this.UpdateOverwatchControlsState();
+			this.OptionChanged_Handler(sender, e);
+		}
+
+		private void UpdateOverwatchControlsState()
+		{
+			bool enabled = this.EnableOverwatchModeCheckBox.Checked;
+			this.OverwatchWidthLabel.Enabled = enabled;
+			this.OverwatchHeightLabel.Enabled = enabled;
+			this.OverwatchPosXLabel.Enabled = enabled;
+			this.OverwatchPosYLabel.Enabled = enabled;
+			this.FocusedThumbnailWidthNumericEdit.Enabled = enabled;
+			this.FocusedThumbnailHeightNumericEdit.Enabled = enabled;
+			this.FocusedThumbnailLocationXNumericEdit.Enabled = enabled;
+			this.FocusedThumbnailLocationYNumericEdit.Enabled = enabled;
+		}
+
+		private void UpdateThumbnailSnapControlsState()
+		{
+			bool edgeSnap = this.ThumbnailSnapToEdgesCheckBox.Checked;
+			this.ThumbnailSnapToGridCheckBox.Enabled = !edgeSnap;
+			bool gridSnapEnabled = !edgeSnap && this.ThumbnailSnapToGridCheckBox.Checked;
+			this.ThumbnailSnapToGridSizeXNumericEdit.Enabled = gridSnapEnabled;
+			this.ThumbnailSnapToGridSizeYNumericEdit.Enabled = gridSnapEnabled;
+			this.SnapXLabel.Enabled = gridSnapEnabled;
+			this.SnapYLabel.Enabled = gridSnapEnabled;
 		}
 
 		private void ThumbnailSizeChanged_Handler(object sender, EventArgs e)

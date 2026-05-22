@@ -10,11 +10,10 @@ namespace EveOPreview.View
 	{
 		#region Private fields
 		private readonly PictureBox _thumbnail;
-		private IThumbnailConfiguration _config;
 		#endregion
 
-		public StaticThumbnailView(IWindowManager windowManager, IThumbnailConfiguration config, IThumbnailManager thumbnailManager)
-			: base(windowManager, config, thumbnailManager)
+		public StaticThumbnailView(IWindowManager windowManager, IThumbnailConfiguration config, IThumbnailManager thumbnailManager, ICharacterPortraitService characterPortraitService)
+			: base(windowManager, config, thumbnailManager, characterPortraitService)
 		{
 			this._thumbnail = new StaticThumbnailImage
 			{
@@ -24,7 +23,6 @@ namespace EveOPreview.View
 				Size = new Size(this.ClientSize.Width, this.ClientSize.Height)
 			};
 			this.Controls.Add(this._thumbnail);
-			this._config = config;
 		}
 
 		protected override void RefreshThumbnail(bool forceRefresh)

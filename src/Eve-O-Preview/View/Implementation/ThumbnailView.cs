@@ -44,12 +44,14 @@ namespace EveOPreview.View
 
 		private IThumbnailConfiguration _config;
 		private Lazy<Color> _myBorderColor;
-		private Lazy<Color> _preventPreviewColor;
-		private Lazy<bool> _preventPreviews;
+		private Color _preventPreviewColorValue;
+		private bool _preventPreviewsEnabled;
+		private int _appliedPreventHighlightBorder = -1;
 		private IThumbnailManager _thumbnailManager;
+		private readonly ICharacterPortraitService _characterPortraitService;
 		#endregion
 
-		protected ThumbnailView(IWindowManager windowManager, IThumbnailConfiguration config, IThumbnailManager thumbnailManager)
+		protected ThumbnailView(IWindowManager windowManager, IThumbnailConfiguration config, IThumbnailManager thumbnailManager, ICharacterPortraitService characterPortraitService)
 		{
 			this._config = config;
 			this.SuppressResizeEvent();
@@ -83,10 +85,11 @@ namespace EveOPreview.View
 				this.MouseMove_Handler
 				);
 
+			this._thumbnailManager = thumbnailManager;
+			this._characterPortraitService = characterPortraitService;
+
 			SetDefaultBorderColor();
 			SetPreventPreviews();
-			this._overlay.EnableFakePreview(this._preventPreviews.Value, false, 0, 0, 0, 0, SystemColors.Control);
-			this._thumbnailManager = thumbnailManager;
 		}
 
 		public IWindowManager WindowManager { get; }
@@ -103,7 +106,6 @@ namespace EveOPreview.View
 				this._overlay.SetPropertiesOverlayLabel(_config.OverlayLabelFont, _config.OverlayLabelColor, _config.OverlayLabelAnchor);
 				SetDefaultBorderColor();
 				SetPreventPreviews();
-				this._overlay.EnableFakePreview(this._preventPreviews.Value, false, 0, 0, 0, 0, SystemColors.Control);
 				this._overlay.SetCycleGroupIndicator(this.IsExcludedFromCycleGroup , _config.CycleGroupIndicatorAnchor);
 			}
 		}
@@ -163,33 +165,88 @@ namespace EveOPreview.View
 
 		public bool IsPreventPreviews()
 		{
-			return this._preventPreviews.Value;
+			return this._preventPreviewsEnabled;
 		}
+
 		public void SetPreventPreviews()
 		{
-			this._preventPreviews = new Lazy<bool>(() =>
+			if (this._config.PerClientPreventPreviews.TryGetValue(this.Title, out bool perClientPrevent))
 			{
-				if (this._config.PerClientPreventPreviews.Any(x => x.Key == this.Title))
-				{
-					return this._config.PerClientPreventPreviews[Title];
-				}
-				else
-				{
-					return _config.PreventPreviews;
-				}
-			});
+				this._preventPreviewsEnabled = perClientPrevent;
+			}
+			else
+			{
+				this._preventPreviewsEnabled = this._config.PreventPreviews;
+			}
 
-			this._preventPreviewColor = new Lazy<Color>(() =>
+			if (this._config.PerClientPreventPreviewColor.TryGetValue(this.Title, out Color perClientColor))
 			{
-				if (this._config.PerClientPreventPreviewColor.Any(x => x.Key == this.Title))
-				{
-					return this._config.PerClientPreventPreviewColor[Title];
-				}
-				else
-				{
-					return _config.PreventPreviewColor;
-				}
-			});
+				this._preventPreviewColorValue = perClientColor;
+			}
+			else
+			{
+				this._preventPreviewColorValue = this._config.PreventPreviewColor;
+			}
+
+			this._appliedPreventHighlightBorder = -1;
+			this.OnPreventPreviewsChanged();
+		}
+
+		public void RefreshPortraitOverlay()
+		{
+			if (!this.IsPreventPreviews())
+			{
+				this._overlay.ClearPortrait();
+				return;
+			}
+
+			Image portrait = this._characterPortraitService.TryLoadPortraitImage(this.Title);
+			try
+			{
+				this._overlay.SetPortraitImage(portrait == null ? null : (Image)portrait.Clone());
+			}
+			finally
+			{
+				portrait?.Dispose();
+			}
+		}
+
+		protected virtual void OnPreventPreviewsChanged()
+		{
+			this.Refresh(true);
+		}
+
+		private void ApplyPreventPreviewVisuals(int highlightBorderWidth)
+		{
+			Color highlightColor = highlightBorderWidth > 0 ? this._myBorderColor.Value : this._preventPreviewColorValue;
+			this._overlay.EnableFakePreview(
+				true,
+				false,
+				0,
+				0,
+				0,
+				0,
+				this._preventPreviewColorValue,
+				highlightBorderWidth,
+				highlightColor);
+		}
+
+		private void ApplyPreventPreviewState(bool fullRepaint)
+		{
+			int border = this._isHighlightRequested ? this._highlightWidth : 0;
+
+			if (fullRepaint || border != this._appliedPreventHighlightBorder)
+			{
+				this.ResizeThumbnail(this.ClientSize.Width, this.ClientSize.Height, 0, 0, 0, 0);
+				this.ApplyPreventPreviewVisuals(border);
+				this._appliedPreventHighlightBorder = border;
+			}
+
+			if (fullRepaint)
+			{
+				this.RefreshPortraitOverlay();
+				this._overlay.BringToFront();
+			}
 		}
 
 		public new void Show()
@@ -294,14 +351,14 @@ namespace EveOPreview.View
 
 		public void SetTopMost(bool enableTopmost)
 		{
+			this._overlay.TopMost = enableTopmost;
+
 			if (this._isTopMost == enableTopmost)
 			{
 				return;
 			}
 
-			this._overlay.TopMost = enableTopmost;
 			this.TopMost = enableTopmost;
-
 			this._isTopMost = enableTopmost;
 		}
 
@@ -312,7 +369,7 @@ namespace EveOPreview.View
 
 		public void SetHighlight(bool enabled, int width)
 		{
-			if (this._isHighlightRequested == enabled)
+			if (this._isHighlightRequested == enabled && (!enabled || this._highlightWidth == width))
 			{
 				return;
 			}
@@ -321,7 +378,7 @@ namespace EveOPreview.View
 			{
 				this._isHighlightRequested = true;
 				this._highlightWidth = width;
-				this.BackColor = _myBorderColor.Value;
+				this.BackColor = this.IsPreventPreviews() ? Color.Black : _myBorderColor.Value;
 			}
 			else
 			{
@@ -334,7 +391,15 @@ namespace EveOPreview.View
 
 		public void ClearBorder()
 		{
-			this.SetHighlight(false, 0);
+			if (this._isHighlightRequested)
+			{
+				this.SetHighlight(false, 0);
+			}
+			else if (this.IsPreventPreviews())
+			{
+				this._isSizeChanged = true;
+			}
+
 			this.Refresh(true);
 		}
 
@@ -427,10 +492,20 @@ namespace EveOPreview.View
 
 		public void Refresh(bool forceRefresh)
 		{
+			if (this.IsPreventPreviews())
+			{
+				bool fullUpdate = forceRefresh || this._isSizeChanged || this._isLocationChanged;
+				this.RefreshThumbnail(fullUpdate);
+				this.SyncOverlay(fullUpdate);
+				this.ApplyPreventPreviewState(fullUpdate);
+				this._isLocationChanged = false;
+				this._isSizeChanged = false;
+				return;
+			}
+
 			this.RefreshThumbnail(forceRefresh);
 			this.HighlightThumbnail(forceRefresh || this._isSizeChanged);
-			this.RefreshOverlay(forceRefresh || this._isSizeChanged || this._isLocationChanged);
-
+			this.SyncOverlay(forceRefresh || this._isSizeChanged || this._isLocationChanged);
 			this._isSizeChanged = false;
 		}
 
@@ -455,7 +530,7 @@ namespace EveOPreview.View
 			{
 				//No highlighting enabled, so no math required
 				this.ResizeThumbnail(baseWidth, baseHeight, 0, 0, 0, 0);
-				this._overlay.EnableFakePreview(this._preventPreviews.Value, false, 0, 0, 0, 0, this._preventPreviewColor.Value);
+				this._overlay.EnableFakePreview(false, false, 0, 0, 0, 0, SystemColors.Control);
 				return;
 			}
 
@@ -467,25 +542,35 @@ namespace EveOPreview.View
 			int highlightWidthLeft = (baseWidth - actualWidth) / 2;
 			int highlightWidthRight = baseWidth - actualWidth - highlightWidthLeft;
 
-			this._overlay.EnableFakePreview(this._preventPreviews.Value, true, this._highlightWidth, highlightWidthRight, this._highlightWidth, highlightWidthLeft, this._preventPreviewColor.Value);
+			this._overlay.EnableFakePreview(false, true, this._highlightWidth, highlightWidthRight, this._highlightWidth, highlightWidthLeft, SystemColors.Control);
 			this.ResizeThumbnail(this.ClientSize.Width, this.ClientSize.Height, this._highlightWidth, highlightWidthRight, this._highlightWidth, highlightWidthLeft);
 		}
 
-		private void RefreshOverlay(bool forceRefresh)
+		private void SyncOverlay(bool updateGeometry)
 		{
-			if (this._isOverlayVisible && !forceRefresh)
+			if (!this.IsPreventPreviews() && this._isOverlayVisible && !updateGeometry)
 			{
-				// No need to update anything. Everything is already set up
 				return;
 			}
 
-			// Only show overlay if enabled AND thumbnail is active/visible.
+			bool shouldShowOverlay = ((this.IsOverlayEnabled && this.Visible) || this.IsPreventPreviews())
+				&& !this._config.IsThumbnailDisabled(this.Title);
+
+			if (!shouldShowOverlay)
+			{
+				if (this._isOverlayVisible)
+				{
+					this._overlay.Hide();
+					this._isOverlayVisible = false;
+				}
+
+				return;
+			}
+
 			this._overlay.EnableOverlayLabel(this.IsOverlayEnabled && this.Visible);
 
-			if (!this._isOverlayVisible && ((this.IsOverlayEnabled && this.Visible) || this.IsPreventPreviews() ) && !_config.IsThumbnailDisabled(this.Title) )
+			if (!this._isOverlayVisible)
 			{
-				// One-time action to show the Overlay before it is set up
-				// Otherwise its position won't be set
 				this._overlay.Show();
 				this._isOverlayVisible = true;
 			}
@@ -499,11 +584,14 @@ namespace EveOPreview.View
 
 			this._isLocationChanged = false;
 			this._overlay.Size = overlaySize;
-
-			this._overlay.SetPropertiesOverlayLabel(_config.OverlayLabelFont, _config.OverlayLabelColor, _config.OverlayLabelAnchor);
-
+			this._overlay.SetPropertiesOverlayLabel(this._config.OverlayLabelFont, this._config.OverlayLabelColor, this._config.OverlayLabelAnchor);
 			this._overlay.Location = overlayLocation;
-			this._overlay.Refresh();
+			this._overlay.TopMost = this.TopMost;
+
+			if (updateGeometry)
+			{
+				this._overlay.BringToFront();
+			}
 		}
 
 		private void SuppressResizeEvent()
@@ -572,19 +660,29 @@ namespace EveOPreview.View
 		{
 			if (e.Button == MouseButtons.Right)
 			{
+				if (this.WindowMoved && _config.ThumbnailSnapToEdges)
+				{
+					this._thumbnailManager.SnapThumbnail(this.Id);
+				}
+
 				this.ExitCustomMouseMode();
 
-				// Snap to Grid on release of mouse (if moved)
-				if (_config.ThumbnailSnapToGrid && this.WindowMoved)
+				if (this.WindowMoved)
 				{
-					var x = (int)Math.Round((double)this.Location.X / (double)_config.ThumbnailSnapToGridSizeX) * _config.ThumbnailSnapToGridSizeX;
-                    var y = (int)Math.Round((double)this.Location.Y / (double)_config.ThumbnailSnapToGridSizeY) * _config.ThumbnailSnapToGridSizeY;
-					this.Location = new Point(x, y);
-					this._baseZoomLocation = this.Location;
+					if (_config.ThumbnailSnapToEdges)
+					{
+						this.ThumbnailMoved?.Invoke(this.Id);
+					}
+					else if (_config.ThumbnailSnapToGrid)
+					{
+						var x = (int)Math.Round((double)this.Location.X / (double)_config.ThumbnailSnapToGridSizeX) * _config.ThumbnailSnapToGridSizeX;
+						var y = (int)Math.Round((double)this.Location.Y / (double)_config.ThumbnailSnapToGridSizeY) * _config.ThumbnailSnapToGridSizeY;
+						this.Location = new Point(x, y);
+						this._baseZoomLocation = this.Location;
+					}
 
 					this.WindowMoved = false;
-
-                }
+				}
 			}
 		}
 
@@ -624,6 +722,7 @@ namespace EveOPreview.View
 
 			this._isCustomMouseModeActive = true;
 			this._baseMousePosition = Control.MousePosition;
+			this._thumbnailManager.NotifyThumbnailDragStarted(this.Id);
 		}
 
 		private void ProcessCustomMouseMode(bool leftButton, bool rightButton)
@@ -654,6 +753,7 @@ namespace EveOPreview.View
 		private void ExitCustomMouseMode()
 		{
 			this._isCustomMouseModeActive = false;
+			this._thumbnailManager.NotifyThumbnailDragEnded(this.Id);
 		}
 		#endregion
 

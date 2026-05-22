@@ -30,6 +30,7 @@ namespace EveOPreview.View
 		void SetHighlight(bool enabled, int width);
 		bool IsPreventPreviews();
 		void SetPreventPreviews();
+		void RefreshPortraitOverlay();
 		void ZoomIn(ViewZoomAnchor anchor, int zoomFactor);
 		void ZoomOut();
 

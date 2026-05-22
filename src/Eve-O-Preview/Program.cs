@@ -101,6 +101,7 @@ namespace EveOPreview
 			container.Register<IThumbnailManager>();
 			container.Register<IThumbnailViewFactory>();
 			container.Register<IThumbnailDescription>();
+			container.Register<ICharacterPortraitService>();
 
 			IApplicationController controller = new ApplicationController(container);
 

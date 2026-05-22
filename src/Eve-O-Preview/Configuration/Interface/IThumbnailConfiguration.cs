@@ -26,6 +26,9 @@ namespace EveOPreview.Configuration
 		List<string> CycleGroup5BackwardHotkeys { get; set; }
 		Dictionary<string, int> CycleGroup5ClientsOrder { get; set; }
 
+		List<string> DynamicCycleForwardHotkeys { get; set; }
+		List<string> DynamicCycleBackwardHotkeys { get; set; }
+
 		Dictionary<string, Color> PerClientActiveClientHighlightColor { get; set; }
 		Dictionary<string, Color> PerClientPreventPreviewColor { get; set; }
 		Dictionary<string, bool> PerClientPreventPreviews { get; set; }
@@ -55,6 +58,7 @@ namespace EveOPreview.Configuration
 		int HideThumbnailsDelay { get; set; }
 
 		Size ThumbnailSize { get; set; }
+		bool EnableOverwatchMode { get; set; }
 		Size FocusedThumbnailSize { get; set; }
 		Point FocusedThumbnailLocation { get; set; }
 		Size ThumbnailMinimumSize { get; set; }
@@ -74,6 +78,7 @@ namespace EveOPreview.Configuration
 		bool ThumbnailSnapToGrid {  get; set; }
 		int ThumbnailSnapToGridSizeX { get; set; }
 		int ThumbnailSnapToGridSizeY { get; set; }
+		bool ThumbnailSnapToEdges { get; set; }
 
 		bool EnableActiveClientHighlight { get; set; }
 		Color ActiveClientHighlightColor { get; set; }
@@ -86,6 +91,12 @@ namespace EveOPreview.Configuration
 		List<string> MinimizeAllClientsHotkeys { get; set; }
 
 		Point LoginThumbnailLocation { get; set; }
+
+		/// <summary>Full path to the directory where cached character portrait images are stored (typically "thumbs" next to the executable).</summary>
+		string PortraitThumbnailsDirectory { get; set; }
+
+		/// <summary>Maps EVE window title (e.g. "EVE - Character Name") to the full path of the cached portrait image file.</summary>
+		Dictionary<string, string> ClientPortraitPaths { get; set; }
 
 		Point GetThumbnailLocation(string currentClient, string activeClient, Point defaultLocation);
 		Size GetThumbnailSize(string currentClient, string activeClient, Size defaultSize);

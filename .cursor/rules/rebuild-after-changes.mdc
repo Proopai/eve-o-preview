@@ -1,16 +1,28 @@
 ---
-description: Build and publish single-file exe after edits so the user can test.
+description: Build and deploy via deploy.bat after edits so the user can test without manual clicks.
 alwaysApply: true
 ---
 
-Whenever you change any file in this repo during a turn (code, designer, rules, csproj), finish by running all three steps so the user always has a fresh testable exe:
+Whenever you change any file in this repo during a turn (code, designer, rules, csproj), do **not** run `deploy.bat` unless the user explicitly asks to deploy in that turn.
 
-1. `dotnet clean "src\EVE-O-Preview.sln" -c Release`
-2. `dotnet build "src\EVE-O-Preview.sln" -c Release --no-incremental`
-3. `dotnet publish "src\Eve-O-Preview\Eve-O-Preview.csproj" -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true`
+When the user asks to deploy, run **only** `deploy.bat` from the repo root (do not run separate `dotnet clean` / `dotnet build` / `dotnet publish` steps):
 
-Report success or errors. Always give the full path to the single-file output:
+```
+deploy.bat
+```
 
-`c:\Users\cmatt\Documents\Code\eve-o-preview\bin\net8.0-windows8.0\win-x64\publish\EVE-O-Preview.exe`
+Or from PowerShell:
 
-If a turn only answers questions and touches no files, skip the commands.
+```powershell
+cd "c:\Users\cmatt\Documents\Code\eve-o-preview"
+.\deploy.bat
+```
+
+`deploy.bat` builds Release, publishes the single-file exe, stops any running `EVE-O-Preview.exe`, copies to `C:\Eve\EVE-O-Preview.exe`, and starts it.
+
+Report success or errors. On success, mention:
+
+- Published: `c:\Users\cmatt\Documents\Code\eve-o-preview\bin\net8.0-windows8.0\win-x64\publish\EVE-O-Preview.exe`
+- Deployed: `C:\Eve\EVE-O-Preview.exe`
+
+If a turn only answers questions and touches no files, skip deploy. If you made code changes but the user did not ask to deploy, say the change is ready and they can run `deploy.bat` when they want to test.

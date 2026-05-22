@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using EveOPreview.Configuration;
 
 namespace EveOPreview.View
 {
@@ -27,6 +28,7 @@ namespace EveOPreview.View
 		bool EnablePerClientThumbnailLayouts { get; set; }
 
 		Size ThumbnailSize { get; set; }
+		bool EnableOverwatchMode { get; set; }
 		Size FocusedThumbnailSize { get; set; }
 		Point FocusedThumbnailLocation { get; set; }
 
@@ -43,6 +45,7 @@ namespace EveOPreview.View
 		bool ThumbnailSnapToGrid { get; set; }
 		int ThumbnailSnapToGridSizeX { get; set; }
 		int ThumbnailSnapToGridSizeY { get; set; }
+		bool ThumbnailSnapToEdges { get; set; }
 
 		bool EnableActiveClientHighlight { get; set; }
 		Color ActiveClientHighlightColor { get; set; }
@@ -51,6 +54,10 @@ namespace EveOPreview.View
 		Font OverlayLabelFont { get; set; }
 
 		string IconName { get; set; }
+
+		GlobalShortcutSettings GetGlobalShortcutSettings();
+		void SetGlobalShortcutSettings(GlobalShortcutSettings settings);
+		void ConfigureShortcutHotkeyRecording(Action suspendGlobalHotkeys, Action resumeGlobalHotkeys);
 
 		void SetDocumentationUrl(string url);
 		void SetVersionInfo(string version);
@@ -69,9 +76,13 @@ namespace EveOPreview.View
 		Action FormMinimized { get; set; }
 		Action<ViewCloseRequest> FormCloseRequested { get; set; }
 		Action ApplicationSettingsChanged { get; set; }
+		Action GlobalShortcutSettingsChanged { get; set; }
 		Action ThumbnailsSizeChanged { get; set; }
 		Action<string> ThumbnailStateChanged { get; set; }
 		Action DocumentationLinkActivated { get; set; }
 		Action CloseAllEveClientsRequested { get; set; }
+		Action RefreshPortraitsRequested { get; set; }
+
+		void SetRefreshPortraitsEnabled(bool enabled);
 	}
 }

@@ -2,6 +2,7 @@
 using EveOPreview.Services;
 using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.Windows.Forms;
 using Rectangle = System.Drawing.Rectangle;
@@ -16,7 +17,16 @@ namespace EveOPreview.View
 		private readonly Action<object, MouseEventArgs> _areaMouseDownAction;
 		private readonly Action<object, MouseEventArgs> _areaMouseUpAction;
 		private readonly Action<object, MouseEventArgs> _areaMouseMoveAction;
+		private static readonly Color LiveOverlayTransparencyKey = Color.FromArgb(0, 0, 1);
+		private static readonly Color OpaqueOverlayTransparencyKey = Color.FromArgb(1, 0, 1);
+
 		private bool _showOverlayText = true;
+		private bool _fakePreviewEnabled;
+		private Image _portraitImage;
+		private Color _fakePreviewBackgroundColor;
+		private int _fakePreviewBorderWidth;
+		private Color _fakePreviewBorderColor;
+		private bool _fakePreviewLayoutApplied;
 		#endregion
 
 		public ThumbnailOverlay(Form owner,
@@ -234,51 +244,91 @@ namespace EveOPreview.View
 			//this.OverlayLabel.Visible = enable;
 			this._showOverlayText = enable;
 		}
-		public void EnableFakePreview(bool enable, bool resizeForHighlight, int insetTop, int insetRight, int insetBottom, int insetLeft, Color bgColor)
+		public void SetPortraitImage(Image image)
 		{
-			bool IsLocationUpdateRequired(Point currentLocation, int left, int top)
-			{
-				return (currentLocation.X != left) || (currentLocation.Y != top);
-			}
+			this._portraitImage?.Dispose();
+			this._portraitImage = image;
+			this.OverlayAreaPictureBox.Invalidate();
+		}
 
-			bool IsSizeUpdateRequired(Size currentSize, int width, int height)
-			{
-				return (currentSize.Width != width) || (currentSize.Height != height);
-			}
+		public void ClearPortrait()
+		{
+			this._portraitImage?.Dispose();
+			this._portraitImage = null;
+			this.OverlayAreaPictureBox.Invalidate();
+		}
+
+		public void EnableFakePreview(bool enable, bool resizeForHighlight, int insetTop, int insetRight, int insetBottom, int insetLeft, Color bgColor, int opaqueBorderWidth = 0, Color opaqueBorderColor = default)
+		{
+			int borderWidth = Math.Max(0, opaqueBorderWidth);
 
 			if (!enable)
 			{
-				OverlayAreaPictureBox.BackColor = Color.Transparent;
-				OverlayLabel.BackColor = Color.Transparent;
-			}
-			else
-			{
-				OverlayAreaPictureBox.BackColor = bgColor;
-				OverlayLabel.BackColor = Color.Transparent;
+				this._fakePreviewLayoutApplied = false;
+				this._fakePreviewEnabled = false;
+				this.TransparencyKey = ThumbnailOverlay.LiveOverlayTransparencyKey;
+				this.BackColor = ThumbnailOverlay.LiveOverlayTransparencyKey;
+				OverlayAreaPictureBox.BackColor = ThumbnailOverlay.LiveOverlayTransparencyKey;
+				OverlayLabel.BackColor = ThumbnailOverlay.LiveOverlayTransparencyKey;
+				this.ClearPortrait();
+				this.ApplyLiveOverlayPictureBoxLayout(resizeForHighlight, insetTop, insetRight, insetBottom, insetLeft);
+				return;
 			}
 
+			if (this._fakePreviewLayoutApplied
+				&& this._fakePreviewEnabled
+				&& this._fakePreviewBackgroundColor == bgColor
+				&& this._fakePreviewBorderWidth == borderWidth
+				&& this._fakePreviewBorderColor == opaqueBorderColor
+				&& OverlayAreaPictureBox.Dock == DockStyle.Fill)
+			{
+				return;
+			}
+
+			this._fakePreviewEnabled = true;
+			this._fakePreviewBackgroundColor = bgColor;
+			this._fakePreviewBorderWidth = borderWidth;
+			this._fakePreviewBorderColor = opaqueBorderColor;
+			this._fakePreviewLayoutApplied = true;
+
+			// Portrait / prevent-preview: opaque surface — do not use TransparencyKey holes for the highlight border.
+			this.TransparencyKey = ThumbnailOverlay.OpaqueOverlayTransparencyKey;
+			this.BackColor = bgColor;
+			OverlayAreaPictureBox.BackColor = bgColor;
+			OverlayLabel.BackColor = Color.Transparent;
+			OverlayAreaPictureBox.Dock = DockStyle.Fill;
+			OverlayAreaPictureBox.Location = Point.Empty;
+			OverlayAreaPictureBox.Size = this.ClientSize;
+			this.OverlayAreaPictureBox.Invalidate();
+		}
+
+		private void ApplyLiveOverlayPictureBoxLayout(bool resizeForHighlight, int insetTop, int insetRight, int insetBottom, int insetLeft)
+		{
 			if (!resizeForHighlight)
 			{
 				OverlayAreaPictureBox.Dock = DockStyle.Fill;
+				this.OverlayAreaPictureBox.Invalidate();
 				return;
 			}
 
 			OverlayAreaPictureBox.Dock = DockStyle.None;
 
-			var left = insetLeft;
-			var top = insetTop;
-			var width = Math.Max(0, this.ClientSize.Width - insetLeft - insetRight);
-			var height = Math.Max(0, this.ClientSize.Height - insetTop - insetBottom);
+			int left = insetLeft;
+			int top = insetTop;
+			int width = Math.Max(0, this.ClientSize.Width - insetLeft - insetRight);
+			int height = Math.Max(0, this.ClientSize.Height - insetTop - insetBottom);
 
-			if (IsLocationUpdateRequired(OverlayAreaPictureBox.Location, left, top))
+			if (OverlayAreaPictureBox.Location.X != left || OverlayAreaPictureBox.Location.Y != top)
 			{
 				OverlayAreaPictureBox.Location = new Point(left, top);
 			}
 
-			if (IsSizeUpdateRequired(OverlayAreaPictureBox.Size, width, height))
+			if (OverlayAreaPictureBox.Size.Width != width || OverlayAreaPictureBox.Size.Height != height)
 			{
 				OverlayAreaPictureBox.Size = new Size(width, height);
 			}
+
+			this.OverlayAreaPictureBox.Invalidate();
 		}
 
 		private void PaintDrawText(PaintEventArgs e, System.Windows.Forms.Label l)
@@ -297,7 +347,73 @@ namespace EveOPreview.View
 
 		private void OverlayAreaPictureBox_Paint(object sender, PaintEventArgs e)
 		{
-			if (this._showOverlayText) PaintDrawText(e, OverlayLabel);
+			if (this._fakePreviewEnabled)
+			{
+				this.PaintPortrait(e);
+			}
+
+			if (this._showOverlayText)
+			{
+				PaintDrawText(e, OverlayLabel);
+			}
+		}
+
+		private void PaintPortrait(PaintEventArgs e)
+		{
+			Rectangle bounds = this.OverlayAreaPictureBox.ClientRectangle;
+			if (bounds.Width <= 0 || bounds.Height <= 0)
+			{
+				return;
+			}
+
+			int border = this._fakePreviewBorderWidth;
+			if (border > 0)
+			{
+				using (SolidBrush borderBrush = new SolidBrush(this._fakePreviewBorderColor))
+				{
+					e.Graphics.FillRectangle(borderBrush, bounds);
+				}
+
+				bounds = Rectangle.Inflate(bounds, -border, -border);
+				if (bounds.Width <= 0 || bounds.Height <= 0)
+				{
+					return;
+				}
+			}
+
+			using (SolidBrush backgroundBrush = new SolidBrush(this._fakePreviewBackgroundColor))
+			{
+				e.Graphics.FillRectangle(backgroundBrush, bounds);
+			}
+
+			if (this._portraitImage == null)
+			{
+				return;
+			}
+
+			float imageAspect = (float)this._portraitImage.Width / this._portraitImage.Height;
+			float boxAspect = (float)bounds.Width / bounds.Height;
+			int drawWidth;
+			int drawHeight;
+
+			if (imageAspect > boxAspect)
+			{
+				drawWidth = bounds.Width;
+				drawHeight = Math.Max(1, (int)Math.Round(bounds.Width / imageAspect));
+			}
+			else
+			{
+				drawHeight = bounds.Height;
+				drawWidth = Math.Max(1, (int)Math.Round(bounds.Height * imageAspect));
+			}
+
+			int x = bounds.X + (bounds.Width - drawWidth) / 2;
+			int y = bounds.Y + (bounds.Height - drawHeight) / 2;
+
+			e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+			e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+			e.Graphics.CompositingMode = CompositingMode.SourceOver;
+			e.Graphics.DrawImage(this._portraitImage, x, y, drawWidth, drawHeight);
 		}
 
 		protected override CreateParams CreateParams

@@ -57,6 +57,9 @@ namespace EveOPreview.Configuration.Implementation
 				{ "EVE - cycle group 5", 1 },
 			};
 
+			this.DynamicCycleForwardHotkeys = new List<string> { "F20" };
+			this.DynamicCycleBackwardHotkeys = new List<string> { "F21" };
+
 			this.PerClientActiveClientHighlightColor = new Dictionary<string, Color>
 			{
 				{"EVE - Example Toon 1", Color.Red},
@@ -92,6 +95,8 @@ namespace EveOPreview.Configuration.Implementation
 			this.MinimizeAllClientsHotkeys = new List<string> { "Control+F22" };
 			this.DisableThumbnail = new Dictionary<string, bool>();
 			this.PriorityClients = new List<string>();
+			this.ClientPortraitPaths = new Dictionary<string, string>();
+			this.PortraitThumbnailsDirectory = string.Empty;
 
 			this.ExecutablesToPreview = new List<string> { "exefile" };
 
@@ -123,6 +128,7 @@ namespace EveOPreview.Configuration.Implementation
 			this.HideThumbnailsDelay = 2; // 2 thumbnails refresh cycles (1.0 sec)
 
 			this.ThumbnailSize = new Size(384, 216);
+			this.EnableOverwatchMode = false;
 			this.FocusedThumbnailSize = new Size(960, 540);
 			this.FocusedThumbnailLocation = new Point(100, 100);
 			this.ThumbnailMinimumSize = new Size(192, 108);
@@ -143,6 +149,7 @@ namespace EveOPreview.Configuration.Implementation
 			this.ThumbnailSnapToGrid = true;
 			this.ThumbnailSnapToGridSizeX = 100;
 			this.ThumbnailSnapToGridSizeY = 50;
+			this.ThumbnailSnapToEdges = false;
 
             this.EnableActiveClientHighlight = false;
 			this.ActiveClientHighlightColor = Color.GreenYellow;
@@ -208,6 +215,12 @@ namespace EveOPreview.Configuration.Implementation
 
 		[JsonProperty("CycleGroup5ClientsOrder")]
 		public Dictionary<string, int> CycleGroup5ClientsOrder { get; set; }
+
+		[JsonProperty("DynamicCycleForwardHotkeys")]
+		public List<string> DynamicCycleForwardHotkeys { get; set; }
+
+		[JsonProperty("DynamicCycleBackwardHotkeys")]
+		public List<string> DynamicCycleBackwardHotkeys { get; set; }
 
 		[JsonProperty("PerClientPreventPreviewColor")]
 		public Dictionary<string, Color> PerClientPreventPreviewColor { get; set; }
@@ -278,6 +291,9 @@ namespace EveOPreview.Configuration.Implementation
 
 		public Size ThumbnailSize { get; set; }
 
+		[JsonProperty("EnableOverwatchMode")]
+		public bool EnableOverwatchMode { get; set; }
+
 		[JsonProperty("FocusedThumbnailSize")]
 		public Size FocusedThumbnailSize { get; set; }
 
@@ -302,6 +318,8 @@ namespace EveOPreview.Configuration.Implementation
 		public bool ThumbnailSnapToGrid { get; set; }
 		public int ThumbnailSnapToGridSizeX {  get; set; }
 		public int ThumbnailSnapToGridSizeY { get; set; }
+		[JsonProperty("ThumbnailSnapToEdges")]
+		public bool ThumbnailSnapToEdges { get; set; }
 
 		public bool EnableActiveClientHighlight { get; set; }
 
@@ -317,6 +335,12 @@ namespace EveOPreview.Configuration.Implementation
 
 		[JsonProperty("LoginThumbnailLocation")]
 		public Point LoginThumbnailLocation { get; set; }
+
+		[JsonProperty("PortraitThumbnailsDirectory")]
+		public string PortraitThumbnailsDirectory { get; set; }
+
+		[JsonProperty("ClientPortraitPaths")]
+		public Dictionary<string, string> ClientPortraitPaths { get; set; }
 
 		[JsonProperty]
 		private Dictionary<string, Dictionary<string, Point>> PerClientLayout { get; set; }
@@ -374,13 +398,8 @@ namespace EveOPreview.Configuration.Implementation
 		{
 			Dictionary<string, Point> layoutSource;
 
-			if (this.EnablePerClientThumbnailLayouts)
+			if (this.EnablePerClientThumbnailLayouts && !string.IsNullOrEmpty(activeClient))
 			{
-				if (string.IsNullOrEmpty(activeClient))
-				{
-					return;
-				}
-
 				if (!this.PerClientLayout.TryGetValue(activeClient, out layoutSource))
 				{
 					layoutSource = new Dictionary<string, Point>();

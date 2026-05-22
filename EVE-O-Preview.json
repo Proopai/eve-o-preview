@@ -1,0 +1,138 @@
+{
+  "ConfigVersion": 1,
+  "CycleGroup1ForwardHotkeys": [
+    "F14",
+    "Control+F14"
+  ],
+  "CycleGroup1BackwardHotkeys": [
+    "F13",
+    "Control+F13"
+  ],
+  "CycleGroup1ClientsOrder": {
+    "EVE - Example DPS Toon 1": 1,
+    "EVE - Example DPS Toon 2": 2,
+    "EVE - Example DPS Toon 3": 3
+  },
+  "CycleGroup2ForwardHotkeys": [
+    "F16",
+    "Control+F16"
+  ],
+  "CycleGroup2BackwardHotkeys": [
+    "F15",
+    "Control+F15"
+  ],
+  "CycleGroup2ClientsOrder": {
+    "EVE - Example Logi Toon 1": 1,
+    "EVE - Example Scout Toon 2": 2,
+    "EVE - Example Tackle Toon 3": 3
+  },
+  "CycleGroup3ForwardHotkeys": [
+    ""
+  ],
+  "CycleGroup3BackwardHotkeys": [
+    ""
+  ],
+  "CycleGroup3ClientsOrder": {
+    "EVE - cycle group 3": 1
+  },
+  "CycleGroup4ForwardHotkeys": [
+    ""
+  ],
+  "CycleGroup4BackwardHotkeys": [
+    ""
+  ],
+  "CycleGroup4ClientsOrder": {
+    "EVE - cycle group 4": 1
+  },
+  "CycleGroup5ForwardHotkeys": [
+    ""
+  ],
+  "CycleGroup5BackwardHotkeys": [
+    ""
+  ],
+  "CycleGroup5ClientsOrder": {
+    "EVE - cycle group 5": 1
+  },
+  "DynamicCycleForwardHotkeys": [
+    "F20"
+  ],
+  "DynamicCycleBackwardHotkeys": [
+    "F21"
+  ],
+  "PerClientPreventPreviewColor": {
+    "EVE - Example Toon 1": "Red",
+    "EVE - Example Toon 2": "Green"
+  },
+  "PerClientActiveClientHighlightColor": {
+    "EVE - Example Toon 1": "Red",
+    "EVE - Example Toon 2": "Green"
+  },
+  "PerClientPreventPreviews": {
+    "EVE - Example Toon 1": false,
+    "EVE - Example Toon 2": true
+  },
+  "PerClientThumbnailSize": {
+    "EVE - Example Toon 1": "200, 200",
+    "EVE - Example Toon 2": "200, 200"
+  },
+  "PerClientZoomAnchor": {
+    "EVE - Example Toon 1": 1,
+    "EVE - Example Toon 2": 7
+  },
+  "MinimizeToTray": false,
+  "ThumbnailRefreshPeriod": 500,
+  "ThumbnailResizeTimeoutPeriod": 500,
+  "WineCompatibilityMode": false,
+  "ThumbnailsOpacity": 0.5,
+  "EnableClientLayoutTracking": false,
+  "HideActiveClientThumbnail": false,
+  "HideLoginClientThumbnail": false,
+  "MinimizeInactiveClients": false,
+  "HideCaptionOnClients": false,
+  "WindowsAnimationStyle": 1,
+  "ShowThumbnailsAlwaysOnTop": true,
+  "EnablePerClientThumbnailLayouts": false,
+  "PreventPreviews": false,
+  "HideThumbnailsOnLostFocus": false,
+  "OnlyRegisterCycleHotkeysWhenEveFocused": true,
+  "DynamicCycleGroup": false,
+  "HideThumbnailsDelay": 2,
+  "ThumbnailSize": "384, 216",
+  "FocusedThumbnailSize": "960, 540",
+  "FocusedThumbnailLocation": "100, 100",
+  "ThumbnailMaximumSize": "960, 540",
+  "ThumbnailMinimumSize": "192, 108",
+  "EnableThumbnailSnap": true,
+  "EnableThumbnailZoom": false,
+  "ThumbnailZoomFactor": 2,
+  "ThumbnailZoomAnchor": 0,
+  "OverlayLabelAnchor": 0,
+  "CycleGroupIndicatorAnchor": 0,
+  "ShowThumbnailOverlays": true,
+  "ShowThumbnailFrames": false,
+  "LockThumbnailLocation": false,
+  "ThumbnailSnapToGrid": true,
+  "ThumbnailSnapToGridSizeX": 100,
+  "ThumbnailSnapToGridSizeY": 50,
+  "ThumbnailSnapToEdges": false,
+  "EnableActiveClientHighlight": false,
+  "ActiveClientHighlightColor": "GreenYellow",
+  "PreventPreviewColor": "Purple",
+  "OverlayLabelColor": "Orange",
+  "OverlayLabelFont": "Microsoft Sans Serif, 10pt, style=Bold",
+  "IconName": "",
+  "ActiveClientHighlightThickness": 3,
+  "LoginThumbnailLocation": "5, 5",
+  "PerClientLayout": {},
+  "FlatLayout": {},
+  "ClientLayout": {},
+  "ClientHotkey": {},
+  "MinimizeAllClientsHotkeys": [
+    "Control+F22"
+  ],
+  "DisableThumbnail": {},
+  "PriorityClients": [],
+  "ExecutablesToPreview": [
+    "exefile"
+  ]
+}
