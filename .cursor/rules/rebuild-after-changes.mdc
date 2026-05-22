@@ -1,0 +1,16 @@
+---
+description: Build and publish single-file exe after edits so the user can test.
+alwaysApply: true
+---
+
+Whenever you change any file in this repo during a turn (code, designer, rules, csproj), finish by running all three steps so the user always has a fresh testable exe:
+
+1. `dotnet clean "src\EVE-O-Preview.sln" -c Release`
+2. `dotnet build "src\EVE-O-Preview.sln" -c Release --no-incremental`
+3. `dotnet publish "src\Eve-O-Preview\Eve-O-Preview.csproj" -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true`
+
+Report success or errors. Always give the full path to the single-file output:
+
+`c:\Users\cmatt\Documents\Code\eve-o-preview\bin\net8.0-windows8.0\win-x64\publish\EVE-O-Preview.exe`
+
+If a turn only answers questions and touches no files, skip the commands.

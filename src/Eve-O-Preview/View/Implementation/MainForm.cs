@@ -163,6 +163,12 @@ namespace EveOPreview.View
 			set => this.OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox.Checked = value;
 		}
 
+		public bool DynamicCycleGroup
+		{
+			get => this.DynamicCycleGroupCheckBox.Checked;
+			set => this.DynamicCycleGroupCheckBox.Checked = value;
+		}
+
 		public bool EnablePerClientThumbnailLayouts
 		{
 			get => this.EnablePerClientThumbnailsLayoutsCheckBox.Checked;

@@ -51,6 +51,7 @@ namespace EveOPreview.Configuration
 		bool PreventPreviews { get; set; }
 		bool HideThumbnailsOnLostFocus { get; set; }
 		bool OnlyRegisterCycleHotkeysWhenEveFocused { get; set; }
+		bool DynamicCycleGroup { get; set; }
 		int HideThumbnailsDelay { get; set; }
 
 		Size ThumbnailSize { get; set; }

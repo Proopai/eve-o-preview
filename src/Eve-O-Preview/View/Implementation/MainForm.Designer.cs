@@ -69,6 +69,7 @@ namespace EveOPreview.View
 			ShowThumbnailsAlwaysOnTopCheckBox = new CheckBox();
 			HideThumbnailsOnLostFocusCheckBox = new CheckBox();
 			OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox = new CheckBox();
+			DynamicCycleGroupCheckBox = new CheckBox();
 			EnablePerClientThumbnailsLayoutsCheckBox = new CheckBox();
 			MinimizeToTrayCheckBox = new CheckBox();
 			CloseAllEveClientsButton = new Button();
@@ -261,7 +262,7 @@ namespace EveOPreview.View
 			GeneralTabPage.Margin = new Padding(4);
 			GeneralTabPage.Name = "GeneralTabPage";
 			GeneralTabPage.Padding = new Padding(4);
-			GeneralTabPage.Size = new Size(327, 332);
+			GeneralTabPage.Size = new Size(327, 353);
 			GeneralTabPage.TabIndex = 0;
 			GeneralTabPage.Text = "General";
 			// 
@@ -277,6 +278,7 @@ namespace EveOPreview.View
 			GeneralSettingsPanel.Controls.Add(ShowThumbnailsAlwaysOnTopCheckBox);
 			GeneralSettingsPanel.Controls.Add(HideThumbnailsOnLostFocusCheckBox);
 			GeneralSettingsPanel.Controls.Add(OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox);
+			GeneralSettingsPanel.Controls.Add(DynamicCycleGroupCheckBox);
 			GeneralSettingsPanel.Controls.Add(EnablePerClientThumbnailsLayoutsCheckBox);
 			GeneralSettingsPanel.Controls.Add(MinimizeToTrayCheckBox);
 			GeneralSettingsPanel.Controls.Add(CloseAllEveClientsButton);
@@ -284,7 +286,7 @@ namespace EveOPreview.View
 			GeneralSettingsPanel.Location = new Point(4, 4);
 			GeneralSettingsPanel.Margin = new Padding(4);
 			GeneralSettingsPanel.Name = "GeneralSettingsPanel";
-			GeneralSettingsPanel.Size = new Size(319, 270);
+			GeneralSettingsPanel.Size = new Size(319, 291);
 			GeneralSettingsPanel.TabIndex = 18;
 			// 
 			// HideCaptionOnClientsCheckBox
@@ -401,12 +403,24 @@ namespace EveOPreview.View
 			OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox.UseVisualStyleBackColor = true;
 			OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox.CheckedChanged += OptionChanged_Handler;
 			// 
+			// DynamicCycleGroupCheckBox
+			// 
+			DynamicCycleGroupCheckBox.AutoSize = true;
+			DynamicCycleGroupCheckBox.Location = new Point(9, 205);
+			DynamicCycleGroupCheckBox.Margin = new Padding(4);
+			DynamicCycleGroupCheckBox.Name = "DynamicCycleGroupCheckBox";
+			DynamicCycleGroupCheckBox.Size = new Size(140, 19);
+			DynamicCycleGroupCheckBox.TabIndex = 30;
+			DynamicCycleGroupCheckBox.Text = "Dynamic cycle group";
+			DynamicCycleGroupCheckBox.UseVisualStyleBackColor = true;
+			DynamicCycleGroupCheckBox.CheckedChanged += OptionChanged_Handler;
+			// 
 			// EnablePerClientThumbnailsLayoutsCheckBox
 			// 
 			EnablePerClientThumbnailsLayoutsCheckBox.AutoSize = true;
 			EnablePerClientThumbnailsLayoutsCheckBox.Checked = true;
 			EnablePerClientThumbnailsLayoutsCheckBox.CheckState = CheckState.Checked;
-			EnablePerClientThumbnailsLayoutsCheckBox.Location = new Point(9, 205);
+			EnablePerClientThumbnailsLayoutsCheckBox.Location = new Point(9, 226);
 			EnablePerClientThumbnailsLayoutsCheckBox.Margin = new Padding(4);
 			EnablePerClientThumbnailsLayoutsCheckBox.Name = "EnablePerClientThumbnailsLayoutsCheckBox";
 			EnablePerClientThumbnailsLayoutsCheckBox.Size = new Size(200, 19);
@@ -429,7 +443,7 @@ namespace EveOPreview.View
 			// 
 			// CloseAllEveClientsButton
 			// 
-			CloseAllEveClientsButton.Location = new Point(9, 232);
+			CloseAllEveClientsButton.Location = new Point(9, 253);
 			CloseAllEveClientsButton.Margin = new Padding(4);
 			CloseAllEveClientsButton.Name = "CloseAllEveClientsButton";
 			CloseAllEveClientsButton.Size = new Size(280, 28);
@@ -1601,6 +1615,7 @@ namespace EveOPreview.View
 		private CheckBox ShowThumbnailsAlwaysOnTopCheckBox;
 		private CheckBox HideThumbnailsOnLostFocusCheckBox;
 		private CheckBox OnlyRegisterCycleHotkeysWhenEveFocusedCheckBox;
+		private CheckBox DynamicCycleGroupCheckBox;
 		private CheckBox EnablePerClientThumbnailsLayoutsCheckBox;
 		private CheckBox MinimizeToTrayCheckBox;
 		private Button CloseAllEveClientsButton;

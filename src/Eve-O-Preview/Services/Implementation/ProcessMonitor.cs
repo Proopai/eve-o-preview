@@ -1,15 +1,16 @@
 ﻿using EveOPreview.Configuration;
+using EveOPreview.Services.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace EveOPreview.Services.Implementation
+namespace EveOPreview.Services
 {
 	sealed class ProcessMonitor : IProcessMonitor
 	{
 		#region Private constants
-		private const string DEFAULT_PROCESS_NAME = "ExeFile";
-		private const string CURRENT_PROCESS_NAME = "EVE-O-Preview";
+		/// <summary>Windows / Wine EVE Online client process name (no .exe).</summary>
+		private const string EveOnlineClientProcessName = "exefile";
 		#endregion
 
 		#region Private fields
@@ -118,6 +119,31 @@ namespace EveOPreview.Services.Implementation
 				string title = this._processCache[index];
 				removedProcesses.Add(new ProcessInfo(index, title));
 				this._processCache.Remove(index);
+			}
+		}
+
+		public void CloseAllMonitoredClients()
+		{
+			foreach (Process process in Process.GetProcesses())
+			{
+				using (process)
+				{
+					if (!string.Equals(process.ProcessName, EveOnlineClientProcessName, StringComparison.OrdinalIgnoreCase))
+					{
+						continue;
+					}
+
+					try
+					{
+						process.Kill(entireProcessTree: true);
+					}
+					catch (InvalidOperationException)
+					{
+					}
+					catch (System.ComponentModel.Win32Exception)
+					{
+					}
+				}
 			}
 		}
 	}

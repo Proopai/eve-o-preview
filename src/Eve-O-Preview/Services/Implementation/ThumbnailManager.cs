@@ -142,6 +142,12 @@ namespace EveOPreview.Services
 		}
 		public void CycleNextClient(bool isForwards, Dictionary<string, int> cycleOrder)
 		{
+			if (this._configuration.DynamicCycleGroup)
+			{
+				this.CycleNextClientByThumbnailPosition(isForwards, cycleOrder);
+				return;
+			}
+
 			IOrderedEnumerable<KeyValuePair<string, int>> clientOrder;
 			Dictionary<string, int> _cycleOrder = new Dictionary<string, int>(cycleOrder);
 
@@ -239,6 +245,87 @@ namespace EveOPreview.Services
 
 			// unable to select anything !
 			return;
+		}
+
+		/// <summary>
+		/// Cycles clients in on-screen order: rows by top edge (top-to-bottom), left-to-right within a row.
+		/// A row spans at most 90% of preview height below its topmost thumbnail.
+		/// </summary>
+		private void CycleNextClientByThumbnailPosition(bool isForwards, Dictionary<string, int> cycleOrder)
+		{
+			IEnumerable<KeyValuePair<IntPtr, IThumbnailView>> candidates = this._thumbnailViews
+				.Where(x => !x.Value.IsExcludedFromCycleGroup);
+
+			if (cycleOrder.Count > 0)
+			{
+				var titlesInGroup = new HashSet<string>(cycleOrder.Keys, StringComparer.OrdinalIgnoreCase);
+				candidates = candidates.Where(x => titlesInGroup.Contains(x.Value.Title));
+			}
+
+			List<KeyValuePair<IntPtr, IThumbnailView>> ordered = OrderThumbnailsForDynamicCycle(candidates.ToList());
+
+			if (ordered.Count == 0)
+			{
+				return;
+			}
+
+			int activeIndex = ordered.FindIndex(x => x.Key == this._activeClient.Handle);
+			if (activeIndex < 0)
+			{
+				activeIndex = ordered.FindIndex(x => x.Value.Title == this._activeClient.Title);
+			}
+
+			int nextIndex;
+			if (activeIndex < 0)
+			{
+				nextIndex = 0;
+			}
+			else if (isForwards)
+			{
+				nextIndex = (activeIndex + 1) % ordered.Count;
+			}
+			else
+			{
+				nextIndex = (activeIndex - 1 + ordered.Count) % ordered.Count;
+			}
+
+			this.SetActive(ordered[nextIndex]);
+		}
+
+		private static List<KeyValuePair<IntPtr, IThumbnailView>> OrderThumbnailsForDynamicCycle(
+			List<KeyValuePair<IntPtr, IThumbnailView>> candidates)
+		{
+			if (candidates.Count == 0)
+			{
+				return candidates;
+			}
+
+			int maxThumbnailHeight = candidates.Max(x => x.Value.ThumbnailSize.Height);
+			int rowYTolerance = Math.Max(50, (int)(maxThumbnailHeight * 0.9));
+			var rows = new List<List<KeyValuePair<IntPtr, IThumbnailView>>>();
+
+			foreach (KeyValuePair<IntPtr, IThumbnailView> item in candidates.OrderBy(x => x.Value.ThumbnailLocation.Y))
+			{
+				int itemY = item.Value.ThumbnailLocation.Y;
+				List<KeyValuePair<IntPtr, IThumbnailView>> row = rows.FirstOrDefault(existingRow =>
+				{
+					int rowTopY = existingRow.Min(x => x.Value.ThumbnailLocation.Y);
+					return itemY >= rowTopY && itemY - rowTopY <= rowYTolerance;
+				});
+
+				if (row == null)
+				{
+					row = new List<KeyValuePair<IntPtr, IThumbnailView>>();
+					rows.Add(row);
+				}
+
+				row.Add(item);
+			}
+
+			return rows
+				.OrderBy(row => row.Min(x => x.Value.ThumbnailLocation.Y))
+				.SelectMany(row => row.OrderBy(x => x.Value.ThumbnailLocation.X))
+				.ToList();
 		}
 
 		public void RegisterCycleClientHotkey(IEnumerable<Keys> keys, bool isForwards, Dictionary<string, int> cycleOrder)
