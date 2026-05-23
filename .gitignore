@@ -1,6 +1,7 @@
 bin/
 obj/
 publish/
+release-staging/
 tools/
 src/.vs/
 src/*/.vs/
