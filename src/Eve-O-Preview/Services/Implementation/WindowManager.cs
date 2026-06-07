@@ -199,9 +199,6 @@ namespace EveOPreview.Services.Implementation
 #if WINDOWS
 		public void ActivateWindow(IntPtr handle, AnimationStyle animation)
 		{
-			User32NativeMethods.SetForegroundWindow(handle);
-			User32NativeMethods.SetFocus(handle);
-
 			uint style = User32NativeMethods.GetWindowLong(handle, InteropConstants.GWL_STYLE);
 
 			if ((style & InteropConstants.WS_MINIMIZE) == InteropConstants.WS_MINIMIZE)
@@ -216,6 +213,46 @@ namespace EveOPreview.Services.Implementation
 						User32NativeMethods.ShowWindowAsync(handle, InteropConstants.SW_RESTORE);
 						RestoreAnimation();
 						break;
+				}
+			}
+
+			this.ForceSetForegroundWindow(handle);
+			User32NativeMethods.SetFocus(handle);
+		}
+
+		// Windows only allows a process to change the foreground window if it "received
+		// the last input event". A global mouse hook merely observes input destined for
+		// the EVE client, so a direct SetForegroundWindow call is refused (the target's
+		// taskbar button just flashes). Briefly attaching to the foreground window's
+		// input queue grants us that right. Paths that already hold it (thumbnail click,
+		// keyboard hotkey) are unaffected - the attach is harmless or a no-op there.
+		private void ForceSetForegroundWindow(IntPtr handle)
+		{
+			IntPtr foreground = User32NativeMethods.GetForegroundWindow();
+			if (foreground == handle)
+			{
+				return;
+			}
+
+			uint foreThread = User32NativeMethods.GetWindowThreadProcessId(foreground, out _);
+			uint appThread = User32NativeMethods.GetCurrentThreadId();
+
+			bool attached = false;
+			if ((foreThread != 0) && (foreThread != appThread))
+			{
+				attached = User32NativeMethods.AttachThreadInput(appThread, foreThread, true);
+			}
+
+			try
+			{
+				User32NativeMethods.BringWindowToTop(handle);
+				User32NativeMethods.SetForegroundWindow(handle);
+			}
+			finally
+			{
+				if (attached)
+				{
+					User32NativeMethods.AttachThreadInput(appThread, foreThread, false);
 				}
 			}
 		}
