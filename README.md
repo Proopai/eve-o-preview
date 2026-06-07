@@ -247,6 +247,38 @@ Should you wish to remove these HotKeys completely, Simply set the values to emp
 	  "CycleGroup5BackwardHotkeys": [],
 	  "CycleGroup5ClientsOrder": {}
 
+### Cycle Clients with Mouse Buttons
+
+In addition to keyboard hotkeys, the cycle groups can be triggered directly by the **middle mouse button (M3)** and the two side buttons **M4** and **M5** — no need to remap them to keyboard keys in your mouse software first.
+
+Mouse buttons live in the *same* `CycleGroupNForwardHotkeys` / `CycleGroupNBackwardHotkeys` lists as keyboard hotkeys; just add the mouse token alongside (or instead of) your keys. For example, to cycle group 1 forward with M5 and backward with M4, while keeping the F-key bindings:
+
+    "CycleGroup1ForwardHotkeys": [
+      "F14",
+      "Control+F14",
+      "M5",
+      "Control+M5"
+    ],
+    "CycleGroup1BackwardHotkeys": [
+      "F13",
+      "M4"
+    ]
+
+The accepted button tokens are:
+
+| Button | Tokens (any are accepted, case-insensitive) |
+| --- | --- |
+| Middle mouse button | **M3**, **Middle**, **MButton** |
+| Side button 1 | **M4**, **Mouse4**, **XButton1** |
+| Side button 2 | **M5**, **Mouse5**, **XButton2** |
+
+Modifiers work exactly like keyboard hotkeys: prefix with **Control+**, **Shift+**, and/or **Alt+** (e.g. **Control+M5**). As with keyboard hotkeys, the match is exact — a plain **M5** fires only when no modifier is held, so if you want it to also fire while holding Control (e.g. mid Ctrl-click in EVE) add **Control+M5** as a second entry.
+
+**Notes:**
+* Only buttons you actually bind are intercepted. An unbound middle-click (or a plain M3 when you've only bound **Control+M3**) still passes through to whatever is under the cursor as normal.
+* A bound button is consumed by EVE-O Preview and is **not** passed on to EVE (the same behaviour as cycle hotkeys).
+* The standard left and right mouse buttons cannot be bound here — they are reserved for clicking/dragging the thumbnails themselves.
+
 ### Minimize All Clients with Hotkey Setup
 
 In a similar pattern to the per client Hotkey Setup, It is possible to set a key combinations to Minimize all the Eve Windows. EVE-O Preview doesn't provide any GUI to set the these hotkeys. It should be done via editing the configuration file directly. Don't forget to make a backup copy of the file before editing it.
@@ -254,6 +286,8 @@ In a similar pattern to the per client Hotkey Setup, It is possible to set a key
   "MinimizeAllClientsHotkeys": [
     "F22"
   ],
+
+The same mouse buttons (**M3** / **M4** / **M5**, with optional **Control+** / **Shift+** / **Alt+** modifiers) can be used here too, e.g. `"Control+M3"`.
 
 
 **Hints** 
