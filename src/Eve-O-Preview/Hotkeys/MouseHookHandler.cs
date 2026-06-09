@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace EveOPreview.UI.Hotkeys
@@ -39,6 +40,10 @@ namespace EveOPreview.UI.Hotkeys
 		// button-up can be swallowed too, leaving no dangling button state in the
 		// target application.
 		private MouseButton? _swallowedButton;
+
+		// The bound cycle action is posted here (the UI thread's message loop) rather than being
+		// invoked inside the hook callback, which sits on the system input path.
+		private readonly SynchronizationContext _syncContext;
 		#endregion
 
 		public MouseHookHandler()
@@ -47,6 +52,10 @@ namespace EveOPreview.UI.Hotkeys
 			this._bindings = new List<Binding>();
 			this._hookId = IntPtr.Zero;
 			this._swallowedButton = null;
+
+			// Captured on the UI thread (the hook is created during startup on that thread) so the
+			// hook callback can post work to the message loop instead of executing it inline.
+			this._syncContext = SynchronizationContext.Current;
 		}
 
 		public bool HasBindings => this._bindings.Count > 0;
@@ -145,13 +154,35 @@ namespace EveOPreview.UI.Hotkeys
 
 			this._swallowedButton = button;
 
-			try
+			// Run the cycle action on the UI message loop, NOT inside this hook. This callback
+			// executes on the system input path; performing the foreground switch (AttachThreadInput
+			// + SetForegroundWindow) inline can wedge the target window's input queue. Posting it makes
+			// the mouse path behave like the keyboard-hotkey path, which already runs in the normal pump.
+			Action toRun = callback;
+			if (this._syncContext != null)
 			{
-				callback();
+				this._syncContext.Post(_ =>
+				{
+					try
+					{
+						toRun();
+					}
+					catch
+					{
+						// Never let a cycle error crash the app
+					}
+				}, null);
 			}
-			catch
+			else
 			{
-				// A failure in the cycle logic must never break the global mouse hook
+				try
+				{
+					toRun();
+				}
+				catch
+				{
+					// Never let a cycle error break the global mouse hook
+				}
 			}
 
 			// Consume the event so it does not reach the focused application (e.g. EVE)
