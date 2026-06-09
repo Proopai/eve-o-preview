@@ -52,6 +52,7 @@ namespace EveOPreview.Services
 		private int _hideThumbnailsDelay;
 
 		private List<HotkeyHandler> _cycleClientHotkeyHandlers = new List<HotkeyHandler>();
+		private readonly MouseHookHandler _mouseHookHandler;
 		#endregion
 
 		public ThumbnailManager(IMediator mediator, IThumbnailConfiguration configuration, IProcessMonitor processMonitor, IWindowManager windowManager, IThumbnailViewFactory factory)
@@ -80,22 +81,29 @@ namespace EveOPreview.Services
 
 			this._hideThumbnailsDelay = this._configuration.HideThumbnailsDelay;
 
-			RegisterCycleClientHotkey(this._configuration.CycleGroup1ForwardHotkeys?.Select(x => this._configuration.StringToKey(x)), true, this._configuration.CycleGroup1ClientsOrder);
-			RegisterCycleClientHotkey(this._configuration.CycleGroup1BackwardHotkeys?.Select(x => this._configuration.StringToKey(x)), false, this._configuration.CycleGroup1ClientsOrder);
+			this._mouseHookHandler = new MouseHookHandler();
 
-			RegisterCycleClientHotkey(this._configuration.CycleGroup2ForwardHotkeys?.Select(x => this._configuration.StringToKey(x)), true, this._configuration.CycleGroup2ClientsOrder);
-			RegisterCycleClientHotkey(this._configuration.CycleGroup2BackwardHotkeys?.Select(x => this._configuration.StringToKey(x)), false, this._configuration.CycleGroup2ClientsOrder);
+			// Each cycle binding may be a keyboard hotkey (RegisterHotKey) or a mouse
+			// button (low-level mouse hook). Both kinds share the same configuration lists.
+			RegisterCycleClientHotkey(this._configuration.CycleGroup1ForwardHotkeys, true, this._configuration.CycleGroup1ClientsOrder);
+			RegisterCycleClientHotkey(this._configuration.CycleGroup1BackwardHotkeys, false, this._configuration.CycleGroup1ClientsOrder);
 
-			RegisterCycleClientHotkey(this._configuration.CycleGroup3ForwardHotkeys?.Select(x => this._configuration.StringToKey(x)), true, this._configuration.CycleGroup3ClientsOrder);
-			RegisterCycleClientHotkey(this._configuration.CycleGroup3BackwardHotkeys?.Select(x => this._configuration.StringToKey(x)), false, this._configuration.CycleGroup3ClientsOrder);
+			RegisterCycleClientHotkey(this._configuration.CycleGroup2ForwardHotkeys, true, this._configuration.CycleGroup2ClientsOrder);
+			RegisterCycleClientHotkey(this._configuration.CycleGroup2BackwardHotkeys, false, this._configuration.CycleGroup2ClientsOrder);
 
-			RegisterCycleClientHotkey(this._configuration.CycleGroup4ForwardHotkeys?.Select(x => this._configuration.StringToKey(x)), true, this._configuration.CycleGroup4ClientsOrder);
-			RegisterCycleClientHotkey(this._configuration.CycleGroup4BackwardHotkeys?.Select(x => this._configuration.StringToKey(x)), false, this._configuration.CycleGroup4ClientsOrder);
+			RegisterCycleClientHotkey(this._configuration.CycleGroup3ForwardHotkeys, true, this._configuration.CycleGroup3ClientsOrder);
+			RegisterCycleClientHotkey(this._configuration.CycleGroup3BackwardHotkeys, false, this._configuration.CycleGroup3ClientsOrder);
 
-			RegisterCycleClientHotkey(this._configuration.CycleGroup5ForwardHotkeys?.Select(x => this._configuration.StringToKey(x)), true, this._configuration.CycleGroup5ClientsOrder);
-			RegisterCycleClientHotkey(this._configuration.CycleGroup5BackwardHotkeys?.Select(x => this._configuration.StringToKey(x)), false, this._configuration.CycleGroup5ClientsOrder);
+			RegisterCycleClientHotkey(this._configuration.CycleGroup4ForwardHotkeys, true, this._configuration.CycleGroup4ClientsOrder);
+			RegisterCycleClientHotkey(this._configuration.CycleGroup4BackwardHotkeys, false, this._configuration.CycleGroup4ClientsOrder);
 
-			RegisterMinimizeAllClientsHotkey(this._configuration.MinimizeAllClientsHotkeys?.Select(x => this._configuration.StringToKey(x)));
+			RegisterCycleClientHotkey(this._configuration.CycleGroup5ForwardHotkeys, true, this._configuration.CycleGroup5ClientsOrder);
+			RegisterCycleClientHotkey(this._configuration.CycleGroup5BackwardHotkeys, false, this._configuration.CycleGroup5ClientsOrder);
+
+			RegisterMinimizeAllClientsHotkey(this._configuration.MinimizeAllClientsHotkeys);
+
+			// Install the single shared mouse hook (no-op if no mouse buttons were bound)
+			this._mouseHookHandler.Hook();
 		}
 
 		public IThumbnailView GetClientByTitle(string title)
@@ -235,39 +243,43 @@ namespace EveOPreview.Services
 			return;
 		}
 
-		public void RegisterCycleClientHotkey(IEnumerable<Keys> keys, bool isForwards, Dictionary<string, int> cycleOrder)
+		public void RegisterCycleClientHotkey(IEnumerable<string> bindings, bool isForwards, Dictionary<string, int> cycleOrder)
 		{
-			foreach (var hotkey in keys)
-			{
-				if (hotkey == Keys.None)
-				{
-					return;
-				}
-
-				var newHandler = new HotkeyHandler(default(IntPtr), hotkey);
-				newHandler.Pressed += (object s, HandledEventArgs e) =>
-				{
-					this.CycleNextClient(isForwards, cycleOrder);
-					e.Handled = true;
-				};
-
-				newHandler.Register();
-				this._cycleClientHotkeyHandlers.Add(newHandler);
-			}
+			this.RegisterBindings(bindings, () => this.CycleNextClient(isForwards, cycleOrder));
 		}
-		public void RegisterMinimizeAllClientsHotkey(IEnumerable<Keys> keys)
+		public void RegisterMinimizeAllClientsHotkey(IEnumerable<string> bindings)
 		{
-			foreach (var hotkey in keys)
+			this.RegisterBindings(bindings, () => this.MinimizeAllClients());
+		}
+
+		// Registers each configuration token to the given action, routing mouse-button
+		// tokens (e.g. "M4", "Control+M5") to the low-level mouse hook and everything
+		// else to a keyboard hotkey via RegisterHotKey.
+		private void RegisterBindings(IEnumerable<string> bindings, Action action)
+		{
+			if (bindings == null)
 			{
+				return;
+			}
+
+			foreach (var token in bindings)
+			{
+				if (MouseHookHandler.TryParse(token, out MouseButton button, out Keys mouseModifiers))
+				{
+					this._mouseHookHandler.AddBinding(button, mouseModifiers, action);
+					continue;
+				}
+
+				Keys hotkey = this._configuration.StringToKey(token);
 				if (hotkey == Keys.None)
 				{
-					return;
+					continue;
 				}
 
 				var newHandler = new HotkeyHandler(default(IntPtr), hotkey);
 				newHandler.Pressed += (object s, HandledEventArgs e) =>
 				{
-					this.MinimizeAllClients();
+					action();
 					e.Handled = true;
 				};
 
@@ -286,6 +298,7 @@ namespace EveOPreview.Services
 		public void Stop()
 		{
 			this._thumbnailUpdateTimer.Stop();
+			this._mouseHookHandler.Unhook();
 		}
 
 		private void ThumbnailUpdateTimerTick(object sender, EventArgs e)
