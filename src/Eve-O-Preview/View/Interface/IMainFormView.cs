@@ -22,6 +22,7 @@ namespace EveOPreview.View
         bool ShowThumbnailsAlwaysOnTop { get; set; }
 		bool PreventPreviews { get; set; }
 		bool HideThumbnailsOnLostFocus { get; set; }
+		bool RestrictCycleHotkeysToActiveClients { get; set; }
 		bool EnablePerClientThumbnailLayouts { get; set; }
 
 		Size ThumbnailSize { get; set; }

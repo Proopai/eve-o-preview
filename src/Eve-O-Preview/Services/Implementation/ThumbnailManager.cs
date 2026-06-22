@@ -51,7 +51,14 @@ namespace EveOPreview.Services
 		private int _refreshCycleCount;
 		private int _hideThumbnailsDelay;
 
-		private List<HotkeyHandler> _cycleClientHotkeyHandlers = new List<HotkeyHandler>();
+		// The cycle / minimize hotkeys are registered through RegisterHotKey (HotkeyHandler) so that activating
+		// a client retains the implicit foreground-activation right that RegisterHotKey grants. To still allow
+		// the keys to pass through to their native action when no EVE window is focused, the hotkeys are
+		// registered / unregistered on the fly as the foreground window changes (see _foregroundWatcher).
+		private readonly List<(Keys Key, Action Action)> _cycleHotkeyDefinitions = new List<(Keys, Action)>();
+		private readonly List<HotkeyHandler> _cycleHotkeyHandlers = new List<HotkeyHandler>();
+		private readonly ForegroundWindowWatcher _foregroundWatcher = new ForegroundWindowWatcher();
+		private bool _cycleHotkeysRegistered;
 		#endregion
 
 		public ThumbnailManager(IMediator mediator, IThumbnailConfiguration configuration, IProcessMonitor processMonitor, IWindowManager windowManager, IThumbnailViewFactory factory)
@@ -79,6 +86,11 @@ namespace EveOPreview.Services
 			this._thumbnailUpdateTimer.Interval = new TimeSpan(0, 0, 0, 0, configuration.ThumbnailRefreshPeriod);
 
 			this._hideThumbnailsDelay = this._configuration.HideThumbnailsDelay;
+
+			// The cycle / minimize hotkeys are (un)registered as the foreground window changes so that, when
+			// 'RestrictCycleHotkeysToActiveClients' is enabled, they only act while an EVE client or an
+			// EVE-O-Preview window is focused; otherwise the key passes through to its native action.
+			this._foregroundWatcher.ForegroundChanged += this.OnForegroundChanged;
 
 			RegisterCycleClientHotkey(this._configuration.CycleGroup1ForwardHotkeys?.Select(x => this._configuration.StringToKey(x)), true, this._configuration.CycleGroup1ClientsOrder);
 			RegisterCycleClientHotkey(this._configuration.CycleGroup1BackwardHotkeys?.Select(x => this._configuration.StringToKey(x)), false, this._configuration.CycleGroup1ClientsOrder);
@@ -235,49 +247,120 @@ namespace EveOPreview.Services
 			return;
 		}
 
+		// Decides whether the cycle / minimize hotkeys should currently be registered (and therefore act and
+		// suppress the key) or unregistered (and therefore pass through to their native action).
+		private bool ShouldCycleHotkeysBeActive(IntPtr foregroundWindowHandle)
+		{
+			if (!this._configuration.RestrictCycleHotkeysToActiveClients)
+			{
+				return true;
+			}
+
+			return this.IsClientWindowActive(foregroundWindowHandle) || this.IsMainWindowActive(foregroundWindowHandle);
+		}
+
+		// Fired by the foreground watcher whenever the active window changes. Registering here (rather than
+		// polling) means the hotkeys are live the instant focus returns to an EVE / EVE-O-Preview window.
+		private void OnForegroundChanged(IntPtr foregroundWindowHandle)
+		{
+			this.UpdateCycleHotkeyRegistration(foregroundWindowHandle);
+		}
+
+		private void UpdateCycleHotkeyRegistration(IntPtr foregroundWindowHandle)
+		{
+			bool shouldBeRegistered = this.ShouldCycleHotkeysBeActive(foregroundWindowHandle);
+
+			if (shouldBeRegistered == this._cycleHotkeysRegistered)
+			{
+				return;
+			}
+
+			if (shouldBeRegistered)
+			{
+				this.RegisterCycleHotkeys();
+			}
+			else
+			{
+				this.UnregisterCycleHotkeys();
+			}
+		}
+
+		private void RegisterCycleHotkeys()
+		{
+			if (this._cycleHotkeysRegistered)
+			{
+				return;
+			}
+
+			foreach (var definition in this._cycleHotkeyDefinitions)
+			{
+				Action action = definition.Action;
+				var handler = new HotkeyHandler(default(IntPtr), definition.Key);
+				handler.Pressed += (sender, e) =>
+				{
+					action();
+					e.Handled = true;
+				};
+				handler.Register();
+				this._cycleHotkeyHandlers.Add(handler);
+			}
+
+			this._cycleHotkeysRegistered = true;
+		}
+
+		private void UnregisterCycleHotkeys()
+		{
+			foreach (var handler in this._cycleHotkeyHandlers)
+			{
+				handler.Dispose();
+			}
+
+			this._cycleHotkeyHandlers.Clear();
+			this._cycleHotkeysRegistered = false;
+		}
+
 		public void RegisterCycleClientHotkey(IEnumerable<Keys> keys, bool isForwards, Dictionary<string, int> cycleOrder)
 		{
+			if (keys == null)
+			{
+				return;
+			}
+
 			foreach (var hotkey in keys)
 			{
 				if (hotkey == Keys.None)
 				{
-					return;
+					continue;
 				}
 
-				var newHandler = new HotkeyHandler(default(IntPtr), hotkey);
-				newHandler.Pressed += (object s, HandledEventArgs e) =>
-				{
-					this.CycleNextClient(isForwards, cycleOrder);
-					e.Handled = true;
-				};
-
-				newHandler.Register();
-				this._cycleClientHotkeyHandlers.Add(newHandler);
+				this._cycleHotkeyDefinitions.Add((hotkey, () => this.CycleNextClient(isForwards, cycleOrder)));
 			}
 		}
 		public void RegisterMinimizeAllClientsHotkey(IEnumerable<Keys> keys)
 		{
+			if (keys == null)
+			{
+				return;
+			}
+
 			foreach (var hotkey in keys)
 			{
 				if (hotkey == Keys.None)
 				{
-					return;
+					continue;
 				}
 
-				var newHandler = new HotkeyHandler(default(IntPtr), hotkey);
-				newHandler.Pressed += (object s, HandledEventArgs e) =>
-				{
-					this.MinimizeAllClients();
-					e.Handled = true;
-				};
-
-				newHandler.Register();
-				this._cycleClientHotkeyHandlers.Add(newHandler);
+				this._cycleHotkeyDefinitions.Add((hotkey, () => this.MinimizeAllClients()));
 			}
 		}
 
 		public void Start()
 		{
+			// Start watching foreground changes and set the initial hotkey registration state based on the
+			// window that is focused right now.
+			this._foregroundWatcher.Start();
+			this.UpdateCycleHotkeyRegistration(this._windowManager.GetForegroundWindowHandle());
+
 			this._thumbnailUpdateTimer.Start();
 
 			this.RefreshThumbnails();
@@ -286,6 +369,9 @@ namespace EveOPreview.Services
 		public void Stop()
 		{
 			this._thumbnailUpdateTimer.Stop();
+
+			this._foregroundWatcher.Stop();
+			this.UnregisterCycleHotkeys();
 		}
 
 		private void ThumbnailUpdateTimerTick(object sender, EventArgs e)
@@ -407,6 +493,10 @@ namespace EveOPreview.Services
 			{
 				return;
 			}
+
+			// Backstop for the foreground watcher: keeps the cycle-hotkey registration in sync and lets a
+			// runtime change to 'RestrictCycleHotkeysToActiveClients' take effect without a restart.
+			this.UpdateCycleHotkeyRegistration(foregroundWindowHandle);
 
 			string foregroundWindowTitle = null;
 

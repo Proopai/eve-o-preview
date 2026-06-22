@@ -197,6 +197,10 @@ namespace EveOPreview.Services.Implementation
 #endif
 
 #if WINDOWS
+		// The cycle / minimize / per-client hotkeys reach this method through RegisterHotKey (see
+		// HotkeyHandler), whose WM_HOTKEY message implicitly grants this process the right to change the
+		// foreground window. A plain SetForegroundWindow therefore activates the target instantly and
+		// reliably - no foreground-lock or AttachThreadInput workarounds are needed.
 		public void ActivateWindow(IntPtr handle, AnimationStyle animation)
 		{
 			User32NativeMethods.SetForegroundWindow(handle);
