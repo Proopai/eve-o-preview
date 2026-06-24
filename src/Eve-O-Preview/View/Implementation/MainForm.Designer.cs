@@ -67,6 +67,7 @@ namespace EveOPreview.View
 			HideActiveClientThumbnailCheckBox = new CheckBox();
 			ShowThumbnailsAlwaysOnTopCheckBox = new CheckBox();
 			HideThumbnailsOnLostFocusCheckBox = new CheckBox();
+			RestrictCycleHotkeysToActiveClientsCheckBox = new CheckBox();
 			EnablePerClientThumbnailsLayoutsCheckBox = new CheckBox();
 			MinimizeToTrayCheckBox = new CheckBox();
 			label1 = new Label();
@@ -253,6 +254,7 @@ namespace EveOPreview.View
 			GeneralSettingsPanel.Controls.Add(HideActiveClientThumbnailCheckBox);
 			GeneralSettingsPanel.Controls.Add(ShowThumbnailsAlwaysOnTopCheckBox);
 			GeneralSettingsPanel.Controls.Add(HideThumbnailsOnLostFocusCheckBox);
+			GeneralSettingsPanel.Controls.Add(RestrictCycleHotkeysToActiveClientsCheckBox);
 			GeneralSettingsPanel.Controls.Add(EnablePerClientThumbnailsLayoutsCheckBox);
 			GeneralSettingsPanel.Controls.Add(MinimizeToTrayCheckBox);
 			GeneralSettingsPanel.Dock = DockStyle.Fill;
@@ -361,7 +363,19 @@ namespace EveOPreview.View
 			HideThumbnailsOnLostFocusCheckBox.Text = "Hide previews when EVE client is not active";
 			HideThumbnailsOnLostFocusCheckBox.UseVisualStyleBackColor = true;
 			HideThumbnailsOnLostFocusCheckBox.CheckedChanged += OptionChanged_Handler;
-			// 
+			//
+			// RestrictCycleHotkeysToActiveClientsCheckBox
+			//
+			RestrictCycleHotkeysToActiveClientsCheckBox.AutoSize = true;
+			RestrictCycleHotkeysToActiveClientsCheckBox.Location = new Point(9, 207);
+			RestrictCycleHotkeysToActiveClientsCheckBox.Margin = new Padding(4);
+			RestrictCycleHotkeysToActiveClientsCheckBox.Name = "RestrictCycleHotkeysToActiveClientsCheckBox";
+			RestrictCycleHotkeysToActiveClientsCheckBox.Size = new Size(290, 19);
+			RestrictCycleHotkeysToActiveClientsCheckBox.TabIndex = 24;
+			RestrictCycleHotkeysToActiveClientsCheckBox.Text = "Cycle hotkeys only when an EVE window is focused";
+			RestrictCycleHotkeysToActiveClientsCheckBox.UseVisualStyleBackColor = true;
+			RestrictCycleHotkeysToActiveClientsCheckBox.CheckedChanged += OptionChanged_Handler;
+			//
 			// EnablePerClientThumbnailsLayoutsCheckBox
 			// 
 			EnablePerClientThumbnailsLayoutsCheckBox.AutoSize = true;
@@ -1438,6 +1452,7 @@ namespace EveOPreview.View
 		private CheckBox HideActiveClientThumbnailCheckBox;
 		private CheckBox ShowThumbnailsAlwaysOnTopCheckBox;
 		private CheckBox HideThumbnailsOnLostFocusCheckBox;
+		private CheckBox RestrictCycleHotkeysToActiveClientsCheckBox;
 		private CheckBox EnablePerClientThumbnailsLayoutsCheckBox;
 		private CheckBox MinimizeToTrayCheckBox;
 		private NumericUpDown ThumbnailsWidthNumericEdit;
