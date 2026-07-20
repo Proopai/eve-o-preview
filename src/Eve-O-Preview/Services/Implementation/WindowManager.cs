@@ -1,6 +1,7 @@
 ﻿using EveOPreview.Configuration;
 using EveOPreview.Services.Interop;
 using System;
+using System.Collections.Concurrent;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -17,6 +18,7 @@ namespace EveOPreview.Services.Implementation
 
 		#region Private fields
 		private readonly bool _enableWineCompatabilityMode;
+		private readonly ConcurrentDictionary<IntPtr, bool> _minimizedWindowMaximizedStates = new ConcurrentDictionary<IntPtr, bool>();
 		private string _bashLocation;
 		private string _wmctrlLocation;
 		private const string EXCEPTION_DUMP_FILE_NAME = "EVE-O-Preview.log";
@@ -211,58 +213,53 @@ namespace EveOPreview.Services.Implementation
 
 			if ((style & InteropConstants.WS_MINIMIZE) == InteropConstants.WS_MINIMIZE)
 			{
-				switch (animation)
-				{
-					case AnimationStyle.OriginalAnimation:
-						User32NativeMethods.ShowWindowAsync(handle, InteropConstants.SW_RESTORE);
-						break;
-					case AnimationStyle.NoAnimation:
-						TurnOffAnimation();
-						User32NativeMethods.ShowWindowAsync(handle, InteropConstants.SW_RESTORE);
-						RestoreAnimation();
-						break;
-				}
-			}
-		}
+				bool restoreMaximized = this._minimizedWindowMaximizedStates.TryGetValue(handle, out bool wasMaximized) && wasMaximized;
+				int showCommand = restoreMaximized ? InteropConstants.SW_SHOWMAXIMIZED : InteropConstants.SW_RESTORE;
 
-		public void MinimizeWindow(IntPtr handle, AnimationStyle animation, bool enableAnimation)
-		{
-			System.Diagnostics.Debug.WriteLine($"MinimizeWindow");
-			if (enableAnimation)
-			{
 				switch (animation)
 				{
 					case AnimationStyle.OriginalAnimation:
-						User32NativeMethods.SendMessage(handle, InteropConstants.WM_SYSCOMMAND, InteropConstants.SC_MINIMIZE, 0);
+						User32NativeMethods.ShowWindowAsync(handle, showCommand);
 						break;
 					case AnimationStyle.NoAnimation:
 						TurnOffAnimation();
-						User32NativeMethods.SendMessage(handle, InteropConstants.WM_SYSCOMMAND, InteropConstants.SC_MINIMIZE, 0);
+						User32NativeMethods.ShowWindowAsync(handle, showCommand);
 						RestoreAnimation();
 						break;
 				}
 			}
 			else
 			{
-				switch (animation)
-				{
-					case AnimationStyle.OriginalAnimation:
-						WINDOWPLACEMENT param = new WINDOWPLACEMENT();
-						param.length = Marshal.SizeOf(typeof(WINDOWPLACEMENT));
-						User32NativeMethods.GetWindowPlacement(handle, ref param);
-						param.showCmd = WINDOWPLACEMENT.SW_MINIMIZE;
-						User32NativeMethods.SetWindowPlacement(handle, ref param);
-						break;
-					case AnimationStyle.NoAnimation:
-						TurnOffAnimation();
-						User32NativeMethods.SendMessage(handle, InteropConstants.WM_SYSCOMMAND, InteropConstants.SC_MINIMIZE, 0);
-						RestoreAnimation();
-						break;
-				}
+				this._minimizedWindowMaximizedStates.TryRemove(handle, out _);
+			}
+		}
+
+		public void MinimizeWindow(IntPtr handle, AnimationStyle animation, bool enableAnimation)
+		{
+			System.Diagnostics.Debug.WriteLine($"MinimizeWindow");
+			if ((handle != IntPtr.Zero) && !this.IsWindowMinimized(handle))
+			{
+				this._minimizedWindowMaximizedStates[handle] = this.IsWindowMaximized(handle);
+			}
+
+			if (enableAnimation && (animation == AnimationStyle.OriginalAnimation))
+			{
+				User32NativeMethods.SendMessage(handle, InteropConstants.WM_SYSCOMMAND, InteropConstants.SC_MINIMIZE, 0);
+			}
+			else
+			{
+				TurnOffAnimation();
+				User32NativeMethods.SendMessage(handle, InteropConstants.WM_SYSCOMMAND, InteropConstants.SC_MINIMIZE, 0);
+				RestoreAnimation();
 			}
 		}
 #endif
 
+
+		public void ForgetWindowState(IntPtr handle)
+		{
+			this._minimizedWindowMaximizedStates.TryRemove(handle, out _);
+		}
 		public void MoveWindow(IntPtr handle, int left, int top, int width, int height)
 		{
 			User32NativeMethods.MoveWindow(handle, left, top, width, height, true);

@@ -481,6 +481,7 @@ namespace EveOPreview.Services
 				IThumbnailView view = this._thumbnailViews[process.Handle];
 
 				this._thumbnailViews.Remove(view.Id);
+				this._windowManager.ForgetWindowState(view.Id);
 				if (view.Title != ThumbnailManager.DEFAULT_CLIENT_TITLE)
 				{
 					viewsRemoved.Add(view.Title);
@@ -1159,6 +1160,11 @@ namespace EveOPreview.Services
 
 				// No need to save layout for not yet logged-in clients
 				if (view.Title == ThumbnailManager.DEFAULT_CLIENT_TITLE)
+				{
+					continue;
+				}
+
+				if (this._windowManager.IsWindowMinimized(view.Id))
 				{
 					continue;
 				}
