@@ -11,7 +11,7 @@ namespace EveOPreview.Services.Interop
 		public int showCmd;
 		public System.Drawing.Point ptMinPosition;
 		public System.Drawing.Point ptMaxPosition;
-		public System.Drawing.Rectangle rcNormalPosition;
+		public RECT rcNormalPosition;
 
 		//Definitions For Different Window Placement Constants
 		public const int SW_HIDE = 0;

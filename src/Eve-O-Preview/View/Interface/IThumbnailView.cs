@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using EveOPreview.Configuration;
+using EveOPreview.NamedPipe.Messages;
 using EveOPreview.Services;
 
 namespace EveOPreview.View
@@ -12,7 +13,7 @@ namespace EveOPreview.View
 		IntPtr Id { get; set; }
 		int ProcessId { get; set; }
 		string Title { get; set; }
-
+		string ClientName { get; set; }
 		bool IsActive { get; set; }
 		Point ThumbnailLocation { get; set; }
 		Size ThumbnailSize { get; set; }
@@ -34,6 +35,10 @@ namespace EveOPreview.View
 		void SetPreventPreviews();
 		void ZoomIn(ViewZoomAnchor anchor, int zoomFactor);
 		void ZoomOut();
+
+		void PipeAgression(bool agressionIndicator);
+		void PipeSystemUpdate(string systemName);
+		void PipeAlertClient(PipeAlertClient alertClient);
 
 		void RegisterHotkey(Keys hotkey);
 		void UnregisterHotkey();

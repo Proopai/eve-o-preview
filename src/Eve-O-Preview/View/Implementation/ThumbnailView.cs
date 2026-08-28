@@ -5,6 +5,7 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
 using EveOPreview.Configuration;
+using EveOPreview.NamedPipe.Messages;
 using EveOPreview.Services;
 using EveOPreview.UI.Hotkeys;
 
@@ -96,12 +97,15 @@ namespace EveOPreview.View
 		public IntPtr Id { get; set; }
 		public int ProcessId { get; set; }
 
+		public string ClientName { get; set; }
 		public string Title
 		{
 			get => this.Text;
 			set
 			{
 				this.Text = value;
+
+				this.ClientName = value.Replace("EVE - ", "").Replace("EVE Frontier - ", "*");
 
 				if (this._config.PerClientAliases.Any(x => x.Key == this.Title))
 				{
@@ -511,6 +515,7 @@ namespace EveOPreview.View
 			this._overlay.Size = overlaySize;
 
 			this._overlay.SetPropertiesOverlayLabel(_config.OverlayLabelFont, _config.OverlayLabelColor, _config.OverlayLabelOutlineColor, _config.OverlayLabelOutlineSize, _config.OverlayLabelAnchor);
+			this._overlay.SetPropertiesSystemNameLabel(_config.SystemNameLabelFont, _config.SystemNameLabelColor, _config.SystemNameLabelOutlineColor, _config.SystemNameLabelOutlineSize, _config.SystemNameLabelAnchor);
 
 			this._overlay.Location = overlayLocation;
 			this._overlay.Refresh();
@@ -522,6 +527,24 @@ namespace EveOPreview.View
 			// Any Resize events fired before this timestamp will be ignored
 			this._suppressResizeEventsTimestamp = DateTime.UtcNow.AddMilliseconds(_config.ThumbnailResizeTimeoutPeriod);
 		}
+
+		public void PipeAgression(bool agressionIndicator)
+		{
+			this._overlay.SetAgression(agressionIndicator, _config.AgressionColor, _config.AgressionSeconds);
+		}
+
+		public void PipeSystemUpdate(string systemName)
+		{
+			this._overlay.SetSystemNameLabel(systemName);
+			this._isLocationChanged = true;
+		}
+		public void PipeAlertClient(PipeAlertClient alertClient)
+		{
+			this._overlay.SetAlertClient(alertClient.AlertJumps, alertClient.AlertType, _config.AlertColor, _config.AlertThickness, _config.AlertDashStyle, _config.AlertSeconds);
+			this._isLocationChanged = true;
+
+		}
+
 
 		#region GUI events
 		protected override CreateParams CreateParams

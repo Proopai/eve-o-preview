@@ -1,5 +1,7 @@
 ﻿using EveOPreview.Configuration;
 using EveOPreview.Mediator.Messages;
+using EveOPreview.NamedPipe;
+using EveOPreview.NamedPipe.Messages;
 using EveOPreview.Services.Interop;
 using EveOPreview.UI.Hotkeys;
 using EveOPreview.View;
@@ -8,15 +10,18 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO.Pipes;
 using System.Linq;
+using System.Net;
 using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
-using System.Net;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Media.Animation;
+using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace EveOPreview.Services
@@ -27,7 +32,7 @@ namespace EveOPreview.Services
 		private const int WINDOW_POSITION_THRESHOLD_LOW = -10_000;
 		private const int WINDOW_POSITION_THRESHOLD_HIGH = 31_000;
 		private const int WINDOW_SIZE_THRESHOLD = 10;
-		private const int FORCED_REFRESH_CYCLE_THRESHOLD = 20;
+		private const int FORCED_REFRESH_CYCLE_THRESHOLD = 2;
 		private const int DEFAULT_LOCATION_CHANGE_NOTIFICATION_DELAY = 2;
 		private int ProcessorCount = Environment.ProcessorCount;
 
@@ -52,17 +57,18 @@ namespace EveOPreview.Services
         private bool _ignoreViewEvents;
         private bool _isHoverEffectActive;
 
-        private int _refreshCycleCount;
-        private int _hideThumbnailsDelay;
+		private int _refreshCycleCount;
+		private int _hideThumbnailsDelay;
 
         private List<HotkeyHandler> _cycleClientHotkeyHandlers = new List<HotkeyHandler>();
 
         // Hot-reload support (issue #94)
         private readonly IConfigurationStorage _configurationStorage;
         private readonly Dispatcher _dispatcher;
-        #endregion
+		private readonly PipeServer _pipeServer;
+		#endregion
 
-        public ThumbnailManager(IMediator mediator, IThumbnailConfiguration configuration, IProcessMonitor processMonitor, IWindowManager windowManager, IThumbnailViewFactory factory, IConfigurationStorage configurationStorage)
+		public ThumbnailManager(IMediator mediator, IThumbnailConfiguration configuration, IProcessMonitor processMonitor, IWindowManager windowManager, IThumbnailViewFactory factory, IConfigurationStorage configurationStorage)
         {
             this._mediator = mediator;
             this._processMonitor = processMonitor;
@@ -98,14 +104,32 @@ namespace EveOPreview.Services
 			RegisterRefreshMinimizedClientsHotkey(this._configuration.RefreshMinimizedClientsHotkeys?.Select(x => this._configuration.StringToKey(x)));
 
 			this.RegisterConfiguredCycleHotkeys();
-        }
+			this._pipeServer = new PipeServer();
+            this._pipeServer.MessageReceived += this.PipeMessageReceived;
+			this._pipeServer.Start();
+		}
 
-        public IThumbnailView GetClientByTitle(string title)
-        {
-            return _thumbnailViews.FirstOrDefault(x => x.Value.Title == title).Value;
-        }
+        private void PipeMessageReceived(object sender, PipeEnvelope e)
+		{
+            try
+            {
+                this._mediator.Publish(new ThumbnailPipeMessage(e.Type, e.Payload));
+            }
+            catch (Exception ex) { 
+            }
+		}
 
-        public IThumbnailView GetClientByPointer(IntPtr ptr)
+		public IThumbnailView GetClientByTitle(string title)
+		{
+			return _thumbnailViews.FirstOrDefault(x => x.Value.Title == title).Value;
+		}
+
+		public IThumbnailView GetClientByClientName(string clientName)
+		{
+			return _thumbnailViews.FirstOrDefault(x => x.Value.ClientName == clientName).Value;
+		}
+
+		public IThumbnailView GetClientByPointer(IntPtr ptr)
         {
             return _thumbnailViews.FirstOrDefault(x => x.Key == ptr).Value;
         }
@@ -172,36 +196,53 @@ namespace EveOPreview.Services
 					foregroundWindowTitle = foregroundView.Title;
 				}
 
+				/*
+
+								foreach (KeyValuePair<IntPtr, IThumbnailView> entry in this._thumbnailViews)
+								{
+									IThumbnailView view = entry.Value;
+									if (view.Id != foregroundWindowHandle && !view.IsPreventPreviews() && !this._configuration.IsPriorityClient(view.Title) && this._windowManager.IsWindowMinimized(view.Id))
+									{
+				#if LINUX
+								this._windowManager.ActivateWindow(view.Id, view.Title, false);
+								this._windowManager.ActivateWindow(foregroundWindowHandle, foregroundWindowTitle, false);
+				#else
+										this._windowManager.ActivateWindow(view.Id, this._configuration.WindowsAnimationStyle, false);
+										this._windowManager.ActivateWindow(foregroundWindowHandle, this._configuration.WindowsAnimationStyle, true);
+				#endif
+									}
+								}
+
+								foreach (KeyValuePair<IntPtr, IThumbnailView> entry in this._thumbnailViews)
+								{
+									IThumbnailView view = entry.Value;
+									// Minimize the currently active client if needed
+									if (!this._configuration.IsPriorityClient(view.Title))
+									{
+										System.Diagnostics.Debug.WriteLine($"Calling MinimizeWindow {view.Title}");
+										this._windowManager.MinimizeWindow(view.Id, this._configuration.WindowsAnimationStyle, false);
+									}
+								}
+
+				*/
+
 				foreach (KeyValuePair<IntPtr, IThumbnailView> entry in this._thumbnailViews)
 				{
 					IThumbnailView view = entry.Value;
 					if (view.Id != foregroundWindowHandle && !view.IsPreventPreviews() && !this._configuration.IsPriorityClient(view.Title) && this._windowManager.IsWindowMinimized(view.Id))
 					{
-#if LINUX
-   			    this._windowManager.ActivateWindow(view.Id, view.Title, false);
-   			    this._windowManager.ActivateWindow(foregroundWindowHandle, foregroundWindowTitle, false);
-#else
-						this._windowManager.ActivateWindow(view.Id, this._configuration.WindowsAnimationStyle, false);
-						this._windowManager.ActivateWindow(foregroundWindowHandle, this._configuration.WindowsAnimationStyle, true);
-#endif
+						this._windowManager.TickleWindow(view.Id, this._configuration.WindowsAnimationStyle);
 					}
 				}
 
-				foreach (KeyValuePair<IntPtr, IThumbnailView> entry in this._thumbnailViews)
-				{
-					IThumbnailView view = entry.Value;
-					// Minimize the currently active client if needed
-					if (!this._configuration.IsPriorityClient(view.Title))
-					{
-						System.Diagnostics.Debug.WriteLine($"Calling MinimizeWindow {view.Title}");
-						this._windowManager.MinimizeWindow(view.Id, this._configuration.WindowsAnimationStyle, false);
-					}
-				}
+/*
 #if LINUX
-   			    this._windowManager.ActivateWindow(foregroundWindowHandle, foregroundWindowTitle, true);
+								this._windowManager.ActivateWindow(foregroundWindowHandle, foregroundWindowTitle, true);
 #else
 				this._windowManager.ActivateWindow(foregroundWindowHandle, this._configuration.WindowsAnimationStyle, true);
 #endif
+*/
+
 			}
 
 		}
@@ -616,10 +657,8 @@ namespace EveOPreview.Services
                 this._hideThumbnailsDelay = this._configuration.HideThumbnailsDelay; // Reset the counter
             }
 
-            this._refreshCycleCount++;
-
             bool forceRefresh;
-            if (this._refreshCycleCount >= ThumbnailManager.FORCED_REFRESH_CYCLE_THRESHOLD)
+            if (this._refreshCycleCount++ >= ThumbnailManager.FORCED_REFRESH_CYCLE_THRESHOLD)
             {
                 this._refreshCycleCount = 0;
                 forceRefresh = true;
@@ -629,7 +668,7 @@ namespace EveOPreview.Services
                 forceRefresh = false;
             }
 
-            this.DisableViewEvents();
+			this.DisableViewEvents();
 
             // Snap thumbnail
             // No need to update Thumbnails while one of them is highlighted
@@ -709,9 +748,9 @@ namespace EveOPreview.Services
                 }
                 else
                 {
-                    view.Refresh(forceRefresh);
-                }
-            }
+					view.Refresh(forceRefresh);
+				}
+			}
 
             this.EnableViewEvents();
         }
@@ -1306,5 +1345,49 @@ namespace EveOPreview.Services
                     && (top > ThumbnailManager.WINDOW_POSITION_THRESHOLD_LOW) && (top < ThumbnailManager.WINDOW_POSITION_THRESHOLD_HIGH)
                     && (width > ThumbnailManager.WINDOW_SIZE_THRESHOLD) && (height > ThumbnailManager.WINDOW_SIZE_THRESHOLD);
         }
-    }
+
+
+		public void ProcessPipeMessage(string type, JsonElement payload)
+        {
+            IThumbnailView view;
+			switch (type)
+				{
+				case PipeAlertClient.MessageType:
+					PipeAlertClient payloadAlertClient = JsonSerializer.Deserialize<PipeAlertClient>(payload);
+                    view = GetClientByClientName(payloadAlertClient.Client);
+					if (view is System.Windows.Forms.Control controlAlert)
+					{
+						controlAlert.BeginInvoke(() =>
+						{
+							view?.PipeAlertClient(payloadAlertClient);
+						});
+					}
+					break;
+					break;
+				case PipeSystemUpdate.MessageType:
+					PipeSystemUpdate payloadSystemUpdate = JsonSerializer.Deserialize<PipeSystemUpdate>(payload);
+					view = GetClientByClientName(payloadSystemUpdate.Client);
+					if (view is System.Windows.Forms.Control controlSystemUpdate)
+					{
+						controlSystemUpdate.BeginInvoke(() =>
+						{
+							view?.PipeSystemUpdate(payloadSystemUpdate.SystemName);
+						});
+					}
+					break;
+				case PipeAgression.MessageType:
+					PipeAgression payloadAgression = JsonSerializer.Deserialize<PipeAgression>(payload);
+					view = GetClientByClientName(payloadAgression.Client);
+					if (view is System.Windows.Forms.Control controlAgression)
+					{
+						controlAgression.BeginInvoke(() =>
+						{
+							view?.PipeAgression(payloadAgression.Agression);
+						});
+					}
+					break;
+			}
+		}
+
+	}
 }

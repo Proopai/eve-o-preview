@@ -1,4 +1,6 @@
-﻿using EveOPreview.View;
+﻿using EveOPreview.Mediator.Messages;
+using EveOPreview.View;
+using System.Text.Json;
 
 namespace EveOPreview.Services
 {
@@ -16,7 +18,9 @@ namespace EveOPreview.Services
 
 		void RefreshHotkeys();
 
-        IThumbnailView GetClientByTitle(string title);
+        void ProcessPipeMessage(string type, JsonElement payload);
+
+		IThumbnailView GetClientByTitle(string title);
         IThumbnailView GetClientByPointer(System.IntPtr ptr);
         IThumbnailView GetActiveClient();
     }

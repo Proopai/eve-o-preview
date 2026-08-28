@@ -4,7 +4,9 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Input;
+using System.Windows.Media.Media3D;
 
 namespace EveOPreview.Services.Implementation
 {
@@ -197,6 +199,43 @@ namespace EveOPreview.Services.Implementation
 		}
 
 #endif
+
+		public void TickleWindow(IntPtr handle, AnimationStyle animation)
+		{
+			if (User32NativeMethods.IsIconic(handle))
+			{
+/*
+				WINDOWPLACEMENT wp = new WINDOWPLACEMENT();
+				wp.length = Marshal.SizeOf(typeof(WINDOWPLACEMENT));
+				User32NativeMethods.GetWindowPlacement(handle, ref wp);
+				var originalwp = wp;
+				var width = wp.rcNormalPosition.Right - wp.rcNormalPosition.Left;
+				var height = wp.rcNormalPosition.Bottom - wp.rcNormalPosition.Top;
+
+				wp.rcNormalPosition.Left = -32000;
+				wp.rcNormalPosition.Top = -32000;
+				wp.rcNormalPosition.Right = -32000 + width;
+				wp.rcNormalPosition.Bottom = -32000 + height;
+
+				User32NativeMethods.SetWindowPlacement(handle, ref wp);
+				User32NativeMethods.SetWindowPos(
+					handle,
+					IntPtr.Zero,
+					-32000,
+					-32000,
+					0,
+					0,
+					User32NativeMethods.SWP_NOSIZE |
+					User32NativeMethods.SWP_NOZORDER |
+					User32NativeMethods.SWP_NOACTIVATE);
+*/
+				User32NativeMethods.ShowWindowAsync(handle,User32NativeMethods.SW_SHOWNOACTIVATE);
+				Thread.Sleep(30);
+//				User32NativeMethods.SetWindowPlacement(handle, ref wp);
+				User32NativeMethods.ShowWindowAsync(handle,User32NativeMethods.SW_SHOWMINNOACTIVE);
+//				User32NativeMethods.SetWindowPlacement(handle, ref originalwp);
+			}
+		}
 
 #if WINDOWS
 		public void ActivateWindow(IntPtr handle, AnimationStyle animation, bool focus)

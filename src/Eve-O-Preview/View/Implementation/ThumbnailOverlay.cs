@@ -22,12 +22,25 @@ namespace EveOPreview.View
 		private readonly Action<object, MouseEventArgs> _areaMouseMoveAction;
 		private bool _showOverlayText = true;
 		private bool _showBorder = false;
-		private int _showBorderOffset = 0;
+		private bool _showAgression = false;
+		private bool _showAlert = false;
+		private int _showAlertOffset = 0;
+		private int _showAgressionOffset = 0;
+		private int _showAlertSeconds = 10;
+		private int _showAgressionSeconds = 10;
 		private Color _showBorderColour = Color.White;
+		private Color _showAlertColour = Color.White;
+		private Color _showAgressionColour = Color.White;
 		private int _showBorderWidth = 1;
+		private int _showAlertWidth = 6;
 		private Color _fakeBackground = Color.Red;
 		private bool _showFakeBackground = false;
+		private DateTime _alertTime;
+		private DateTime _agressionTime;
+		private int _alertType;
+		private int _alertJumps=0;
 		private DashStyle _showBorderDashStyle = DashStyle.Solid;
+		private DashStyle _showAlertDashStyle = DashStyle.Solid;
 		#endregion
 
 		public ThumbnailOverlay(Form owner,
@@ -75,13 +88,37 @@ namespace EveOPreview.View
 		{
 			this.OverlayLabel.Text = label;
 		}
+		public void SetSystemNameLabel(string label)
+		{
+			this.SystemNameLabel.Text = label;
+		}
+		public void SetAgression(bool agression, Color alertColor, int alertSeconds)
+		{
+			this._showAgression = agression;
+			this._agressionTime = DateTime.Now;
+			this._showAgressionColour = alertColor;
+			this._showAgressionSeconds = alertSeconds;
+		}
 
+		public void SetAlertClient(int jumps, int type, Color alertColor, int alertBorderWidth, DashStyle dsAlert, int alertSeconds)
+		{
+			this._alertTime = DateTime.Now;
+			this._alertJumps = jumps;
+			this._alertType = type;
+			this._showAlert = true;
+
+			this._showAlertColour = alertColor;
+			this._showAlertWidth = alertBorderWidth;
+			this._showAlertDashStyle = dsAlert;
+			this._showAlertSeconds = alertSeconds;
+		}
 		public void SetBorder(bool showBorder, Color borderColor, int borderWidth, DashStyle ds)
 		{
 			this._showBorder = showBorder;
 			this._showBorderColour = borderColor;
 			this._showBorderWidth = borderWidth;
 			this._showBorderDashStyle = ds;
+
 		}
 
 		public void SetCycleGroupIndicator(bool displayCycleGroup, ZoomAnchor anchor)
@@ -148,72 +185,81 @@ namespace EveOPreview.View
 
 		public void SetPropertiesOverlayLabel(Font font, System.Drawing.Color foregroundColour, System.Drawing.Color outlineColour, int outlineSize, ZoomAnchor anchor)
 		{
+			SetPropertiesLabel(this.OverlayLabel, font, foregroundColour, outlineColour, outlineSize, anchor);
+		}
+		public void SetPropertiesSystemNameLabel(Font font, System.Drawing.Color foregroundColour, System.Drawing.Color outlineColour, int outlineSize, ZoomAnchor anchor)
+		{
+			SetPropertiesLabel(this.SystemNameLabel, font, foregroundColour, outlineColour, outlineSize, anchor);
+		}
+
+		private void SetPropertiesLabel(BorderLabel label, Font font, System.Drawing.Color foregroundColour, System.Drawing.Color outlineColour, int outlineSize, ZoomAnchor anchor)
+		{
 			if (
-				this.OverlayLabel.Font.Size != font.Size ||
-				this.OverlayLabel.Font.FontFamily != font.FontFamily ||
-				this.OverlayLabel.Font.Italic != font.Italic ||
-				this.OverlayLabel.Font.Bold != font.Bold
+				label.Font.Size != font.Size ||
+				label.Font.FontFamily != font.FontFamily ||
+				label.Font.Italic != font.Italic ||
+				label.Font.Bold != font.Bold
 				)
 			{
-				this.OverlayLabel.Font = font;
+				label.Font = font;
 			}
-			this.OverlayLabel.ForeColor = foregroundColour;
+			label.ForeColor = foregroundColour;
 			
-			this.OverlayLabel.BorderColor = outlineColour;
-			this.OverlayLabel.BorderSize = outlineSize;
+			label.BorderColor = outlineColour;
+			label.BorderSize = outlineSize;
 
 			int margin = 5;
 
 			switch (anchor)
 			{
 				case ZoomAnchor.NW:
-					this.OverlayLabel.Left = margin;
-					this.OverlayLabel.Top = margin;
-					this.OverlayLabel.TextAlign = System.Drawing.ContentAlignment.TopLeft;
+					label.Left = margin;
+					label.Top = margin;
+					label.TextAlign = System.Drawing.ContentAlignment.TopLeft;
 					break;
 				case ZoomAnchor.N:
-					this.OverlayLabel.Left = (this.Width / 2) - (this.OverlayLabel.Width / 2);
-					this.OverlayLabel.Top = margin;
-					this.OverlayLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+					label.Left = (this.Width / 2) - (label.Width / 2);
+					label.Top = margin;
+					label.TextAlign = System.Drawing.ContentAlignment.TopCenter;
 					break;
 				case ZoomAnchor.NE:
-					this.OverlayLabel.Left = this.Width - this.OverlayLabel.Width - margin;
-					this.OverlayLabel.Top = margin;
-					this.OverlayLabel.TextAlign = System.Drawing.ContentAlignment.TopRight;
+					label.Left = this.Width - label.Width - margin;
+					label.Top = margin;
+					label.TextAlign = System.Drawing.ContentAlignment.TopRight;
 					break;
 				case ZoomAnchor.W:
-					this.OverlayLabel.Left = margin;
-					this.OverlayLabel.Top = (this.Height / 2) - (this.OverlayLabel.Height / 2);
-					this.OverlayLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+					label.Left = margin;
+					label.Top = (this.Height / 2) - (label.Height / 2);
+					label.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 					break;
 				case ZoomAnchor.C:
-					this.OverlayLabel.Left = (this.Width / 2) - (this.OverlayLabel.Width / 2);
-					this.OverlayLabel.Top = (this.Height / 2) - (this.OverlayLabel.Height / 2);
-					this.OverlayLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+					label.Left = (this.Width / 2) - (label.Width / 2);
+					label.Top = (this.Height / 2) - (label.Height / 2);
+					label.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 					break;
 				case ZoomAnchor.E:
-					this.OverlayLabel.Left = this.Width - this.OverlayLabel.Width - margin;
-					this.OverlayLabel.Top = (this.Height / 2) - (this.OverlayLabel.Height / 2);
-					this.OverlayLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+					label.Left = this.Width - label.Width - margin;
+					label.Top = (this.Height / 2) - (label.Height / 2);
+					label.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 					break;
 				case ZoomAnchor.SW:
-					this.OverlayLabel.Left = margin;
-					this.OverlayLabel.Top = this.Height - this.OverlayLabel.Height - margin;
-					this.OverlayLabel.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+					label.Left = margin;
+					label.Top = this.Height - label.Height - margin;
+					label.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
 					break;
 				case ZoomAnchor.S:
-					this.OverlayLabel.Left = (this.Width / 2) - (this.OverlayLabel.Width / 2);
-					this.OverlayLabel.Top = this.Height - this.OverlayLabel.Height - margin;
-					this.OverlayLabel.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+					label.Left = (this.Width / 2) - (label.Width / 2);
+					label.Top = this.Height - label.Height - margin;
+					label.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
 					break;
 				case ZoomAnchor.SE:
-					this.OverlayLabel.Left = this.Width - this.OverlayLabel.Width - margin;
-					this.OverlayLabel.Top = this.Height - this.OverlayLabel.Height - margin;
-					this.OverlayLabel.TextAlign = System.Drawing.ContentAlignment.BottomRight;
+					label.Left = this.Width - label.Width - margin;
+					label.Top = this.Height - label.Height - margin;
+					label.TextAlign = System.Drawing.ContentAlignment.BottomRight;
 					break;
 			}
-			if (this.OverlayLabel.Top < 0) this.OverlayLabel.Top = 0;
-			if (this.OverlayLabel.Left < 0) this.OverlayLabel.Left = 0;
+			if (label.Top < 0) label.Top = 0;
+			if (label.Left < 0) label.Left = 0;
 		}
 
 		public void EnableOverlayLabel(bool enable)
@@ -353,7 +399,7 @@ namespace EveOPreview.View
 		}
 		private void IncreaseHighlightDashOffset()
 		{
-			_showBorderOffset++;
+			_showAlertOffset++;
 		}
 
 		private void OverlayAreaPictureBox_Paint(object sender, PaintEventArgs e)
@@ -374,15 +420,55 @@ namespace EveOPreview.View
 
 			if (this._showOverlayText) PaintDrawText(e, OverlayLabel);
 
+			if (SystemNameLabel.Text != string.Empty) PaintDrawText(e, SystemNameLabel);
+
 			if (this._showBorder)
 			{
 				int halfSize = (int)Math.Round((double)(_showBorderWidth / 2),0);
 				using (Pen pp = new Pen(_showBorderColour, _showBorderWidth)) {
 					pp.DashStyle = _showBorderDashStyle;
-					pp.DashOffset = _showBorderOffset; 
+					//pp.DashOffset = _showBorderOffset; 
 					e.Graphics.DrawRectangle(pp, halfSize, halfSize, this.ClientSize.Width -_showBorderWidth,this.ClientSize.Height - _showBorderWidth );
 				}
 			}
+
+			if (this._showAlert)
+			{
+				int halfSize = (int)Math.Round((double)(_showBorderWidth / 2), 0);
+				int halfSizeAlert = (int)Math.Round((double)(_showAlertWidth / 2), 0);
+				using (Pen pp = new Pen(_showAlertColour, _showAlertWidth))
+				{
+					pp.DashStyle = _showAlertDashStyle;
+					pp.DashOffset = (_showAlertOffset++); 
+					e.Graphics.DrawRectangle(pp, halfSize + halfSizeAlert, halfSize + halfSizeAlert, 
+						this.ClientSize.Width - _showAlertWidth - _showBorderWidth, this.ClientSize.Height - _showAlertWidth - _showBorderWidth);
+				}
+				if (DateTime.Now.Subtract(this._alertTime).TotalSeconds > _showAlertSeconds)
+				{
+					this._showAlert = false;
+					this._showAlertOffset = 0;
+				}
+			}
+
+
+			if ( this._showAgression)
+			{
+				int halfSize = (int)Math.Round((double)(_showBorderWidth / 2), 0);
+				int halfSizeAlert = (int)Math.Round((double)(_showAlertWidth / 2), 0);
+				using (Pen pp = new Pen(_showAgressionColour, _showAlertWidth))
+				{
+					pp.DashStyle = _showAlertDashStyle;
+					pp.DashOffset = (_showAgressionOffset++);
+					e.Graphics.DrawEllipse(pp, halfSize + halfSizeAlert, halfSize + halfSizeAlert,
+						this.ClientSize.Width - _showAlertWidth - _showBorderWidth, this.ClientSize.Height - _showAlertWidth - _showBorderWidth);
+				}
+				if (DateTime.Now.Subtract(this._agressionTime).TotalSeconds > _showAgressionSeconds)
+				{
+					this._showAgression = false;
+					this._showAgressionOffset = 0;
+				}
+			}
+
 		}
 
 		protected override CreateParams CreateParams

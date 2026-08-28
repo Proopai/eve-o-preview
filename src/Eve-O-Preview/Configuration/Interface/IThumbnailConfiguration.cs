@@ -55,8 +55,9 @@ namespace EveOPreview.Configuration
         bool ThumbnailZoomEnabled { get; set; }
         int ThumbnailZoomFactor { get; set; }
         ZoomAnchor ThumbnailZoomAnchor { get; set; }
-        ZoomAnchor OverlayLabelAnchor { get; set; }
-        ZoomAnchor CycleGroupIndicatorAnchor { get; set; }
+		ZoomAnchor OverlayLabelAnchor { get; set; }
+		ZoomAnchor SystemNameLabelAnchor { get; set; }
+		ZoomAnchor CycleGroupIndicatorAnchor { get; set; }
 
 		bool ShowThumbnailOverlays { get; set; }
 		bool ShowThumbnailFrames { get; set; }
@@ -68,13 +69,23 @@ namespace EveOPreview.Configuration
 
 		bool EnableActiveClientHighlight { get; set; }
 		Color ActiveClientHighlightColor { get; set; }
+		Color AlertColor { get; set; }
+		Color AgressionColor { get; set; }
 		Color PreventPreviewColor { get; set; }
 		int ActiveClientHighlightThickness { get; set; }
+		int AlertThickness { get; set; }
 		DashStyle ActiveClientHighlightDashStyle { get; set; }
+		DashStyle AlertDashStyle { get; set; }
+		int AlertSeconds { get; set; }
+		int AgressionSeconds { get; set; }
 		Color OverlayLabelColor { get; set; }
 		Color OverlayLabelOutlineColor { get; set; }
 		int OverlayLabelOutlineSize { get; set; }
 		Font OverlayLabelFont { get; set; }
+		Color SystemNameLabelColor { get; set; }
+		Color SystemNameLabelOutlineColor { get; set; }
+		int SystemNameLabelOutlineSize { get; set; }
+		Font SystemNameLabelFont { get; set; }
 
 		string IconName { get; set; }
 		List<string> MinimizeAllClientsHotkeys { get; set; }

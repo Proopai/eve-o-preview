@@ -143,8 +143,9 @@ namespace EveOPreview.Configuration.Implementation
             this.ThumbnailZoomEnabled = false;
             this.ThumbnailZoomFactor = 2;
             this.ThumbnailZoomAnchor = ZoomAnchor.NW;
-            this.OverlayLabelAnchor = ZoomAnchor.NW;
-            this.CycleGroupIndicatorAnchor = ZoomAnchor.NW;
+			this.OverlayLabelAnchor = ZoomAnchor.NW;
+			this.SystemNameLabelAnchor = ZoomAnchor.NE;
+			this.CycleGroupIndicatorAnchor = ZoomAnchor.NW;
 
             this.ShowThumbnailOverlays = true;
             this.ShowThumbnailFrames = false;
@@ -156,17 +157,30 @@ namespace EveOPreview.Configuration.Implementation
 
             this.EnableActiveClientHighlight = false;
             this.ActiveClientHighlightColor = Color.GreenYellow;
-            this.ActiveClientHighlightDashStyle = DashStyle.Solid;
+            this.ActiveClientHighlightDashStyle = DashStyle.DashDotDot;
 
 			this.PreventPreviewColor = Color.Purple;
-            this.ActiveClientHighlightThickness = 3;
+            this.ActiveClientHighlightThickness = 4;
+
+			this.AlertThickness = 6;
+			this.AlertDashStyle = DashStyle.DashDotDot;
+			this.AlertColor = Color.Violet;
+			this.AlertSeconds = 10;
+
+			this.AgressionColor = Color.Red;
+			this.AgressionSeconds = 10;
 
 			this.OverlayLabelColor = Color.Orange;
 			this.OverlayLabelOutlineColor = Color.Black;
 			this.OverlayLabelOutlineSize = 1;
-			this.OverlayLabelFont = new Font(FontFamily.GenericSansSerif,10.0F, FontStyle.Bold);
+			this.OverlayLabelFont = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Bold);
 
-            this.IconName = "";
+			this.SystemNameLabelColor = Color.Orange;
+			this.SystemNameLabelOutlineColor = Color.Black;
+			this.SystemNameLabelOutlineSize = 1;
+			this.SystemNameLabelFont = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Bold);
+
+			this.IconName = "";
 
 			this.CoreAffinity = false;
 			this.LoginThumbnailLocation = new Point(5, 5);
@@ -334,8 +348,9 @@ namespace EveOPreview.Configuration.Implementation
         public bool ThumbnailZoomEnabled { get; set; }
         public int ThumbnailZoomFactor { get; set; }
         public ZoomAnchor ThumbnailZoomAnchor { get; set; }
-        public ZoomAnchor OverlayLabelAnchor { get; set; }
-        public ZoomAnchor CycleGroupIndicatorAnchor { get; set; }
+		public ZoomAnchor OverlayLabelAnchor { get; set; }
+		public ZoomAnchor SystemNameLabelAnchor { get; set; }
+		public ZoomAnchor CycleGroupIndicatorAnchor { get; set; }
 
         public bool ShowThumbnailOverlays { get; set; }
         public bool ShowThumbnailFrames { get; set; }
@@ -345,19 +360,29 @@ namespace EveOPreview.Configuration.Implementation
         public int ThumbnailSnapToGridSizeY { get; set; }
 
         public bool EnableActiveClientHighlight { get; set; }
-        public DashStyle ActiveClientHighlightDashStyle { get; set; }
+		public DashStyle ActiveClientHighlightDashStyle { get; set; }
+		public DashStyle AlertDashStyle { get; set; }
 
 		public Color ActiveClientHighlightColor { get; set; }
+		public Color AlertColor { get; set; }
+		public int AlertSeconds { get; set; }
+		public Color AgressionColor { get; set; }
+		public int AgressionSeconds { get; set; }
 		public Color PreventPreviewColor { get; set; }
 		public Color OverlayLabelColor { get; set; }
 		public Color OverlayLabelOutlineColor { get; set; }
 		public int OverlayLabelOutlineSize { get; set; }
 
-        [JsonProperty]
-        public Font OverlayLabelFont { get; set; }
-        public string IconName { get; set; }
+		public Color SystemNameLabelColor { get; set; }
+		public Color SystemNameLabelOutlineColor { get; set; }
+		public int SystemNameLabelOutlineSize { get; set; }
+		[JsonProperty]
+		public Font OverlayLabelFont { get; set; }
+		public Font SystemNameLabelFont { get; set; }
+		public string IconName { get; set; }
 
-        public int ActiveClientHighlightThickness { get; set; }
+		public int ActiveClientHighlightThickness { get; set; }
+		public int AlertThickness { get; set; }
 
 		[JsonProperty("LoginThumbnailLocation")]
 		public Point LoginThumbnailLocation { get; set; }
@@ -581,6 +606,7 @@ namespace EveOPreview.Configuration.Implementation
             this.ThumbnailOpacity = ThumbnailConfiguration.ApplyRestrictions((int)(this.ThumbnailOpacity * 100.00), 20, 100) / 100.00;
             this.ThumbnailZoomFactor = ThumbnailConfiguration.ApplyRestrictions(this.ThumbnailZoomFactor, 2, 10);
 			this.OverlayLabelOutlineSize = ThumbnailConfiguration.ApplyRestrictions(this.OverlayLabelOutlineSize, 0, 10);
+			this.SystemNameLabelOutlineSize = ThumbnailConfiguration.ApplyRestrictions(this.SystemNameLabelOutlineSize, 0, 10);
 			this.ActiveClientHighlightThickness = ThumbnailConfiguration.ApplyRestrictions(this.ActiveClientHighlightThickness, 1, 6);
 		}
 
