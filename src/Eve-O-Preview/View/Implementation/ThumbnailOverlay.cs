@@ -499,11 +499,31 @@ namespace EveOPreview.View
 
 			if ( this._showAggression)
 			{
-				int halfSize = (int)Math.Round((double)(_showAggressionSize / 2), 0);
-				int halfSizeAlert = (int)Math.Round((double)(_showAlertWidth / 2), 0);
-				using (Brush bb = new SolidBrush(Color.FromArgb(64, _showAggressionColour)))
+
+				// alpha based on time left - SUPER nice idea - thank you LemonCreamPie
+
+				int halfFullSize = (int)Math.Round((double)(_showAggressionSize/ 2), 0);
+
+				double elapsed = (DateTime.Now - _aggressionTime).TotalSeconds;
+				double t = Math.Min(elapsed / _showAggressionSeconds, 1.0);
+				double sizePercent = 1.0 - (0.7 * t);
+				int aggressionSize = (int)(_showAggressionSize * sizePercent);
+				int halfSize = (int)Math.Round((double)(aggressionSize / 2), 0);
+
+				double alphaPercent = 0.10 + (0.40 * Math.Pow(1.0 - t, 3));
+				//				int aggressionAlpha = (int)(255 * (0.5 - (0.4 * t)));
+				int aggressionAlpha = (int)(255 * (alphaPercent));
+
+				using (Brush bb = new SolidBrush(Color.FromArgb(aggressionAlpha, _showAggressionColour)))
 				{
-					e.Graphics.FillEllipse(bb, this._showAggressionX - halfSize, this._showAggressionY - halfSize, _showAggressionSize, _showAggressionSize);
+					//					e.Graphics.FillEllipse(bb, this._showAggressionX - halfFullSize + halfSize, this._showAggressionY - halfFullSize + halfSize, halfSize*2, halfSize*2);
+
+					e.Graphics.FillEllipse(
+					bb,
+					_showAggressionX - halfSize,
+					_showAggressionY - halfSize + halfFullSize,
+					aggressionSize,
+					aggressionSize);
 				}
 				if ((DateTime.Now - _aggressionTime).TotalSeconds > _showAggressionSeconds)
 				{
