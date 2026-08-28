@@ -530,7 +530,7 @@ namespace EveOPreview.View
 
 		public void PipeAgression(bool agressionIndicator)
 		{
-			this._overlay.SetAgression(agressionIndicator, _config.AgressionColor, _config.AgressionSeconds);
+			this._overlay.SetAggression(agressionIndicator, _config.AgressionColor, _config.AgressionSeconds, _config.AgressionSize, _config.AgressionAnchor);
 		}
 
 		public void PipeSystemUpdate(string systemName)

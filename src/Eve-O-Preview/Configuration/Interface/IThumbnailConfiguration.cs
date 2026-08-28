@@ -58,6 +58,9 @@ namespace EveOPreview.Configuration
 		ZoomAnchor OverlayLabelAnchor { get; set; }
 		ZoomAnchor SystemNameLabelAnchor { get; set; }
 		ZoomAnchor CycleGroupIndicatorAnchor { get; set; }
+		ZoomAnchor AgressionAnchor { get; set; }
+
+		int AgressionSize { get; set; }
 
 		bool ShowThumbnailOverlays { get; set; }
 		bool ShowThumbnailFrames { get; set; }

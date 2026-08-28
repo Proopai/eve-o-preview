@@ -5,6 +5,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
+using System.Security.Policy;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Shapes;
@@ -22,21 +23,23 @@ namespace EveOPreview.View
 		private readonly Action<object, MouseEventArgs> _areaMouseMoveAction;
 		private bool _showOverlayText = true;
 		private bool _showBorder = false;
-		private bool _showAgression = false;
+		private bool _showAggression = false;
+		private int _showAggressionSize = 10;
 		private bool _showAlert = false;
 		private int _showAlertOffset = 0;
-		private int _showAgressionOffset = 0;
 		private int _showAlertSeconds = 10;
-		private int _showAgressionSeconds = 10;
+		private int _showAggressionSeconds = 60;
+		private int _showAggressionX;
+		private int _showAggressionY;
 		private Color _showBorderColour = Color.White;
 		private Color _showAlertColour = Color.White;
-		private Color _showAgressionColour = Color.White;
+		private Color _showAggressionColour = Color.White;
 		private int _showBorderWidth = 1;
 		private int _showAlertWidth = 6;
 		private Color _fakeBackground = Color.Red;
 		private bool _showFakeBackground = false;
 		private DateTime _alertTime;
-		private DateTime _agressionTime;
+		private DateTime _aggressionTime;
 		private int _alertType;
 		private int _alertJumps=0;
 		private DashStyle _showBorderDashStyle = DashStyle.Solid;
@@ -92,12 +95,55 @@ namespace EveOPreview.View
 		{
 			this.SystemNameLabel.Text = label;
 		}
-		public void SetAgression(bool agression, Color alertColor, int alertSeconds)
+		public void SetAggression(bool aggression, Color alertColor, int alertSeconds, int size, ZoomAnchor anchor)
 		{
-			this._showAgression = agression;
-			this._agressionTime = DateTime.Now;
-			this._showAgressionColour = alertColor;
-			this._showAgressionSeconds = alertSeconds;
+			this._showAggression = aggression;
+			this._aggressionTime = DateTime.Now;
+			this._showAggressionColour = alertColor;
+			this._showAggressionSeconds = alertSeconds;
+			this._showAggressionSize = size;
+			int margin = 2;
+
+			switch (anchor)
+			{
+				case ZoomAnchor.NW:
+					this._showAggressionX = margin;
+					this._showAggressionY = margin;
+					break;
+				case ZoomAnchor.N:
+					this._showAggressionX = (this.Width / 2) - (size / 2);
+					this._showAggressionY = margin;
+					break;
+				case ZoomAnchor.NE:
+					this._showAggressionX = this.Width - size - margin;
+					this._showAggressionY = margin;
+					break;
+				case ZoomAnchor.W:
+					this._showAggressionX = margin;
+					this._showAggressionY = (this.Height / 2) - (size / 2);
+					break;
+				case ZoomAnchor.C:
+					this._showAggressionX = (this.Width / 2) - (size / 2);
+					this._showAggressionY = (this.Height / 2) - (size / 2);
+					break;
+				case ZoomAnchor.E:
+					this._showAggressionX = this.Width - size - margin;
+					this._showAggressionY = (this.Height / 2) - (size / 2);
+					break;
+				case ZoomAnchor.SW:
+					this._showAggressionX = margin;
+					this._showAggressionY = this.Height - size - margin;
+					break;
+				case ZoomAnchor.S:
+					this._showAggressionX = (this.Width / 2) - (size / 2);
+					this._showAggressionY = this.Height - size - margin;
+					break;
+				case ZoomAnchor.SE:
+					this._showAggressionX = this.Width - size - margin;
+					this._showAggressionY = this.Height - size - margin;
+					break;
+			}
+
 		}
 
 		public void SetAlertClient(int jumps, int type, Color alertColor, int alertBorderWidth, DashStyle dsAlert, int alertSeconds)
@@ -443,29 +489,25 @@ namespace EveOPreview.View
 					e.Graphics.DrawRectangle(pp, halfSize + halfSizeAlert, halfSize + halfSizeAlert, 
 						this.ClientSize.Width - _showAlertWidth - _showBorderWidth, this.ClientSize.Height - _showAlertWidth - _showBorderWidth);
 				}
-				if (DateTime.Now.Subtract(this._alertTime).TotalSeconds > _showAlertSeconds)
-				{
+				if ((DateTime.Now - _alertTime).TotalSeconds > _showAlertSeconds)
+					{
 					this._showAlert = false;
 					this._showAlertOffset = 0;
 				}
 			}
 
 
-			if ( this._showAgression)
+			if ( this._showAggression)
 			{
-				int halfSize = (int)Math.Round((double)(_showBorderWidth / 2), 0);
+				int halfSize = (int)Math.Round((double)(_showAggressionSize / 2), 0);
 				int halfSizeAlert = (int)Math.Round((double)(_showAlertWidth / 2), 0);
-				using (Pen pp = new Pen(_showAgressionColour, _showAlertWidth))
+				using (Brush bb = new SolidBrush(Color.FromArgb(64, _showAggressionColour)))
 				{
-					pp.DashStyle = _showAlertDashStyle;
-					pp.DashOffset = (_showAgressionOffset++);
-					e.Graphics.DrawEllipse(pp, halfSize + halfSizeAlert, halfSize + halfSizeAlert,
-						this.ClientSize.Width - _showAlertWidth - _showBorderWidth, this.ClientSize.Height - _showAlertWidth - _showBorderWidth);
+					e.Graphics.FillEllipse(bb, this._showAggressionX - halfSize, this._showAggressionY - halfSize, _showAggressionSize, _showAggressionSize);
 				}
-				if (DateTime.Now.Subtract(this._agressionTime).TotalSeconds > _showAgressionSeconds)
+				if ((DateTime.Now - _aggressionTime).TotalSeconds > _showAggressionSeconds)
 				{
-					this._showAgression = false;
-					this._showAgressionOffset = 0;
+					this._showAggression = false;
 				}
 			}
 

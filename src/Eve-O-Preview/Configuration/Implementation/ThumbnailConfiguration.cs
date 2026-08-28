@@ -168,7 +168,9 @@ namespace EveOPreview.Configuration.Implementation
 			this.AlertSeconds = 10;
 
 			this.AgressionColor = Color.Red;
-			this.AgressionSeconds = 10;
+			this.AgressionSeconds = 60;
+            this.AgressionAnchor = ZoomAnchor.E;
+            this.AgressionSize = 20;
 
 			this.OverlayLabelColor = Color.Orange;
 			this.OverlayLabelOutlineColor = Color.Black;
@@ -351,8 +353,9 @@ namespace EveOPreview.Configuration.Implementation
 		public ZoomAnchor OverlayLabelAnchor { get; set; }
 		public ZoomAnchor SystemNameLabelAnchor { get; set; }
 		public ZoomAnchor CycleGroupIndicatorAnchor { get; set; }
-
-        public bool ShowThumbnailOverlays { get; set; }
+		public ZoomAnchor AgressionAnchor { get; set; }
+        public int AgressionSize { get; set; }
+		public bool ShowThumbnailOverlays { get; set; }
         public bool ShowThumbnailFrames { get; set; }
         public bool LockThumbnailLocation { get; set; }
         public bool ThumbnailSnapToGrid { get; set; }
