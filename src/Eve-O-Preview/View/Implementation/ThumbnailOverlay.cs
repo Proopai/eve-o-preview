@@ -8,6 +8,7 @@ using System.Drawing.Text;
 using System.Security.Policy;
 using System.Windows;
 using System.Windows.Forms;
+using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
 using Rectangle = System.Drawing.Rectangle;
 
@@ -26,7 +27,6 @@ namespace EveOPreview.View
 		private bool _showAggression = false;
 		private int _showAggressionSize = 10;
 		private bool _showAlert = false;
-		private int _showAlertOffset = 0;
 		private int _showAlertSeconds = 10;
 		private int _showAggressionSeconds = 60;
 		private int _showAggressionX;
@@ -43,7 +43,6 @@ namespace EveOPreview.View
 		private int _alertType;
 		private int _alertJumps=0;
 		private DashStyle _showBorderDashStyle = DashStyle.Solid;
-		private DashStyle _showAlertDashStyle = DashStyle.Solid;
 		#endregion
 
 		public ThumbnailOverlay(Form owner,
@@ -146,7 +145,7 @@ namespace EveOPreview.View
 
 		}
 
-		public void SetAlertClient(int jumps, int type, Color alertColor, int alertBorderWidth, DashStyle dsAlert, int alertSeconds)
+		public void SetAlertClient(int jumps, int type, Color alertColor, int alertBorderWidth, int alertSeconds)
 		{
 			this._alertTime = DateTime.Now;
 			this._alertJumps = jumps;
@@ -155,7 +154,6 @@ namespace EveOPreview.View
 
 			this._showAlertColour = alertColor;
 			this._showAlertWidth = alertBorderWidth;
-			this._showAlertDashStyle = dsAlert;
 			this._showAlertSeconds = alertSeconds;
 		}
 		public void SetBorder(bool showBorder, Color borderColor, int borderWidth, DashStyle ds)
@@ -443,93 +441,205 @@ namespace EveOPreview.View
 			TextRenderer.DrawText(e.Graphics, l.Text, l.Font, bounds, l.ForeColor, flags);
 
 		}
-		private void IncreaseHighlightDashOffset()
+		private void ShowFakeBackgroundBoring(PaintEventArgs e)
 		{
-			_showAlertOffset++;
+			using (Brush bb = new SolidBrush(_fakeBackground))
+			{
+				e.Graphics.FillRectangle(bb, 0, 0, this.ClientSize.Width, this.ClientSize.Height);
+			}
+		}
+
+		private void ShowFakeBackground(PaintEventArgs e)
+		{
+			Rectangle rect = ClientRectangle;
+
+			Color top = ControlPaint.Light(_fakeBackground, 0.2f);
+			Color bottom = ControlPaint.Dark(_fakeBackground, 0.2f);
+
+			using (var brush = new LinearGradientBrush(rect,top,bottom,LinearGradientMode.Vertical))
+				e.Graphics.FillRectangle(brush, rect);
+
+			using (Pen p = new Pen(Color.FromArgb(40, Color.White)))
+				e.Graphics.DrawRectangle(p,0,0,ClientSize.Width - 1,ClientSize.Height - 1);
+		}
+
+		private void ShowBorder(PaintEventArgs e)
+		{
+			int halfSize = (int)Math.Round((double)(_showBorderWidth / 2), 0);
+			/*
+						using (Pen pp = new Pen(_showBorderColour, _showBorderWidth))
+						{
+							pp.DashStyle = _showBorderDashStyle;
+							e.Graphics.DrawRectangle(pp, halfSize, halfSize, this.ClientSize.Width - _showBorderWidth, this.ClientSize.Height - _showBorderWidth);
+						}
+			*/
+
+			// glow
+			for (int i = 4; i >= 1; i--)
+			{
+				using (Pen glowPen = new Pen(Color.FromArgb(15 / i, _showBorderColour), _showBorderWidth + (i * 2)))
+					e.Graphics.DrawRectangle(glowPen, halfSize, halfSize, ClientSize.Width - _showBorderWidth, ClientSize.Height - _showBorderWidth);
+
+				// main border
+				using (Pen pp = new Pen(_showBorderColour, _showBorderWidth))
+				{
+					pp.DashStyle = _showBorderDashStyle;
+					e.Graphics.DrawRectangle(pp, halfSize, halfSize, ClientSize.Width - _showBorderWidth, ClientSize.Height - _showBorderWidth);
+				}
+			}
+		}
+
+		private void ShowAlert(PaintEventArgs e)
+		{
+			double elapsed = (DateTime.Now - _alertTime).TotalSeconds;
+			double t = Math.Min(elapsed / _showAlertSeconds, 1.0);
+			int insetMore = 2;
+
+			// Fade 50% -> 10%
+			int alertAlpha = (int)(255 * (0.5 - (0.4 * t)));
+
+			int left = _showAlertWidth + insetMore;
+			int top = _showAlertWidth + insetMore;
+
+			int right = ClientSize.Width - _showAlertWidth - insetMore;
+			int bottom = ClientSize.Height - _showAlertWidth - insetMore;
+
+			int width = right - left;
+			int height = bottom - top;
+
+			// Hold full rectangle for first 20% of lifetime
+			double meltT;
+			if (t <= 0.25)
+			{
+				meltT = 0.0;
+			}
+			else
+			{
+				meltT = (t - 0.20) / 0.80;
+
+				// Ease-out so it starts slowly then collapses quicker
+				meltT = 1.0 - Math.Pow(1.0 - meltT, 2);
+			}
+
+			// Edge lengths retract toward corners
+			int hLen = (int)(width * (1.0 - meltT));
+			int vLen = (int)(height * (1.0 - meltT));
+
+			// Leave visible corner brackets
+			hLen = Math.Max(hLen, 30);
+			vLen = Math.Max(vLen, 30);
+
+			// Glow
+			for (int i = 5; i >= 1; i--)
+			{
+				using (Pen glowPen = new Pen(
+					Color.FromArgb(alertAlpha / (i * 3), _showAlertColour),
+					_showAlertWidth + (i * 2)))
+				{
+					// TOP
+					e.Graphics.DrawLine(glowPen, left, top, left + (hLen / 2), top);
+					e.Graphics.DrawLine(glowPen, right - (hLen / 2), top, right, top);
+
+					// BOTTOM
+					e.Graphics.DrawLine(glowPen, left, bottom, left + (hLen / 2), bottom);
+					e.Graphics.DrawLine(glowPen, right - (hLen / 2), bottom, right, bottom);
+
+					// LEFT
+					e.Graphics.DrawLine(glowPen, left, top, left, top + (vLen / 2));
+					e.Graphics.DrawLine(glowPen, left, bottom - (vLen / 2), left, bottom);
+
+					// RIGHT
+					e.Graphics.DrawLine(glowPen, right, top, right, top + (vLen / 2));
+					e.Graphics.DrawLine(glowPen, right, bottom - (vLen / 2), right, bottom);
+				}
+			}
+
+			// Main border
+			using (Pen pp = new Pen(
+				Color.FromArgb(alertAlpha, _showAlertColour), _showAlertWidth))
+			{
+				// TOP
+				e.Graphics.DrawLine(pp, left, top, left + (hLen / 2), top);
+				e.Graphics.DrawLine(pp, right - (hLen / 2), top, right, top);
+
+				// BOTTOM
+				e.Graphics.DrawLine(pp, left, bottom, left + (hLen / 2), bottom);
+				e.Graphics.DrawLine(pp, right - (hLen / 2), bottom, right, bottom);
+
+				// LEFT
+				e.Graphics.DrawLine(pp, left, top, left, top + (vLen / 2));
+				e.Graphics.DrawLine(pp, left, bottom - (vLen / 2), left, bottom);
+
+				// RIGHT
+				e.Graphics.DrawLine(pp, right, top, right, top + (vLen / 2));
+				e.Graphics.DrawLine(pp, right, bottom - (vLen / 2), right, bottom);
+			}
+
+			if ((DateTime.Now - _alertTime).TotalSeconds > _showAlertSeconds)
+			{
+				this._showAlert = false;
+			}
+		}
+
+		private void ShowAggression(PaintEventArgs e)
+		{
+
+			// alpha based on time left - SUPER nice idea - thank you LemonCreamPie
+
+			int halfFullSize = (int)Math.Round((double)(_showAggressionSize / 2), 0);
+
+			double elapsed = (DateTime.Now - _aggressionTime).TotalSeconds;
+			double t = Math.Min(elapsed / _showAggressionSeconds, 1.0);
+			double sizePercent = 1.0 - (0.7 * t);
+			int aggressionSize = (int)(_showAggressionSize * sizePercent);
+			int halfSize = (int)Math.Round((double)(aggressionSize / 2), 0);
+
+			double alphaPercent = 0.10 + (0.40 * Math.Pow(1.0 - t, 3));
+			int aggressionAlpha = (int)(255 * (alphaPercent));
+			int aggressionAlpha2 = (int)(255 * (alphaPercent)) + 20;
+
+			for (int i = 5; i >= 1; i--)
+			{
+				int glowSize = aggressionSize + (i * 4);
+				int glowAlpha = aggressionAlpha / (i * 4);
+
+				using (Brush glowBrush = new SolidBrush(
+					Color.FromArgb(glowAlpha, _showAggressionColour)))
+				{
+					e.Graphics.FillEllipse(
+						glowBrush,
+						_showAggressionX - (glowSize / 2),
+						_showAggressionY - (glowSize / 2) + halfFullSize,
+						glowSize,
+						glowSize);
+				}
+			}
+
+			using (Brush bb = new SolidBrush(Color.FromArgb(aggressionAlpha, _showAggressionColour)))
+				e.Graphics.FillEllipse(bb, _showAggressionX - halfSize, _showAggressionY - halfSize + halfFullSize, aggressionSize, aggressionSize);
+
+			if ((DateTime.Now - _aggressionTime).TotalSeconds > _showAggressionSeconds)
+			{
+				this._showAggression = false;
+			}
 		}
 
 		private void OverlayAreaPictureBox_Paint(object sender, PaintEventArgs e)
 		{
 
-			if (this._showFakeBackground)
-			{
-				using (Brush bb = new SolidBrush(_fakeBackground))
-				{
-					e.Graphics.FillRectangle(
-						bb,
-						0,
-						0,
-						this.ClientSize.Width,
-						this.ClientSize.Height);
-				}
-			}
+			e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+			if (this._showFakeBackground) ShowFakeBackground(e);
 
 			if (this._showOverlayText) PaintDrawText(e, OverlayLabel);
 
 			if (SystemNameLabel.Text != string.Empty) PaintDrawText(e, SystemNameLabel);
 
-			if (this._showBorder)
-			{
-				int halfSize = (int)Math.Round((double)(_showBorderWidth / 2),0);
-				using (Pen pp = new Pen(_showBorderColour, _showBorderWidth)) {
-					pp.DashStyle = _showBorderDashStyle;
-					//pp.DashOffset = _showBorderOffset; 
-					e.Graphics.DrawRectangle(pp, halfSize, halfSize, this.ClientSize.Width -_showBorderWidth,this.ClientSize.Height - _showBorderWidth );
-				}
-			}
+			if (this._showBorder) ShowBorder(e);
 
-			if (this._showAlert)
-			{
-				int halfSize = (int)Math.Round((double)(_showBorderWidth / 2), 0);
-				int halfSizeAlert = (int)Math.Round((double)(_showAlertWidth / 2), 0);
-				using (Pen pp = new Pen(_showAlertColour, _showAlertWidth))
-				{
-					pp.DashStyle = _showAlertDashStyle;
-					pp.DashOffset = (_showAlertOffset++); 
-					e.Graphics.DrawRectangle(pp, halfSize + halfSizeAlert, halfSize + halfSizeAlert, 
-						this.ClientSize.Width - _showAlertWidth - _showBorderWidth, this.ClientSize.Height - _showAlertWidth - _showBorderWidth);
-				}
-				if ((DateTime.Now - _alertTime).TotalSeconds > _showAlertSeconds)
-					{
-					this._showAlert = false;
-					this._showAlertOffset = 0;
-				}
-			}
+			if (this._showAlert) ShowAlert(e);
 
-
-			if ( this._showAggression)
-			{
-
-				// alpha based on time left - SUPER nice idea - thank you LemonCreamPie
-
-				int halfFullSize = (int)Math.Round((double)(_showAggressionSize/ 2), 0);
-
-				double elapsed = (DateTime.Now - _aggressionTime).TotalSeconds;
-				double t = Math.Min(elapsed / _showAggressionSeconds, 1.0);
-				double sizePercent = 1.0 - (0.7 * t);
-				int aggressionSize = (int)(_showAggressionSize * sizePercent);
-				int halfSize = (int)Math.Round((double)(aggressionSize / 2), 0);
-
-				double alphaPercent = 0.10 + (0.40 * Math.Pow(1.0 - t, 3));
-				//				int aggressionAlpha = (int)(255 * (0.5 - (0.4 * t)));
-				int aggressionAlpha = (int)(255 * (alphaPercent));
-
-				using (Brush bb = new SolidBrush(Color.FromArgb(aggressionAlpha, _showAggressionColour)))
-				{
-					//					e.Graphics.FillEllipse(bb, this._showAggressionX - halfFullSize + halfSize, this._showAggressionY - halfFullSize + halfSize, halfSize*2, halfSize*2);
-
-					e.Graphics.FillEllipse(
-					bb,
-					_showAggressionX - halfSize,
-					_showAggressionY - halfSize + halfFullSize,
-					aggressionSize,
-					aggressionSize);
-				}
-				if ((DateTime.Now - _aggressionTime).TotalSeconds > _showAggressionSeconds)
-				{
-					this._showAggression = false;
-				}
-			}
+			if (this._showAggression) ShowAggression(e);
 
 		}
 

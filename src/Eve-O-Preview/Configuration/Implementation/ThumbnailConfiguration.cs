@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
+using EveOPreview.NamedPipe.Messages;
 using Newtonsoft.Json;
 
 namespace EveOPreview.Configuration.Implementation
@@ -162,10 +163,9 @@ namespace EveOPreview.Configuration.Implementation
 			this.PreventPreviewColor = Color.Purple;
             this.ActiveClientHighlightThickness = 4;
 
-			this.AlertThickness = 6;
-			this.AlertDashStyle = DashStyle.DashDotDot;
-			this.AlertColor = Color.Violet;
-			this.AlertSeconds = 10;
+			this.AlertThickness = 1;
+
+			this.AlertSeconds = 20;
 
 			this.AgressionColor = Color.Red;
 			this.AgressionSeconds = 60;
@@ -364,11 +364,9 @@ namespace EveOPreview.Configuration.Implementation
 
         public bool EnableActiveClientHighlight { get; set; }
 		public DashStyle ActiveClientHighlightDashStyle { get; set; }
-		public DashStyle AlertDashStyle { get; set; }
-
 		public Color ActiveClientHighlightColor { get; set; }
-		public Color AlertColor { get; set; }
-		public int AlertSeconds { get; set; }
+		public Color[] AlertColors { get; set; } 
+        public int AlertSeconds { get; set; }
 		public Color AgressionColor { get; set; }
 		public int AgressionSeconds { get; set; }
 		public Color PreventPreviewColor { get; set; }
@@ -611,6 +609,17 @@ namespace EveOPreview.Configuration.Implementation
 			this.OverlayLabelOutlineSize = ThumbnailConfiguration.ApplyRestrictions(this.OverlayLabelOutlineSize, 0, 10);
 			this.SystemNameLabelOutlineSize = ThumbnailConfiguration.ApplyRestrictions(this.SystemNameLabelOutlineSize, 0, 10);
 			this.ActiveClientHighlightThickness = ThumbnailConfiguration.ApplyRestrictions(this.ActiveClientHighlightThickness, 1, 6);
+
+			if (this.AlertColors == null || this.AlertColors.Length != 10)
+			{
+				this.AlertColors = new Color[10];
+
+				this.AlertColors[PipeAlertClient.AlertTypeIntel] = Color.Gold;
+				this.AlertColors[PipeAlertClient.AlertTypeKill] = Color.Red;
+				this.AlertColors[PipeAlertClient.AlertTypeDecloak] = Color.DeepSkyBlue;
+				this.AlertColors[PipeAlertClient.AlertTypeFaction] = Color.MediumOrchid;
+				this.AlertColors[PipeAlertClient.AlertTypeMiningOver] = Color.LimeGreen;
+			}
 		}
 
 		// Converts the legacy fixed CycleGroup1..5 properties into the dynamic CycleGroups list

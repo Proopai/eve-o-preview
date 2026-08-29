@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using System.Windows.Shapes;
 
 namespace EveOPreview.Configuration
 {
@@ -12,7 +13,6 @@ namespace EveOPreview.Configuration
 
 		// Unlimited, named cycle groups (replaces the former fixed CycleGroup1..5 properties).
 		List<CycleGroupConfiguration> CycleGroups { get; set; }
-
 
 		Dictionary<string, Color> PerClientActiveClientHighlightColor { get; set; }
 		Dictionary<string, Color> PerClientPreventPreviewColor { get; set; }
@@ -72,13 +72,12 @@ namespace EveOPreview.Configuration
 
 		bool EnableActiveClientHighlight { get; set; }
 		Color ActiveClientHighlightColor { get; set; }
-		Color AlertColor { get; set; }
+		Color[] AlertColors { get; set; }
 		Color AgressionColor { get; set; }
 		Color PreventPreviewColor { get; set; }
 		int ActiveClientHighlightThickness { get; set; }
 		int AlertThickness { get; set; }
 		DashStyle ActiveClientHighlightDashStyle { get; set; }
-		DashStyle AlertDashStyle { get; set; }
 		int AlertSeconds { get; set; }
 		int AgressionSeconds { get; set; }
 		Color OverlayLabelColor { get; set; }

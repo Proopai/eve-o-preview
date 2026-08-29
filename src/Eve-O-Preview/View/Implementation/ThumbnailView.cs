@@ -540,11 +540,9 @@ namespace EveOPreview.View
 		}
 		public void PipeAlertClient(PipeAlertClient alertClient)
 		{
-			this._overlay.SetAlertClient(alertClient.AlertJumps, alertClient.AlertType, _config.AlertColor, _config.AlertThickness, _config.AlertDashStyle, _config.AlertSeconds);
+			this._overlay.SetAlertClient(alertClient.AlertJumps, alertClient.AlertType, _config.AlertColors[alertClient.AlertType], _config.AlertThickness, _config.AlertSeconds);
 			this._isLocationChanged = true;
-
 		}
-
 
 		#region GUI events
 		protected override CreateParams CreateParams
