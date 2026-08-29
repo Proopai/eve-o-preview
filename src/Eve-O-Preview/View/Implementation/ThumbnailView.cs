@@ -116,7 +116,7 @@ namespace EveOPreview.View
 				this._overlay.SetPropertiesOverlayLabel(_config.OverlayLabelFont, _config.OverlayLabelColor, _config.OverlayLabelOutlineColor, _config.OverlayLabelOutlineSize, _config.OverlayLabelAnchor);
 				SetDefaultBorderColor();
 				SetPreventPreviews();
-				this._overlay.EnableFakePreview(this._preventPreviews.Value, false, 0, SystemColors.Control);
+				this._overlay.EnableFakePreview(this._preventPreviews.Value, false, 0, this._preventPreviewColor.Value);
 				this._overlay.SetCycleGroupIndicator(this.IsExcludedFromCycleGroup , _config.CycleGroupIndicatorAnchor);
 			}
 		}
