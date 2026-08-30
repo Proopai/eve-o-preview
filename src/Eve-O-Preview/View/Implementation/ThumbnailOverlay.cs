@@ -31,6 +31,8 @@ namespace EveOPreview.View
 		private int _showAggressionSeconds = 60;
 		private int _showAggressionX;
 		private int _showAggressionY;
+		private bool _showCycleGroupIndicator = false;
+		private System.Drawing.Point _showCycleGroupIndicatorLocation = new System.Drawing.Point(0, 0);
 		private Color _showBorderColour = Color.White;
 		private Color _showAlertColour = Color.White;
 		private Color _showAggressionColour = Color.White;
@@ -167,66 +169,71 @@ namespace EveOPreview.View
 
 		public void SetCycleGroupIndicator(bool displayCycleGroup, ZoomAnchor anchor)
 		{
+			_showCycleGroupIndicator = displayCycleGroup;
+
 			if (displayCycleGroup)
 			{
-				this.CycleGroupIndicator.Visible = true;
 				int margin = 2;
-				int size = Math.Min(Math.Min(this.Height - margin, this.Width - margin), 40);
+				int size = Math.Min(
+					Math.Min(this.Height - margin, this.Width - margin),
+					40);
 
-				this.CycleGroupIndicator.BackColor = this.OverlayAreaPictureBox.BackColor;
-				this.CycleGroupIndicator.Width = size;
-				this.CycleGroupIndicator.Height = size;
+				int left = this.Width - size - margin;
+				int top = margin;
 
-				this.CycleGroupIndicator.Top = 1;
-				this.CycleGroupIndicator.Left = this.Width - size - 2;
 				switch (anchor)
 				{
 					case ZoomAnchor.NW:
-						this.CycleGroupIndicator.Left = margin;
-						this.CycleGroupIndicator.Top = margin;
+						left = margin;
+						top = margin;
 						break;
+
 					case ZoomAnchor.N:
-						this.CycleGroupIndicator.Left = (this.Width / 2) - (this.CycleGroupIndicator.Width / 2);
-						this.CycleGroupIndicator.Top = margin;
+						left = (this.Width / 2) - (size / 2);
+						top = margin;
 						break;
+
 					case ZoomAnchor.NE:
-						this.CycleGroupIndicator.Left = this.Width - this.CycleGroupIndicator.Width - margin;
-						this.CycleGroupIndicator.Top = margin;
+						left = this.Width - size - margin;
+						top = margin;
 						break;
+
 					case ZoomAnchor.W:
-						this.CycleGroupIndicator.Left = margin;
-						this.CycleGroupIndicator.Top = (this.Height / 2) - (this.CycleGroupIndicator.Height / 2);
+						left = margin;
+						top = (this.Height / 2) - (size / 2);
 						break;
+
 					case ZoomAnchor.C:
-						this.CycleGroupIndicator.Left = (this.Width / 2) - (this.CycleGroupIndicator.Width / 2);
-						this.CycleGroupIndicator.Top = (this.Height / 2) - (this.CycleGroupIndicator.Height / 2);
+						left = (this.Width / 2) - (size / 2);
+						top = (this.Height / 2) - (size / 2);
 						break;
+
 					case ZoomAnchor.E:
-						this.CycleGroupIndicator.Left = this.Width - this.CycleGroupIndicator.Width - margin;
-						this.CycleGroupIndicator.Top = (this.Height / 2) - (this.CycleGroupIndicator.Height / 2);
+						left = this.Width - size - margin;
+						top = (this.Height / 2) - (size / 2);
 						break;
+
 					case ZoomAnchor.SW:
-						this.CycleGroupIndicator.Left = margin;
-						this.CycleGroupIndicator.Top = this.Height - this.CycleGroupIndicator.Height - margin;
+						left = margin;
+						top = this.Height - size - margin;
 						break;
+
 					case ZoomAnchor.S:
-						this.CycleGroupIndicator.Left = (this.Width / 2) - (this.CycleGroupIndicator.Width / 2);
-						this.CycleGroupIndicator.Top = this.Height - this.CycleGroupIndicator.Height - margin;
+						left = (this.Width / 2) - (size / 2);
+						top = this.Height - size - margin;
 						break;
+
 					case ZoomAnchor.SE:
-						this.CycleGroupIndicator.Left = this.Width - this.CycleGroupIndicator.Width - margin;
-						this.CycleGroupIndicator.Top = this.Height - this.CycleGroupIndicator.Height - margin;
+						left = this.Width - size - margin;
+						top = this.Height - size - margin;
 						break;
 				}
 
+				_showCycleGroupIndicatorLocation = new System.Drawing.Point(left, top);
+			}
 
-			}
-			else
-			{
-				this.CycleGroupIndicator.Visible = false;
-			}
+			Invalidate();
 		}
-
 		public void SetPropertiesOverlayLabel(Font font, System.Drawing.Color foregroundColour, System.Drawing.Color outlineColour, int outlineSize, ZoomAnchor anchor)
 		{
 			SetPropertiesLabel(this.OverlayLabel, font, foregroundColour, outlineColour, outlineSize, anchor);
@@ -347,100 +354,34 @@ namespace EveOPreview.View
 			e.Graphics.CompositingQuality = CompositingQuality.HighQuality;
 
 
-			if ( l.ForeColor == l.BorderColor || l.BorderSize == 0 )
+			if (l.ForeColor == l.BorderColor || l.BorderSize == 0)
 			{
 				TextRenderer.DrawText(e.Graphics, l.Text, l.Font, new Rectangle(l.Left, l.Top, l.Width, l.Height), l.ForeColor, flags);
 				return;
 			}
 
-			/*
-
-			float fontSize = e.Graphics.DpiY * l.Font.SizeInPoints / 72;
-			var drawSize = e.Graphics.MeasureString(l.Text, l.Font, new PointF(), StringFormat.GenericTypographic);
-			var drawPath = new GraphicsPath();
-			var drawPen = new Pen(new SolidBrush(l.BorderColor), l.BorderSize);
-			var forecolorBrush = new SolidBrush(l.ForeColor);
-			var point = new System.Drawing.Point();
-
-			int margin = 6;
-
-			if (l.AutoSize)
+			Rectangle bounds = new Rectangle(l.Left, l.Top, l.Width, l.Height);
+			// The text is stamped around the base position in a filled square pattern,
+			// which produces a solid outline of the requested thickness
+			for (int dx = -l.BorderSize; dx <= l.BorderSize; dx++)
 			{
-				point.X = margin;
-				point.Y = margin;
-			}
-			else
-			{
-				// Text is Left-Aligned:
-				if (l.TextAlign == ContentAlignment.TopLeft ||
-					l.TextAlign == ContentAlignment.MiddleLeft ||
-					l.TextAlign == ContentAlignment.BottomLeft)
-					point.X = margin;
-
-				// Text is Center-Aligned
-				else if (l.TextAlign == ContentAlignment.TopCenter ||
-					l.TextAlign == ContentAlignment.MiddleCenter ||
-					l.TextAlign == ContentAlignment.BottomCenter)
-					point.X = (int)(l.Width - drawSize.Width) / 2;
-
-				// Text is Right-Aligned
-				else point.X = (int)( l.Width - (margin + drawSize.Width));
-
-				// Text is Top-Aligned
-				if (l.TextAlign == ContentAlignment.TopLeft ||
-					l.TextAlign == ContentAlignment.TopCenter ||
-					l.TextAlign == ContentAlignment.TopRight)
-					point.Y = margin;
-
-				// Text is Middle-Aligned
-				else if (l.TextAlign == ContentAlignment.MiddleLeft ||
-					l.TextAlign == ContentAlignment.MiddleCenter ||
-					l.TextAlign == ContentAlignment.MiddleRight)
-					point.Y = (int)((l.Height - drawSize.Height) / 2);
-
-				// Text is Bottom-Aligned
-				else point.Y = (int) (l.Height - (margin + drawSize.Height));
-			}
-			point.X += l.Location.X;
-			point.Y += l.Location.Y;
-
-			drawPath.Reset();
-			drawPath.AddString(l.Text, l.Font.FontFamily, (int)l.Font.Style, fontSize,point, StringFormat.GenericTypographic);
-			//drawPath.AddString(l.Text, l.Font.FontFamily, (int)l.Font.Style, fontSize, new Rectangle(l.Left, l.Top, l.Width, l.Height), StringFormat.GenericTypographic);
-
-			// And finally, using our pen, all we have to do now
-			//  is draw our graphics path to the screen. Voila!
-			e.Graphics.FillPath(forecolorBrush, drawPath);
-			e.Graphics.DrawPath(drawPen, drawPath);
-
-			drawPath.Dispose();
-			drawPen.Dispose();
-			forecolorBrush.Dispose();
-
-			*/
-
-
-				Rectangle bounds = new Rectangle(l.Left, l.Top, l.Width, l.Height);
-				// The text is stamped around the base position in a filled square pattern,
-				// which produces a solid outline of the requested thickness
-				for (int dx = - l.BorderSize; dx <= l.BorderSize; dx++)
+				for (int dy = -l.BorderSize; dy <= l.BorderSize; dy++)
 				{
-					for (int dy = -l.BorderSize; dy <= l.BorderSize; dy++)
+					if ((dx == 0) && (dy == 0))
 					{
-						if ((dx == 0) && (dy == 0))
-						{
-							continue;
-						}
-
-						Rectangle outlineBounds = bounds;
-						outlineBounds.Offset(dx, dy);
-						TextRenderer.DrawText(e.Graphics, l.Text, l.Font, outlineBounds, l.BorderColor, flags);
+						continue;
 					}
+
+					Rectangle outlineBounds = bounds;
+					outlineBounds.Offset(dx, dy);
+					TextRenderer.DrawText(e.Graphics, l.Text, l.Font, outlineBounds, l.BorderColor, flags);
 				}
+			}
 
 			TextRenderer.DrawText(e.Graphics, l.Text, l.Font, bounds, l.ForeColor, flags);
 
 		}
+
 		private void ShowFakeBackgroundBoring(PaintEventArgs e)
 		{
 			using (Brush bb = new SolidBrush(_fakeBackground))
@@ -493,7 +434,7 @@ namespace EveOPreview.View
 		{
 			double elapsed = (DateTime.Now - _alertTime).TotalSeconds;
 			double t = Math.Min(elapsed / _showAlertSeconds, 1.0);
-			int insetMore = 2;
+			int insetMore = _showBorderWidth+1;
 
 			// Fade 50% -> 10%
 			int alertAlpha = (int)(255 * (0.5 - (0.4 * t)));
@@ -624,23 +565,85 @@ namespace EveOPreview.View
 			}
 		}
 
+		private void ShowCycleGroupIndicator(PaintEventArgs e)
+		{
+			Graphics g = e.Graphics;
+
+			g.SmoothingMode = SmoothingMode.AntiAlias;
+
+			const int size = 40;
+
+			Rectangle rect = new Rectangle(
+				_showCycleGroupIndicatorLocation.X,
+				_showCycleGroupIndicatorLocation.Y,
+				size,
+				size);
+
+			// Circle glow
+			for (int i = 3; i >= 1; i--)
+			{
+				using (var glowPen = new Pen(
+					Color.FromArgb(i * 15, Color.Red),
+					3 + i))
+				{
+					g.DrawEllipse(glowPen, rect);
+				}
+			}
+
+			// Circle
+			using (var circlePen = new Pen(Color.FromArgb(220, Color.Red), 3))
+			{
+				g.DrawEllipse(circlePen, rect);
+			}
+
+			int pad = size / 4;
+
+			System.Drawing.Point p1 = new System.Drawing.Point(
+				rect.Left + pad,
+				rect.Top + pad);
+
+			System.Drawing.Point p2 = new System.Drawing.Point(
+				rect.Right - pad,
+				rect.Bottom - pad);
+
+			System.Drawing.Point p3 = new System.Drawing.Point(
+				rect.Left + pad,
+				rect.Bottom - pad);
+
+			System.Drawing.Point p4 = new System.Drawing.Point(
+				rect.Right - pad,
+				rect.Top + pad);
+
+			// X glow
+			for (int i = 3; i >= 1; i--)
+			{
+				using (var glowPen = new Pen(Color.FromArgb(i * 15, Color.Red),3 + i))
+				{
+					g.DrawLine(glowPen, p1, p2);
+					g.DrawLine(glowPen, p3, p4);
+				}
+			}
+
+			// X
+			using (var xPen = new Pen(Color.FromArgb(220, Color.Red), 3))
+			{
+				g.DrawLine(xPen, p1, p2);
+				g.DrawLine(xPen, p3, p4);
+			}
+		}
+
 		private void OverlayAreaPictureBox_Paint(object sender, PaintEventArgs e)
 		{
 
 			e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
 			if (this._showFakeBackground) ShowFakeBackground(e);
-
-			if (this._showOverlayText) PaintDrawText(e, OverlayLabel);
-
 			if (SystemNameLabel.Text != string.Empty) PaintDrawText(e, SystemNameLabel);
-
 			if (this._showBorder) ShowBorder(e);
-
 			if (this._showAlert) ShowAlert(e);
-
+			if (this._showCycleGroupIndicator) ShowCycleGroupIndicator(e);
 			if (this._showAggression) ShowAggression(e);
-
+			if (this._showOverlayText) PaintDrawText(e, OverlayLabel);
 		}
 
 		protected override CreateParams CreateParams
