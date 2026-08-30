@@ -319,6 +319,7 @@ namespace EveOPreview.View
 		public void SetHighlight()
 		{
 			SetHighlight(_config.EnableActiveClientHighlight, _config.ActiveClientHighlightThickness, _config.ActiveClientHighlightDashStyle);
+			Invalidate();
 		}
 
 		public void SetHighlight(bool enabled, int width, DashStyle ds)

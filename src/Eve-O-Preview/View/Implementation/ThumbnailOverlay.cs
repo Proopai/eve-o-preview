@@ -103,48 +103,49 @@ namespace EveOPreview.View
 			this._showAggressionColour = alertColor;
 			this._showAggressionSeconds = alertSeconds;
 			this._showAggressionSize = size;
-			int margin = 2;
+			int margin = _showBorderWidth + 5;
+			int halfSize = size / 2;
 
 			switch (anchor)
 			{
 				case ZoomAnchor.NW:
-					this._showAggressionX = margin;
-					this._showAggressionY = margin;
+					this._showAggressionX = margin + halfSize;
+					this._showAggressionY = margin + halfSize;
 					break;
 				case ZoomAnchor.N:
-					this._showAggressionX = (this.Width / 2) - (size / 2);
-					this._showAggressionY = margin;
+					this._showAggressionX = (this.Width / 2) ;
+					this._showAggressionY = margin + halfSize;
 					break;
 				case ZoomAnchor.NE:
-					this._showAggressionX = this.Width - size - margin;
-					this._showAggressionY = margin;
+					this._showAggressionX = this.Width - halfSize - margin;
+					this._showAggressionY = margin + halfSize;
 					break;
 				case ZoomAnchor.W:
-					this._showAggressionX = margin;
-					this._showAggressionY = (this.Height / 2) - (size / 2);
+					this._showAggressionX = margin + halfSize;
+					this._showAggressionY = (this.Height / 2) - halfSize;
 					break;
 				case ZoomAnchor.C:
-					this._showAggressionX = (this.Width / 2) - (size / 2);
-					this._showAggressionY = (this.Height / 2) - (size / 2);
+					this._showAggressionX = (this.Width / 2) - halfSize;
+					this._showAggressionY = (this.Height / 2) - halfSize;
 					break;
 				case ZoomAnchor.E:
-					this._showAggressionX = this.Width - size - margin;
-					this._showAggressionY = (this.Height / 2) - (size / 2);
+					this._showAggressionX = this.Width - halfSize - margin;
+					this._showAggressionY = (this.Height / 2) - halfSize;
 					break;
+
 				case ZoomAnchor.SW:
-					this._showAggressionX = margin;
+					this._showAggressionX = margin + halfSize;
 					this._showAggressionY = this.Height - size - margin;
 					break;
 				case ZoomAnchor.S:
-					this._showAggressionX = (this.Width / 2) - (size / 2);
+					this._showAggressionX = (this.Width / 2) - halfSize;
 					this._showAggressionY = this.Height - size - margin;
 					break;
 				case ZoomAnchor.SE:
-					this._showAggressionX = this.Width - size - margin;
+					this._showAggressionX = this.Width - halfSize - margin;
 					this._showAggressionY = this.Height - size - margin;
 					break;
 			}
-
 		}
 
 		public void SetAlertClient(int jumps, int type, Color alertColor, int alertBorderWidth, int alertSeconds)
@@ -173,10 +174,8 @@ namespace EveOPreview.View
 
 			if (displayCycleGroup)
 			{
-				int margin = 2;
-				int size = Math.Min(
-					Math.Min(this.Height - margin, this.Width - margin),
-					40);
+				int margin = _showBorderWidth + 4;
+				int size = Math.Min(Math.Min(this.Height - margin, this.Width - margin),40);
 
 				int left = this.Width - size - margin;
 				int top = margin;

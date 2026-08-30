@@ -163,7 +163,7 @@ namespace EveOPreview.Configuration.Implementation
 			this.PreventPreviewColor = Color.Purple;
             this.ActiveClientHighlightThickness = 4;
 
-			this.AlertThickness = 1;
+			this.AlertThickness = 2;
 
 			this.AlertSeconds = 20;
 

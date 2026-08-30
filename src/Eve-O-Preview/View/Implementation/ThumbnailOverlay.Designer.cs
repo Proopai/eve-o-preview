@@ -30,13 +30,10 @@ namespace EveOPreview.View
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ThumbnailOverlay));
 			OverlayAreaPictureBox = new System.Windows.Forms.PictureBox();
 			OverlayLabel = new BorderLabel();
 			SystemNameLabel = new BorderLabel();
-			CycleGroupIndicator = new System.Windows.Forms.PictureBox();
 			((System.ComponentModel.ISupportInitialize)OverlayAreaPictureBox).BeginInit();
-			((System.ComponentModel.ISupportInitialize)CycleGroupIndicator).BeginInit();
 			SuspendLayout();
 			// 
 			// OverlayAreaPictureBox
@@ -60,11 +57,13 @@ namespace EveOPreview.View
 			// 
 			OverlayLabel.AutoSize = true;
 			OverlayLabel.BackColor = System.Drawing.Color.FromArgb(0, 0, 1);
+			OverlayLabel.BorderColor = System.Drawing.SystemColors.ControlText;
+			OverlayLabel.BorderSize = 1;
 			OverlayLabel.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
 			OverlayLabel.ForeColor = System.Drawing.Color.DarkGray;
 			OverlayLabel.Location = new System.Drawing.Point(8, 8);
 			OverlayLabel.Name = "OverlayLabel";
-			OverlayLabel.Size = new System.Drawing.Size(25, 13);
+			OverlayLabel.Size = new System.Drawing.Size(36, 20);
 			OverlayLabel.TabIndex = 1;
 			OverlayLabel.Text = "...";
 			OverlayLabel.Visible = false;
@@ -78,36 +77,20 @@ namespace EveOPreview.View
 			// 
 			SystemNameLabel.AutoSize = true;
 			SystemNameLabel.BackColor = System.Drawing.Color.FromArgb(0, 0, 1);
+			SystemNameLabel.BorderColor = System.Drawing.SystemColors.ControlText;
+			SystemNameLabel.BorderSize = 1;
 			SystemNameLabel.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
 			SystemNameLabel.ForeColor = System.Drawing.Color.DarkGray;
 			SystemNameLabel.Location = new System.Drawing.Point(8, 8);
 			SystemNameLabel.Name = "SystemNameLabel";
-			SystemNameLabel.Size = new System.Drawing.Size(25, 13);
+			SystemNameLabel.Size = new System.Drawing.Size(0, 20);
 			SystemNameLabel.TabIndex = 1;
-			SystemNameLabel.Text = "";
 			SystemNameLabel.Visible = false;
 			SystemNameLabel.MouseDown += OverlayArea_MouseDown;
 			SystemNameLabel.MouseEnter += OverlayArea_MouseEnter;
 			SystemNameLabel.MouseLeave += OverlayArea_MouseLeave;
 			SystemNameLabel.MouseMove += OverlayArea_MouseMove;
 			SystemNameLabel.MouseUp += OverlayArea_MouseUp;
-			// 
-			// CycleGroupIndicator
-			// 
-			CycleGroupIndicator.BackColor = System.Drawing.Color.Transparent;
-			CycleGroupIndicator.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-			CycleGroupIndicator.Image = (System.Drawing.Image)resources.GetObject("CycleGroupIndicator.Image");
-			CycleGroupIndicator.Location = new System.Drawing.Point(354, 12);
-			CycleGroupIndicator.Name = "CycleGroupIndicator";
-			CycleGroupIndicator.Size = new System.Drawing.Size(72, 78);
-			CycleGroupIndicator.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			CycleGroupIndicator.TabIndex = 3;
-			CycleGroupIndicator.TabStop = false;
-			CycleGroupIndicator.MouseDown += OverlayArea_MouseDown;
-			CycleGroupIndicator.MouseEnter += OverlayArea_MouseEnter;
-			CycleGroupIndicator.MouseLeave += OverlayArea_MouseLeave;
-			CycleGroupIndicator.MouseMove += OverlayArea_MouseMove;
-			CycleGroupIndicator.MouseUp += OverlayArea_MouseUp;
 			// 
 			// ThumbnailOverlay
 			// 
@@ -117,7 +100,6 @@ namespace EveOPreview.View
 			ControlBox = false;
 			Controls.Add(OverlayLabel);
 			Controls.Add(SystemNameLabel);
-			Controls.Add(CycleGroupIndicator);
 			Controls.Add(OverlayAreaPictureBox);
 			FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
 			MaximizeBox = false;
@@ -129,7 +111,6 @@ namespace EveOPreview.View
 			Text = "PreviewOverlay";
 			TransparencyKey = System.Drawing.Color.FromArgb(0, 0, 1);
 			((System.ComponentModel.ISupportInitialize)OverlayAreaPictureBox).EndInit();
-			((System.ComponentModel.ISupportInitialize)CycleGroupIndicator).EndInit();
 			ResumeLayout(false);
 			PerformLayout();
 
@@ -140,6 +121,5 @@ namespace EveOPreview.View
 		private BorderLabel OverlayLabel;
 		private BorderLabel SystemNameLabel;
 		private System.Windows.Forms.PictureBox OverlayAreaPictureBox;
-		private System.Windows.Forms.PictureBox CycleGroupIndicator;
 	}
 }
