@@ -1626,10 +1626,27 @@ namespace EveOPreview.View
 		{
 			TabPage page = (TabPage)sender;
 
-			using (Pen pen = new Pen(SystemColors.ControlDark))
-			{
-				e.Graphics.DrawLine(pen, 0, 0, 0, page.Height);
-			}
+			bool dark = this._darkModeCheckBox?.Checked == true;
+
+			Color borderColor = dark
+				? Color.FromArgb(70, 70, 74)
+				: Color.FromArgb(220, 220, 220);
+
+			Color background = dark
+				? Color.FromArgb(45, 45, 48)
+				: Color.White;
+
+			Rectangle rect = new Rectangle(
+				0,
+				0,
+				page.Width - 1,
+				page.Height - 1);
+
+			using (SolidBrush brush = new SolidBrush(background))
+				e.Graphics.FillRectangle(brush, rect);
+
+			using (Pen pen = new Pen(borderColor))
+				e.Graphics.DrawRectangle(pen, rect);
 		}
 
 		private void InitFormSize()
