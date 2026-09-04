@@ -1199,6 +1199,7 @@ namespace EveOPreview.Services
 			}
 
 			view.Title = clientTitle;
+			view.SetHighlight(true); // force set of colour
 		}
 		public void ApplyAllCoreAffinities()
 		{

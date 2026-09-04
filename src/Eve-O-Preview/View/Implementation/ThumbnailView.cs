@@ -1,13 +1,14 @@
+using EveOPreview.Configuration;
+using EveOPreview.NamedPipe.Messages;
+using EveOPreview.Services;
+using EveOPreview.UI.Hotkeys;
 using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Net;
 using System.Windows.Forms;
-using EveOPreview.Configuration;
-using EveOPreview.NamedPipe.Messages;
-using EveOPreview.Services;
-using EveOPreview.UI.Hotkeys;
 
 namespace EveOPreview.View
 {
@@ -316,19 +317,19 @@ namespace EveOPreview.View
 			this._isTopMost = enableTopmost;
 		}
 
-		public void SetHighlight()
+		public void SetHighlight(bool forceSet=false)
 		{
-			SetHighlight(_config.EnableActiveClientHighlight, _config.ActiveClientHighlightThickness, _config.ActiveClientHighlightDashStyle);
+			SetHighlight(_config.EnableActiveClientHighlight, _config.ActiveClientHighlightThickness, _config.ActiveClientHighlightDashStyle, forceSet);
 			Invalidate();
 		}
 
-		public void SetHighlight(bool enabled, int width, DashStyle ds)
+		public void SetHighlight(bool enabled, int width, DashStyle ds, bool forceSet = false)
 		{
-			if (this._isHighlightRequested == enabled)
+
+			if (this._isHighlightRequested == enabled && !forceSet )
 			{
 				return;
 			}
-
 			if (enabled)
 			{
 				this._isHighlightRequested = true;
