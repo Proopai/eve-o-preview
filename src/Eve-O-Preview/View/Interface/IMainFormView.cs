@@ -22,8 +22,9 @@ namespace EveOPreview.View
 		bool MinimizeInactiveClients { get; set; }
 		ViewCaptionBarStyle CaptionOnClientsStyle { get; set; }
 		ViewAnimationStyle WindowsAnimationStyle { get; set; }
-        bool ShowThumbnailsAlwaysOnTop { get; set; }
-        bool PreventPreviews { get; set; }
+		bool ShowThumbnailsAlwaysOnTop { get; set; }
+		bool UseLazyMinimize { get; set; }
+		bool PreventPreviews { get; set; }
         bool HideThumbnailsOnLostFocus { get; set; }
         bool EnablePerClientThumbnailLayouts { get; set; }
 

@@ -130,6 +130,8 @@ namespace EveOPreview.Configuration.Implementation
 			this.ShowThumbnailsAlwaysOnTop = true;
 			this.EnablePerClientThumbnailLayouts = false;
 
+            this.UseLazyMinimize = true;
+
 			this.HideThumbnailsOnLostFocus = false;
 			this.PreventPreviews = false;
 			this.DefaultCoreAffinity = "11001100";
@@ -320,8 +322,9 @@ namespace EveOPreview.Configuration.Implementation
 		public CaptionBarStyle CaptionOnClientsStyle { get; set; }
 		public AnimationStyle WindowsAnimationStyle { get; set; }
 		public bool ShowThumbnailsAlwaysOnTop { get; set; }
+		public bool UseLazyMinimize { get; set; }
 
-        public bool EnablePerClientThumbnailLayouts
+		public bool EnablePerClientThumbnailLayouts
         {
             get => this._enablePerClientThumbnailLayouts;
             set

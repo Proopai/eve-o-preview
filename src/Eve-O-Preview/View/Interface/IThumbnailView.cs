@@ -57,5 +57,7 @@ namespace EveOPreview.View
 		IWindowManager WindowManager { get; }
 		void SetDefaultBorderColor();
 		void ClearBorder();
+		void SetToMinimize(bool value=false);
+		bool IsMinimizeIfRequired();
 	}
 }

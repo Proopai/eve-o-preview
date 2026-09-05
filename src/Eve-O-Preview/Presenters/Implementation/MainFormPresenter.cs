@@ -157,6 +157,7 @@ namespace EveOPreview.Presenters
 			this.View.CaptionOnClientsStyle = ViewCaptionBarStyleConverter.Convert(this._configuration.CaptionOnClientsStyle);
 			this.View.WindowsAnimationStyle = ViewAnimationStyleConverter.Convert(this._configuration.WindowsAnimationStyle);
 			this.View.ShowThumbnailsAlwaysOnTop = this._configuration.ShowThumbnailsAlwaysOnTop;
+            this.View.UseLazyMinimize = this._configuration.UseLazyMinimize;
 			this.View.PreventPreviews = this._configuration.PreventPreviews;
 			this.View.HideThumbnailsOnLostFocus = this._configuration.HideThumbnailsOnLostFocus;
 			this.View.EnablePerClientThumbnailLayouts = this._configuration.EnablePerClientThumbnailLayouts;
@@ -211,6 +212,7 @@ namespace EveOPreview.Presenters
 			await this._mediator.Publish(new ThumbnailFrameSettingsUpdated());
 
 			this._configuration.ShowThumbnailsAlwaysOnTop = this.View.ShowThumbnailsAlwaysOnTop;
+            this._configuration.UseLazyMinimize = this.View.UseLazyMinimize;
 
             if (this._configuration.PreventPreviews != this.View.PreventPreviews)
             {

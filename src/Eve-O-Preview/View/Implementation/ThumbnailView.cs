@@ -30,6 +30,8 @@ namespace EveOPreview.View
 		private bool _isHighlightRequested;
 		private int _highlightWidth;
 
+		private bool _minimizeView = false;
+
 		private bool _isLocationChanged;
 		private bool _isSizeChanged;
 
@@ -94,7 +96,6 @@ namespace EveOPreview.View
 		}
 
 		public IWindowManager WindowManager { get; }
-
 		public IntPtr Id { get; set; }
 		public int ProcessId { get; set; }
 
@@ -545,6 +546,17 @@ namespace EveOPreview.View
 			this._overlay.SetAlertClient(alertClient.AlertJumps, alertClient.AlertType, _config.AlertColors[alertClient.AlertType], _config.AlertThickness, _config.AlertSeconds);
 			this._isLocationChanged = true;
 		}
+
+		public void SetToMinimize(bool value = false)
+		{
+			this._minimizeView = value;
+		}
+
+		public bool IsMinimizeIfRequired()
+		{
+			return this._minimizeView;
+		}
+
 
 		#region GUI events
 		protected override CreateParams CreateParams

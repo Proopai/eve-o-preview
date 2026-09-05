@@ -17,6 +17,7 @@ using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Forms;
@@ -65,6 +66,7 @@ namespace EveOPreview.Services
         // Hot-reload support (issue #94)
         private readonly IConfigurationStorage _configurationStorage;
         private readonly Dispatcher _dispatcher;
+
 		private readonly PipeServer _pipeServer;
 		#endregion
 
@@ -196,7 +198,7 @@ namespace EveOPreview.Services
 					foregroundWindowTitle = foregroundView.Title;
 				}
 
-				/*
+                /*
 
 								foreach (KeyValuePair<IntPtr, IThumbnailView> entry in this._thumbnailViews)
 								{
@@ -226,23 +228,24 @@ namespace EveOPreview.Services
 
 				*/
 
-				foreach (KeyValuePair<IntPtr, IThumbnailView> entry in this._thumbnailViews)
+                var views = this._thumbnailViews.Where(o => o.Value.Id != foregroundWindowHandle && !_configuration.IsPriorityClient(o.Value.Title) && _windowManager.IsWindowMinimized(o.Value.Id));
+				foreach (var entry in views)
 				{
 					IThumbnailView view = entry.Value;
 					if (view.Id != foregroundWindowHandle && !view.IsPreventPreviews() && !this._configuration.IsPriorityClient(view.Title) && this._windowManager.IsWindowMinimized(view.Id))
 					{
-						this._windowManager.TickleWindow(view.Id, this._configuration.WindowsAnimationStyle);
+						this._windowManager.ShowWindowNoActivate(view.Id);
 					}
 				}
-
-/*
-#if LINUX
-								this._windowManager.ActivateWindow(foregroundWindowHandle, foregroundWindowTitle, true);
-#else
-				this._windowManager.ActivateWindow(foregroundWindowHandle, this._configuration.WindowsAnimationStyle, true);
-#endif
-*/
-
+				Thread.Sleep(35);
+				foreach (var entry in views)
+				{
+					IThumbnailView view = entry.Value;
+					if (view.Id != foregroundWindowHandle && !view.IsPreventPreviews() && !this._configuration.IsPriorityClient(view.Title) && this._windowManager.IsWindowMinimized(view.Id))
+					{
+						this._windowManager.MinimizeWindowNoActivate(view.Id);
+					}
+				}
 			}
 
 		}
@@ -493,9 +496,24 @@ namespace EveOPreview.Services
         {
             this.UpdateThumbnailsList();
             this.RefreshThumbnails();
+            if (_configuration.UseLazyMinimize) this.MinimizeRequiredClients();
         }
 
-        private async void UpdateThumbnailsList()
+        private void MinimizeRequiredClients()
+        {
+			IntPtr foregroundWindowHandle = this._windowManager.GetForegroundWindowHandle();
+			var views = this._thumbnailViews.Where(o => o.Value.Id != foregroundWindowHandle && !_configuration.IsPriorityClient(o.Value.Title) );
+			foreach (var entry in views)
+			{
+				IThumbnailView view = entry.Value;
+                if (view == null) continue;
+                if (!view.IsMinimizeIfRequired()) continue;
+				this._windowManager.MinimizeWindowNoActivate(view.Id);
+                view.SetToMinimize(false);
+			}
+		}
+
+private async void UpdateThumbnailsList()
         {
             this._processMonitor.GetUpdatedProcesses(out ICollection<IProcessInfo> addedProcesses, out ICollection<IProcessInfo> updatedProcesses, out ICollection<IProcessInfo> removedProcesses);
 
@@ -693,7 +711,6 @@ namespace EveOPreview.Services
                 // update ZoomAnchor regardless
                 view.ClientZoomAnchor = this._configuration.GetZoomAnchor(view.Title, this._configuration.ThumbnailZoomAnchor);
 
-
                 if (hideAllThumbnails || this._configuration.IsThumbnailDisabled(view.Title))
                 {
                     if (view.IsActive)
@@ -750,6 +767,7 @@ namespace EveOPreview.Services
                 {
 					view.Refresh(forceRefresh);
 				}
+
 			}
 
             this.EnableViewEvents();
@@ -829,16 +847,22 @@ namespace EveOPreview.Services
 			this._windowManager.ActivateWindow(foregroundClientHandle, this._configuration.WindowsAnimationStyle, true);
 #endif
 
-			// Minimize the currently active client if needed
-			if (this._configuration.MinimizeInactiveClients && !this._configuration.IsPriorityClient(this._activeClient.Title))
-			{
-				System.Diagnostics.Debug.WriteLine($"Calling MinimizeWindow {this._activeClient.Title}");
-
+            // Minimize the currently active client if needed
+            if (this._configuration.MinimizeInactiveClients && !this._configuration.IsPriorityClient(this._activeClient.Title))
+            {
+                // System.Diagnostics.Debug.WriteLine($"Calling MinimizeWindow {this._activeClient.Title}");
+                //					this._windowManager.MinimizeWindow(this._activeClient.Handle, this._configuration.WindowsAnimationStyle, false);
+                var view = GetClientByPointer(this._activeClient.Handle);
+                if (_configuration.UseLazyMinimize)
+                {
+                    view?.SetToMinimize(true);
+                } else
+                {
 					System.Threading.Thread.Sleep(20);
 					this._windowManager.MinimizeWindow(this._activeClient.Handle, this._configuration.WindowsAnimationStyle, false);
+				}
 			}
-
-            this._activeClient = (foregroundClientHandle, foregroundClientTitle);
+			this._activeClient = (foregroundClientHandle, foregroundClientTitle);
         }
 
         private void ThumbnailViewFocused(IntPtr id)

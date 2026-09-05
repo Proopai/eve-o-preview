@@ -3,6 +3,7 @@ using EveOPreview.Services.Interop;
 using System;
 using System.Drawing;
 using System.IO;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Input;
@@ -200,40 +201,11 @@ namespace EveOPreview.Services.Implementation
 
 #endif
 
-		public void TickleWindow(IntPtr handle, AnimationStyle animation)
+		public void ShowWindowNoActivate(IntPtr handle)
 		{
 			if (User32NativeMethods.IsIconic(handle))
 			{
-/*
-				WINDOWPLACEMENT wp = new WINDOWPLACEMENT();
-				wp.length = Marshal.SizeOf(typeof(WINDOWPLACEMENT));
-				User32NativeMethods.GetWindowPlacement(handle, ref wp);
-				var originalwp = wp;
-				var width = wp.rcNormalPosition.Right - wp.rcNormalPosition.Left;
-				var height = wp.rcNormalPosition.Bottom - wp.rcNormalPosition.Top;
-
-				wp.rcNormalPosition.Left = -32000;
-				wp.rcNormalPosition.Top = -32000;
-				wp.rcNormalPosition.Right = -32000 + width;
-				wp.rcNormalPosition.Bottom = -32000 + height;
-
-				User32NativeMethods.SetWindowPlacement(handle, ref wp);
-				User32NativeMethods.SetWindowPos(
-					handle,
-					IntPtr.Zero,
-					-32000,
-					-32000,
-					0,
-					0,
-					User32NativeMethods.SWP_NOSIZE |
-					User32NativeMethods.SWP_NOZORDER |
-					User32NativeMethods.SWP_NOACTIVATE);
-*/
 				User32NativeMethods.ShowWindowAsync(handle,User32NativeMethods.SW_SHOWNOACTIVATE);
-				Thread.Sleep(30);
-//				User32NativeMethods.SetWindowPlacement(handle, ref wp);
-				User32NativeMethods.ShowWindowAsync(handle,User32NativeMethods.SW_SHOWMINNOACTIVE);
-//				User32NativeMethods.SetWindowPlacement(handle, ref originalwp);
 			}
 		}
 
@@ -301,6 +273,17 @@ namespace EveOPreview.Services.Implementation
 			}
 		}
 #endif
+
+		public void MinimizeWindowNoActivate(IntPtr handle)
+		{
+#if WINDOWS
+			TurnOffAnimation();
+			User32NativeMethods.ShowWindowAsync(handle, User32NativeMethods.SW_SHOWMINNOACTIVE);
+			RestoreAnimation();
+#else
+			User32NativeMethods.ShowWindowAsync(handle, User32NativeMethods.SW_SHOWMINNOACTIVE);
+#endif
+		}
 
 		public void MoveWindow(IntPtr handle, int left, int top, int width, int height)
 		{

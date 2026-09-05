@@ -184,12 +184,17 @@ namespace EveOPreview.View
 			set => this.AnimationStyleCombo.SelectedIndex = (int)value;
 		}
 
-        public bool ShowThumbnailsAlwaysOnTop
-        {
-            get => this.ShowThumbnailsAlwaysOnTopCheckBox.Checked;
-            set => this.ShowThumbnailsAlwaysOnTopCheckBox.Checked = value;
-        }
-        public bool PreventPreviews
+		public bool ShowThumbnailsAlwaysOnTop
+		{
+			get => this.ShowThumbnailsAlwaysOnTopCheckBox.Checked;
+			set => this.ShowThumbnailsAlwaysOnTopCheckBox.Checked = value;
+		}
+		public bool UseLazyMinimize
+		{
+			get => this.UseLazyMinimizeCheckBox.Checked;
+			set => this.UseLazyMinimizeCheckBox.Checked = value;
+		}
+		public bool PreventPreviews
         {
             get => this.PreventPreviewsCheckBox.Checked;
             set => this.PreventPreviewsCheckBox.Checked = value;

@@ -29,7 +29,7 @@ namespace EveOPreview.Configuration
         int ThumbnailRefreshPeriod { get; set; }
         int ThumbnailResizeTimeoutPeriod { get; set; }
         bool EnableWineCompatibilityMode { get; set; }
-
+		bool UseLazyMinimize { get; set; }
         double ThumbnailOpacity { get; set; }
 
 		bool EnableClientLayoutTracking { get; set; }
