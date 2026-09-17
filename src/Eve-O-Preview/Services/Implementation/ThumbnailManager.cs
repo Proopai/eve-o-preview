@@ -171,8 +171,6 @@ namespace EveOPreview.Services
 			// refresh then minimize all clients if not priority clients and it minimize all setting set
 			if (this._configuration.MinimizeInactiveClients)
 			{
-
-
 				IntPtr foregroundWindowHandle = this._windowManager.GetForegroundWindowHandle();
 
 				// The foreground window can be NULL in certain circumstances, such as when a window is losing activation.
@@ -198,52 +196,22 @@ namespace EveOPreview.Services
 					foregroundWindowTitle = foregroundView.Title;
 				}
 
-                /*
-
-								foreach (KeyValuePair<IntPtr, IThumbnailView> entry in this._thumbnailViews)
-								{
-									IThumbnailView view = entry.Value;
-									if (view.Id != foregroundWindowHandle && !view.IsPreventPreviews() && !this._configuration.IsPriorityClient(view.Title) && this._windowManager.IsWindowMinimized(view.Id))
-									{
-				#if LINUX
-								this._windowManager.ActivateWindow(view.Id, view.Title, false);
-								this._windowManager.ActivateWindow(foregroundWindowHandle, foregroundWindowTitle, false);
-				#else
-										this._windowManager.ActivateWindow(view.Id, this._configuration.WindowsAnimationStyle, false);
-										this._windowManager.ActivateWindow(foregroundWindowHandle, this._configuration.WindowsAnimationStyle, true);
-				#endif
-									}
-								}
-
-								foreach (KeyValuePair<IntPtr, IThumbnailView> entry in this._thumbnailViews)
-								{
-									IThumbnailView view = entry.Value;
-									// Minimize the currently active client if needed
-									if (!this._configuration.IsPriorityClient(view.Title))
-									{
-										System.Diagnostics.Debug.WriteLine($"Calling MinimizeWindow {view.Title}");
-										this._windowManager.MinimizeWindow(view.Id, this._configuration.WindowsAnimationStyle, false);
-									}
-								}
-
-				*/
-
-                var views = this._thumbnailViews.Where(o => o.Value.Id != foregroundWindowHandle && !_configuration.IsPriorityClient(o.Value.Title) && _windowManager.IsWindowMinimized(o.Value.Id));
+                var views = this._thumbnailViews.Where(o => o.Value.Id != foregroundWindowHandle && !_configuration.IsPriorityClient(o.Value.Title) && _windowManager.IsWindowMinimized(o.Value.Id)).ToList();
 				foreach (var entry in views)
 				{
 					IThumbnailView view = entry.Value;
-					if (view.Id != foregroundWindowHandle && !view.IsPreventPreviews() && !this._configuration.IsPriorityClient(view.Title) && this._windowManager.IsWindowMinimized(view.Id))
+					if (view.Id != foregroundWindowHandle && !view.IsPreventPreviews() )
 					{
 						this._windowManager.ShowWindowNoActivate(view.Id);
 					}
 				}
-				Thread.Sleep(35);
+				//Thread.Sleep(35);
 				foreach (var entry in views)
 				{
 					IThumbnailView view = entry.Value;
-					if (view.Id != foregroundWindowHandle && !view.IsPreventPreviews() && !this._configuration.IsPriorityClient(view.Title) && this._windowManager.IsWindowMinimized(view.Id))
+					if (view.Id != foregroundWindowHandle && !view.IsPreventPreviews())
 					{
-						this._windowManager.MinimizeWindowNoActivate(view.Id);
+                        view.SetToMinimize(true);
 					}
 				}
 			}

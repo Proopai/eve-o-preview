@@ -163,6 +163,20 @@ Some of the application options are not exposed in the GUI. They can be adjusted
 | **ThumbnailResizeTimeoutPeriod** | <div style="font-size: small">Thumbnail Resize Timeout period in milliseconds. This option accepts values between **200** and **5000** only.<br />The default value is **500** milliseconds.<br />For example: **"ThumbnailResizeTimeoutPeriod": 500**. If you are having the preview windows resize incorrectly on startup increase this value.</div> |
 | **ExecutablesToPreview** | <div style="font-size: small">List of executables to display preview windows for. List of strings.<br />The default value is **"exefile"**.<br />For example: **"ExecutablesToPreview": ["exefile","wow","Diablo IV"]**. If you are having the preview windows resize incorrectly on startup increase this value.</div> |
 | **IconName** | <div style="font-size: small">The icon you wish to use for Eve-O-Preview.<br />The default value is **""** which would equate to **IconOriginal**.<br />If an invalid or empty value is used, **IconOriginal** will be used.<br />Valid values are : **IconOriginal**, **IconDefault**, **IconAmber**, **IconBlue**, **IconCherry**, **IconDal**, **IconDark**, **IconMint**, **IconPurple** and **IconUrns**</div> |
+| **DarkMode** | Enable dark mode for the main application window. The default value is **false**. For example: **"DarkMode": true** |
+| **UseLazyMinimize** | Delays some minimize operations to reduce client focus issues during rapid window switching. The default value is **true**. For example: **"UseLazyMinimize": true** |
+| **SystemNameLabelAnchor** | Position of the system-name overlay label. Valid values are **0-8**: 0-NW, 1-North, 2-NE, 3-West, 4-Center, 5-East, 6-SW, 7-South, 8-SE. The default value is **2** (NE). For example: **"SystemNameLabelAnchor": 2**|
+| **SystemNameLabelColor** |Font colour of the system-name overlay label.The default value is **Orange**.For example: **"SystemNameLabelColor": "Orange"**|
+| **SystemNameLabelOutlineColor** |Outline colour of the system-name overlay label. The default value is **Black**. For example: **"SystemNameLabelOutlineColor": "Black"** |
+| **SystemNameLabelOutlineSize** |Outline size of the system-name overlay label. Valid values are **0-10**. The default value is **1**. For example: **"SystemNameLabelOutlineSize": 1**|
+| **CycleGroupIndicatorAnchor** |Position of the cycle-group indicator overlay. Valid values are **0-8**: 0-NW, 1-North, 2-NE, 3-West, 4-Center, 5-East, 6-SW, 7-South, 8-SE. The default value is **0** (NW). For example: **"CycleGroupIndicatorAnchor": 0**|
+| **AlertThickness** |Thickness of the alert border displayed when receiving alert notifications. The default value is **2**. For example: **"AlertThickness": 2**|
+| **AlertSeconds** |Number of seconds an alert indication remains visible. The default value is **20**. For example: **"AlertSeconds": 20**|
+| **AlertColors** |Colour mapping used for alert notifications. Default values include: - Intel = Gold - Kill = Red - Decloak = DeepSkyBlue - Faction = MediumOrchid - MiningOver = LimeGreen|
+| **AgressionColor** |Colour used for aggression indicators. The default value is **Red**. For example: **"AgressionColor": "Red"** | 
+| **AgressionSeconds** |Number of seconds an aggression indicator remains visible. The default value is **60**. For example: **"AgressionSeconds": 60**|
+| **AgressionAnchor** |Position of the aggression indicator. Valid values are **0-8**: 0-NW, 1-North, 2-NE, 3-West, 4-Center, 5-East, 6-SW, 7-South, 8-SE. The default value is **5** (East). For example: **"AgressionAnchor": 5**|
+| **AgressionSize** |Size of the aggression indicator in pixels. The default value is **20**. For example: **"AgressionSize": 20**|
 
 <div style="page-break-after: always;"></div>
 
