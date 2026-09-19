@@ -57,6 +57,8 @@ namespace EveOPreview.Services
 
         private bool _ignoreViewEvents;
         private bool _isHoverEffectActive;
+		private bool _hideAllPreviews = false;
+		private bool _ignoreHotkeys = false;
 
 		private int _refreshCycleCount;
 		private int _hideThumbnailsDelay;
@@ -104,6 +106,8 @@ namespace EveOPreview.Services
 
 			RegisterMinimizeAllClientsHotkey(this._configuration.MinimizeAllClientsHotkeys?.Select(x => this._configuration.StringToKey(x)));
 			RegisterRefreshMinimizedClientsHotkey(this._configuration.RefreshMinimizedClientsHotkeys?.Select(x => this._configuration.StringToKey(x)));
+			RegisterToggleHideAllPreviewsHotkey(this._configuration.ToggleHideAllPreviewsHotkeys?.Select(x => this._configuration.StringToKey(x)));
+			RegisterToggleHotkeysHotkey(this._configuration.ToggleHotkeysHotkeys?.Select(x => this._configuration.StringToKey(x)));
 
 			this.RegisterConfiguredCycleHotkeys();
 			this._pipeServer = new PipeServer();
@@ -165,6 +169,17 @@ namespace EveOPreview.Services
 			{
 				this._windowManager.MinimizeWindow(x.Value.Id, this._configuration.WindowsAnimationStyle, false);
 			}
+		}
+		public void ToggleHideAllPreviews()
+		{
+			_hideAllPreviews = !_hideAllPreviews;
+			_refreshCycleCount = ThumbnailManager.FORCED_REFRESH_CYCLE_THRESHOLD + 1;
+			RefreshThumbnails();
+		}
+		public void ToggleHotkeys()
+		{
+			_ignoreHotkeys= !_ignoreHotkeys;
+            RefreshHotkeys();
 		}
 		public void RefreshMinimizedClients()
 		{
@@ -408,47 +423,94 @@ namespace EveOPreview.Services
 				this._cycleClientHotkeyHandlers.Add(newHandler);
 			}
 		}
-		
-        // Hot-reload reaction (issue #94). Fires on a background thread, so marshal to the UI
+		public void RegisterToggleHideAllPreviewsHotkey(IEnumerable<Keys> keys)
+		{
+			foreach (var hotkey in keys)
+			{
+				if (hotkey == Keys.None)
+				{
+					return;
+				}
+
+				var newHandler = new HotkeyHandler(default(IntPtr), hotkey);
+				newHandler.Pressed += (object s, HandledEventArgs e) =>
+				{
+					this.ToggleHideAllPreviews();
+					e.Handled = true;
+				};
+
+				newHandler.Register();
+				this._cycleClientHotkeyHandlers.Add(newHandler);
+			}
+		}
+		public void RegisterToggleHotkeysHotkey(IEnumerable<Keys> keys)
+		{
+			foreach (var hotkey in keys)
+			{
+				if (hotkey == Keys.None)
+				{
+					return;
+				}
+
+				var newHandler = new HotkeyHandler(default(IntPtr), hotkey);
+				newHandler.Pressed += (object s, HandledEventArgs e) =>
+				{
+					this.ToggleHotkeys();
+					e.Handled = true;
+				};
+
+				newHandler.Register();
+				this._cycleClientHotkeyHandlers.Add(newHandler);
+			}
+		}
+
+		// Hot-reload reaction (issue #94). Fires on a background thread, so marshal to the UI
 		// thread before touching the WinForms message pump used by hotkey (un)registration.
 		private void OnConfigurationReloaded()
         {
             this._dispatcher.BeginInvoke(new Action(this.RefreshHotkeys));
         }
 
-        // Re-applies all hotkeys from the current (possibly reloaded) configuration.
-        public void RefreshHotkeys()
-        {
-            // Tear down existing cycle / minimize-all hotkeys.
-            foreach (HotkeyHandler handler in this._cycleClientHotkeyHandlers)
-            {
-                try
-                {
-                    handler.Unregister();
-                    handler.Dispose();
-                } catch { }
-            }
-            this._cycleClientHotkeyHandlers.Clear();
-
-            // Re-register cycle / minimize-all hotkeys.
-            this.RegisterConfiguredCycleHotkeys();
-
-			RegisterMinimizeAllClientsHotkey(this._configuration.MinimizeAllClientsHotkeys?.Select(x => this._configuration.StringToKey(x)));
-			RegisterRefreshMinimizedClientsHotkey(this._configuration.RefreshMinimizedClientsHotkeys?.Select(x => this._configuration.StringToKey(x)));
-
-			// Re-apply per-client hotkeys to existing thumbnails.
-			foreach (IThumbnailView view in this._thumbnailViews.Values)
-            {
-                try
-                {
-                    view.UnregisterHotkey();
+		// Re-applies all hotkeys from the current (possibly reloaded) configuration.
+		public void RefreshHotkeys()
+		{
+			// Tear down existing cycle / minimize-all hotkeys.
+			foreach (HotkeyHandler handler in this._cycleClientHotkeyHandlers)
+			{
+				try
+				{
+					handler.Unregister();
+					handler.Dispose();
 				}
 				catch { }
-				view.RegisterHotkey(this._configuration.GetClientHotkey(view.Title));
-            }
-        }
+			}
+			this._cycleClientHotkeyHandlers.Clear();
 
-        public void Start()
+			RegisterToggleHotkeysHotkey(this._configuration.ToggleHotkeysHotkeys?.Select(x => this._configuration.StringToKey(x)));
+
+			if (!_ignoreHotkeys)
+			{
+				// Re-register cycle / minimize-all hotkeys.
+				this.RegisterConfiguredCycleHotkeys();
+
+				RegisterMinimizeAllClientsHotkey(this._configuration.MinimizeAllClientsHotkeys?.Select(x => this._configuration.StringToKey(x)));
+				RegisterRefreshMinimizedClientsHotkey(this._configuration.RefreshMinimizedClientsHotkeys?.Select(x => this._configuration.StringToKey(x)));
+				RegisterToggleHideAllPreviewsHotkey(this._configuration.ToggleHideAllPreviewsHotkeys?.Select(x => this._configuration.StringToKey(x)));
+
+				// Re-apply per-client hotkeys to existing thumbnails.
+				foreach (IThumbnailView view in this._thumbnailViews.Values)
+				{
+					try
+					{
+						view.UnregisterHotkey();
+					}
+					catch { }
+					view.RegisterHotkey(this._configuration.GetClientHotkey(view.Title));
+				}
+			}
+		}
+
+		public void Start()
         {
             this._thumbnailUpdateTimer.Start();
 
@@ -623,7 +685,7 @@ private async void UpdateThumbnailsList()
                 this.SwitchActiveClient(foregroundWindowHandle, foregroundWindowTitle);
             }
 
-            bool hideAllThumbnails = this._configuration.HideThumbnailsOnLostFocus && !(isClientWindow || isMainWindowActive);
+            bool hideAllThumbnails = (this._configuration.HideThumbnailsOnLostFocus && !(isClientWindow || isMainWindowActive)) || _hideAllPreviews;
 
             // Wait for some time before hiding all previews
             if (hideAllThumbnails)
@@ -928,7 +990,8 @@ private async void UpdateThumbnailsList()
                 view.SetCycleGroupIndicator(view.IsExcludedFromCycleGroup, _configuration.CycleGroupIndicatorAnchor);
 
             }
-            this.RefreshThumbnails();
+			_refreshCycleCount = ThumbnailManager.FORCED_REFRESH_CYCLE_THRESHOLD + 1;
+			RefreshThumbnails();
         }
 
 

@@ -35,6 +35,8 @@ namespace EveOPreview.View
 		private bool _allowCycleMemberListCheckToggle;
 		private HotkeyInputControl _minimizeAllControl;
 		private HotkeyInputControl _refreshAllControl;
+		private HotkeyInputControl _hideAllPreviewsControl;
+		private HotkeyInputControl _toggleHotkeysControl;
 		private bool _suppressCycleEvents;
         private int _hotkeyTopOffset;
         // Profiles tab + tray submenu.
@@ -757,7 +759,7 @@ namespace EveOPreview.View
 
         private Panel BuildMinimizeAllRow()
         {
-            Panel panel = new Panel { Dock = DockStyle.Top, Height = 66 };
+            Panel panel = new Panel { Dock = DockStyle.Top, Height = 120 };
 
             Label minimizeAllLabel = new Label { Text = "Minimize all clients:", Location = new Point(6, 9), AutoSize = true };
             this._minimizeAllControl = new HotkeyInputControl { Location = new Point(176, 6), Size = new Size(262, 23) };
@@ -779,11 +781,37 @@ namespace EveOPreview.View
 				}
 			};
 
+			Label hideAllPreviewsLabel = new Label { Text = "Hide all clients toggle :", Location = new Point(6, refreshAllLabel.Bottom + 3), AutoSize = true };
+			this._hideAllPreviewsControl = new HotkeyInputControl { Location = new Point(176, refreshAllLabel.Bottom + 6), Size = new Size(262, 23) };
+			this._hideAllPreviewsControl.HotkeyChanged += (sender, e) =>
+			{
+				if (!this._suppressCycleEvents)
+				{
+					this.HideAllPreviewsHotkeyChanged?.Invoke(this._hideAllPreviewsControl.Hotkey);
+				}
+			};
+
+			Label toggleHotkeysLabel = new Label { Text = "toggle hotkeys:", Location = new Point(6, hideAllPreviewsLabel.Bottom + 3), AutoSize = true };
+			this._toggleHotkeysControl = new HotkeyInputControl { Location = new Point(176, hideAllPreviewsLabel.Bottom + 6), Size = new Size(262, 23) };
+			this._toggleHotkeysControl.HotkeyChanged += (sender, e) =>
+			{
+				if (!this._suppressCycleEvents)
+				{
+					this.ToggleHotkeysHotkeyChanged?.Invoke(this._toggleHotkeysControl.Hotkey);
+				}
+			};
+
 			panel.Controls.Add(minimizeAllLabel);
 			panel.Controls.Add(this._minimizeAllControl);
 
 			panel.Controls.Add(refreshAllLabel);
 			panel.Controls.Add(this._refreshAllControl);
+
+			panel.Controls.Add(hideAllPreviewsLabel);
+			panel.Controls.Add(this._hideAllPreviewsControl);
+
+			panel.Controls.Add(toggleHotkeysLabel);
+			panel.Controls.Add(this._toggleHotkeysControl);
 			return panel;
         }
 
@@ -854,6 +882,14 @@ namespace EveOPreview.View
 		public void SetRefreshAllHotkey(Keys hotkey)
 		{
 			this._refreshAllControl?.SetHotkeySilently(hotkey);
+		}
+		public void SetToggleHideAllPreviewsHotkey(Keys hotkey)
+		{
+			this._hideAllPreviewsControl?.SetHotkeySilently(hotkey);
+		}
+		public void SetToggleHotkeysHotkey(Keys hotkey)
+		{
+			this._toggleHotkeysControl?.SetHotkeySilently(hotkey);
 		}
 
 		public Action<bool> ThemeChanged { get; set; }
@@ -1412,6 +1448,8 @@ namespace EveOPreview.View
 		public Action<int, List<string>> CycleGroupMembershipRenumberRequested { get; set; } 
 		public Action<Keys> MinimizeAllHotkeyChanged { get; set; }
 		public Action<Keys> RefreshAllHotkeyChanged { get; set; }
+		public Action<Keys> HideAllPreviewsHotkeyChanged { get; set; }
+		public Action<Keys> ToggleHotkeysHotkeyChanged { get; set; }
 		public Action PushSelectedCycleGroupDetailRequested { get; set; }
 
 		public Action<string> ProfileActivateRequested { get; set; }

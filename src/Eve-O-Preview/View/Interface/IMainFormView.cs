@@ -86,6 +86,8 @@ namespace EveOPreview.View
         void SetCycleGroupDetail(Keys forward, Keys backward, IReadOnlyList<string> memberClients);
 		void SetMinimizeAllHotkey(Keys hotkey);
 		void SetRefreshAllHotkey(Keys hotkey);
+		void SetToggleHideAllPreviewsHotkey(Keys hotkey);
+		void SetToggleHotkeysHotkey(Keys hotkey);
 
 		Action<int> CycleGroupSelected { get; set; }
         Action<string> CycleGroupAddRequested { get; set; }
@@ -96,7 +98,9 @@ namespace EveOPreview.View
 		Action<int, List<string>> CycleGroupMembershipRenumberRequested { get; set; } // (groupIndex)
 		Action<Keys> MinimizeAllHotkeyChanged { get; set; }
 		Action<Keys> RefreshAllHotkeyChanged { get; set; }
-        Action PushSelectedCycleGroupDetailRequested { get; set; }
+		Action<Keys> HideAllPreviewsHotkeyChanged { get; set; }
+		Action<Keys> ToggleHotkeysHotkeyChanged { get; set; }
+		Action PushSelectedCycleGroupDetailRequested { get; set; }
 
 		// --- Profiles ---
 		Action<string> ProfileActivateRequested { get; set; }

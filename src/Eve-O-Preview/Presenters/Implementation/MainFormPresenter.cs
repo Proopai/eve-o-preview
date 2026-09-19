@@ -59,8 +59,10 @@ namespace EveOPreview.Presenters
             this.View.CycleGroupMembershipRenumberRequested = this.RenumberCycleGroupMembership;
             this.View.PushSelectedCycleGroupDetailRequested = this.PushSelectedCycleGroupDetail;
 			this.View.MinimizeAllHotkeyChanged = this.SaveMinimizeAllHotkey;
-            this.View.RefreshAllHotkeyChanged = this.SaveRefreshAllHotkey;
-            this.View.ProfileActivateRequested = this.ActivateProfile;
+			this.View.RefreshAllHotkeyChanged = this.SaveRefreshAllHotkey;
+			this.View.HideAllPreviewsHotkeyChanged = this.SaveToggleHideAllPreviewsHotkey;
+			this.View.ToggleHotkeysHotkeyChanged = this.SaveToggleHotkeysHotkey;
+			this.View.ProfileActivateRequested = this.ActivateProfile;
             this.View.ProfileNewRequested = this.CreateProfile;
             this.View.ProfileSaveRequested = this.SaveCurrentProfile;
             this.View.ProfileDeleteRequested = this.DeleteProfile;
@@ -350,6 +352,8 @@ namespace EveOPreview.Presenters
             this.PushSelectedCycleGroupDetail();
 			this.View.SetMinimizeAllHotkey(this.FirstHotkey(this._configuration.MinimizeAllClientsHotkeys));
 			this.View.SetRefreshAllHotkey(this.FirstHotkey(this._configuration.RefreshMinimizedClientsHotkeys));
+			this.View.SetToggleHideAllPreviewsHotkey(this.FirstHotkey(this._configuration.ToggleHideAllPreviewsHotkeys));
+			this.View.SetToggleHotkeysHotkey(this.FirstHotkey(this._configuration.ToggleHotkeysHotkeys));
 		}
 
 		private void PushSelectedCycleGroupDetail()
@@ -518,6 +522,22 @@ namespace EveOPreview.Presenters
 		private async void SaveRefreshAllHotkey(Keys hotkey)
 		{
 			this._configuration.RefreshMinimizedClientsHotkeys = (hotkey == Keys.None)
+				? new List<string>()
+				: new List<string> { this._configuration.KeyToString(hotkey) };
+			this._configurationStorage.Save();
+			await this._mediator.Send(new RefreshHotkeys());
+		}
+		private async void SaveToggleHideAllPreviewsHotkey(Keys hotkey)
+		{
+			this._configuration.ToggleHideAllPreviewsHotkeys = (hotkey == Keys.None)
+				? new List<string>()
+				: new List<string> { this._configuration.KeyToString(hotkey) };
+			this._configurationStorage.Save();
+			await this._mediator.Send(new RefreshHotkeys());
+		}
+		private async void SaveToggleHotkeysHotkey(Keys hotkey)
+		{
+			this._configuration.ToggleHotkeysHotkeys = (hotkey == Keys.None)
 				? new List<string>()
 				: new List<string> { this._configuration.KeyToString(hotkey) };
 			this._configurationStorage.Save();
