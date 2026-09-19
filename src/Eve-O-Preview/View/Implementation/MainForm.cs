@@ -102,24 +102,30 @@ namespace EveOPreview.View
 
                 this._iconName = value;
 
-                // Set Icon 
-                System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-                if (this._iconName == null || ((resources.GetObject(this._iconName))) == null)
+				// Set Icon 
+				var iconObject = Properties.Resources.ResourceManager.GetObject(this._iconName);
+                if (iconObject == null)
                 {
                     this._iconName = "IconOriginal";
+                    iconObject = Properties.Resources.ResourceManager.GetObject(this._iconName);
                 }
 
-                // pull icon from resources
-                try
-                {
-                    var iconBytes = (byte[])resources.GetObject(this._iconName);
-                    using (MemoryStream ms = new MemoryStream(iconBytes))
-                    {
-                        this.Icon = new Icon(ms);
-                        this.NotifyIcon.Icon = this.Icon;
-                    }
-                }
-                catch (Exception)
+				// pull icon from resources
+				try
+				{
+					if (iconObject is Icon icon)
+					{
+						this.Icon = icon;
+						this.NotifyIcon.Icon = icon;
+					}
+					else if (iconObject is byte[] iconBytes)
+					{
+						using var ms = new MemoryStream(iconBytes);
+						this.Icon = new Icon(ms);
+						this.NotifyIcon.Icon = this.Icon;
+					}
+				}
+				catch (Exception)
                 {
                     // Log ?
                 }

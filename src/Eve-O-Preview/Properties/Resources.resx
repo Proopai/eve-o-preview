@@ -117,4 +117,32 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="IconAmber" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Icons\EVE-O_Amber.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="IconBlue" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Icons\EVE-O_Blue.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="IconCherry" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Icons\EVE-O_Cherry.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="IconDal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Icons\EVE-O_Dal.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="IconDark" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Icons\EVE-O_Dark.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="IconDefault" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Icons\EVE-O_Default.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="IconMint" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Icons\EVE-O_Mint.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="IconPurple" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Icons\EVE-O_Purple.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="IconUrns" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Icons\EVE-O_urns.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>
