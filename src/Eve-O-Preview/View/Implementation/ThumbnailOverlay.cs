@@ -159,12 +159,12 @@ namespace EveOPreview.View
 			this._showAlertWidth = alertBorderWidth;
 			this._showAlertSeconds = alertSeconds;
 		}
-		public void SetBorder(bool showBorder, Color borderColor, int borderWidth, DashStyle ds)
+		public void SetBorder(bool showBorder, Color borderColor, int borderWidth, OutlineStyle ds)
 		{
 			this._showBorder = showBorder;
 			this._showBorderColour = borderColor;
 			this._showBorderWidth = borderWidth;
-			this._showBorderDashStyle = ds;
+			this._showBorderDashStyle = (DashStyle)ds;
 
 		}
 

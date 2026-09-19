@@ -77,7 +77,7 @@ namespace EveOPreview.Configuration
 		Color PreventPreviewColor { get; set; }
 		int ActiveClientHighlightThickness { get; set; }
 		int AlertThickness { get; set; }
-		DashStyle ActiveClientHighlightDashStyle { get; set; }
+		OutlineStyle ActiveClientHighlightDashStyle { get; set; }
 		int AlertSeconds { get; set; }
 		int AgressionSeconds { get; set; }
 		Color OverlayLabelColor { get; set; }

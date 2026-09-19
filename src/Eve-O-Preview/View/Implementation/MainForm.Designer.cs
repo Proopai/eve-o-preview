@@ -51,6 +51,7 @@ namespace EveOPreview.View
 			Label ZoomAnchorLabel;
 			TabPage OverlayTabPage;
 			Panel OverlaySettingsPanel;
+			Label label2;
 			Label label1;
 			TabPage ClientsTabPage;
 			Panel ClientsPanel;
@@ -98,6 +99,7 @@ namespace EveOPreview.View
 			ZoomAanchorSWRadioButton = new RadioButton();
 			EnableThumbnailZoomCheckBox = new CheckBox();
 			ThumbnailZoomFactorNumericEdit = new NumericUpDown();
+			ActiveClientOutlineStyleCombo = new ComboBox();
 			OverlayLabelOutlineSizeNumericEdit = new NumericUpDown();
 			OverlayLabelOutlineColourLabel = new Label();
 			OverlayLabelOutlineColorButton = new Panel();
@@ -159,6 +161,7 @@ namespace EveOPreview.View
 			ZoomAnchorLabel = new Label();
 			OverlayTabPage = new TabPage();
 			OverlaySettingsPanel = new Panel();
+			label2 = new Label();
 			label1 = new Label();
 			ClientsTabPage = new TabPage();
 			ClientsPanel = new Panel();
@@ -240,7 +243,7 @@ namespace EveOPreview.View
 			ContentTabControl.Multiline = true;
 			ContentTabControl.Name = "ContentTabControl";
 			ContentTabControl.SelectedIndex = 0;
-			ContentTabControl.Size = new Size(639, 292);
+			ContentTabControl.Size = new Size(639, 317);
 			ContentTabControl.SizeMode = TabSizeMode.Fixed;
 			ContentTabControl.TabIndex = 6;
 			ContentTabControl.DrawItem += ContentTabControl_DrawItem;
@@ -253,7 +256,7 @@ namespace EveOPreview.View
 			GeneralTabPage.Margin = new Padding(4);
 			GeneralTabPage.Name = "GeneralTabPage";
 			GeneralTabPage.Padding = new Padding(4);
-			GeneralTabPage.Size = new Size(511, 284);
+			GeneralTabPage.Size = new Size(511, 309);
 			GeneralTabPage.TabIndex = 0;
 			GeneralTabPage.Text = "General";
 			// 
@@ -277,7 +280,7 @@ namespace EveOPreview.View
 			GeneralSettingsPanel.Location = new Point(4, 4);
 			GeneralSettingsPanel.Margin = new Padding(4);
 			GeneralSettingsPanel.Name = "GeneralSettingsPanel";
-			GeneralSettingsPanel.Size = new Size(503, 276);
+			GeneralSettingsPanel.Size = new Size(503, 301);
 			GeneralSettingsPanel.TabIndex = 18;
 			GeneralSettingsPanel.Paint += GeneralSettingsPanel_Paint;
 			// 
@@ -452,7 +455,7 @@ namespace EveOPreview.View
 			ThumbnailTabPage.Margin = new Padding(4);
 			ThumbnailTabPage.Name = "ThumbnailTabPage";
 			ThumbnailTabPage.Padding = new Padding(4);
-			ThumbnailTabPage.Size = new Size(511, 284);
+			ThumbnailTabPage.Size = new Size(511, 309);
 			ThumbnailTabPage.TabIndex = 1;
 			ThumbnailTabPage.Text = "Thumbnail";
 			// 
@@ -478,7 +481,7 @@ namespace EveOPreview.View
 			ThumbnailSettingsPanel.Location = new Point(4, 4);
 			ThumbnailSettingsPanel.Margin = new Padding(4);
 			ThumbnailSettingsPanel.Name = "ThumbnailSettingsPanel";
-			ThumbnailSettingsPanel.Size = new Size(503, 276);
+			ThumbnailSettingsPanel.Size = new Size(503, 301);
 			ThumbnailSettingsPanel.TabIndex = 19;
 			// 
 			// DoNotDisplayPreviewColour
@@ -669,7 +672,7 @@ namespace EveOPreview.View
 			ZoomTabPage.Location = new Point(124, 4);
 			ZoomTabPage.Margin = new Padding(4);
 			ZoomTabPage.Name = "ZoomTabPage";
-			ZoomTabPage.Size = new Size(511, 284);
+			ZoomTabPage.Size = new Size(511, 309);
 			ZoomTabPage.TabIndex = 2;
 			ZoomTabPage.Text = "Zoom";
 			// 
@@ -685,7 +688,7 @@ namespace EveOPreview.View
 			ZoomSettingsPanel.Location = new Point(0, 0);
 			ZoomSettingsPanel.Margin = new Padding(4);
 			ZoomSettingsPanel.Name = "ZoomSettingsPanel";
-			ZoomSettingsPanel.Size = new Size(511, 284);
+			ZoomSettingsPanel.Size = new Size(511, 309);
 			ZoomSettingsPanel.TabIndex = 36;
 			// 
 			// ZoomFactorLabel
@@ -870,13 +873,15 @@ namespace EveOPreview.View
 			OverlayTabPage.Location = new Point(124, 4);
 			OverlayTabPage.Margin = new Padding(4);
 			OverlayTabPage.Name = "OverlayTabPage";
-			OverlayTabPage.Size = new Size(511, 284);
+			OverlayTabPage.Size = new Size(511, 309);
 			OverlayTabPage.TabIndex = 3;
 			OverlayTabPage.Text = "Overlay";
 			// 
 			// OverlaySettingsPanel
 			// 
 			OverlaySettingsPanel.BorderStyle = BorderStyle.FixedSingle;
+			OverlaySettingsPanel.Controls.Add(label2);
+			OverlaySettingsPanel.Controls.Add(ActiveClientOutlineStyleCombo);
 			OverlaySettingsPanel.Controls.Add(label1);
 			OverlaySettingsPanel.Controls.Add(OverlayLabelOutlineSizeNumericEdit);
 			OverlaySettingsPanel.Controls.Add(OverlayLabelOutlineColourLabel);
@@ -898,8 +903,29 @@ namespace EveOPreview.View
 			OverlaySettingsPanel.Location = new Point(0, 0);
 			OverlaySettingsPanel.Margin = new Padding(4);
 			OverlaySettingsPanel.Name = "OverlaySettingsPanel";
-			OverlaySettingsPanel.Size = new Size(511, 284);
+			OverlaySettingsPanel.Size = new Size(511, 309);
 			OverlaySettingsPanel.TabIndex = 25;
+			// 
+			// label2
+			// 
+			label2.AutoSize = true;
+			label2.Location = new Point(7, 279);
+			label2.Margin = new Padding(4, 0, 4, 0);
+			label2.Name = "label2";
+			label2.Size = new Size(74, 15);
+			label2.TabIndex = 53;
+			label2.Text = "Outline Style";
+			// 
+			// OutlineStyleCombo
+			// 
+			ActiveClientOutlineStyleCombo.DropDownStyle = ComboBoxStyle.DropDownList;
+			ActiveClientOutlineStyleCombo.FormattingEnabled = true;
+			ActiveClientOutlineStyleCombo.Location = new Point(183, 276);
+			ActiveClientOutlineStyleCombo.Margin = new Padding(4);
+			ActiveClientOutlineStyleCombo.Name = "OutlineStyleCombo";
+			ActiveClientOutlineStyleCombo.Size = new Size(142, 23);
+			ActiveClientOutlineStyleCombo.TabIndex = 52;
+			ActiveClientOutlineStyleCombo.SelectedIndexChanged += OptionChanged_Handler;
 			// 
 			// label1
 			// 
@@ -1330,7 +1356,7 @@ namespace EveOPreview.View
 			ClientsTabPage.Location = new Point(124, 4);
 			ClientsTabPage.Margin = new Padding(4);
 			ClientsTabPage.Name = "ClientsTabPage";
-			ClientsTabPage.Size = new Size(511, 284);
+			ClientsTabPage.Size = new Size(511, 309);
 			ClientsTabPage.TabIndex = 4;
 			ClientsTabPage.Text = "Active Clients";
 			// 
@@ -1343,7 +1369,7 @@ namespace EveOPreview.View
 			ClientsPanel.Location = new Point(0, 0);
 			ClientsPanel.Margin = new Padding(4);
 			ClientsPanel.Name = "ClientsPanel";
-			ClientsPanel.Size = new Size(511, 284);
+			ClientsPanel.Size = new Size(511, 309);
 			ClientsPanel.TabIndex = 32;
 			// 
 			// ThumbnailsList
@@ -1354,7 +1380,7 @@ namespace EveOPreview.View
 			ThumbnailsList.Dock = DockStyle.Bottom;
 			ThumbnailsList.FormattingEnabled = true;
 			ThumbnailsList.IntegralHeight = false;
-			ThumbnailsList.Location = new Point(0, 75);
+			ThumbnailsList.Location = new Point(0, 100);
 			ThumbnailsList.Margin = new Padding(4);
 			ThumbnailsList.Name = "ThumbnailsList";
 			ThumbnailsList.Size = new Size(509, 207);
@@ -1378,7 +1404,7 @@ namespace EveOPreview.View
 			LanguageTabPage.Location = new Point(124, 4);
 			LanguageTabPage.Name = "LanguageTabPage";
 			LanguageTabPage.Padding = new Padding(3);
-			LanguageTabPage.Size = new Size(511, 284);
+			LanguageTabPage.Size = new Size(511, 309);
 			LanguageTabPage.TabIndex = 6;
 			LanguageTabPage.Text = "Language";
 			LanguageTabPage.UseVisualStyleBackColor = true;
@@ -1412,7 +1438,7 @@ namespace EveOPreview.View
 			AboutTabPage.Location = new Point(124, 4);
 			AboutTabPage.Margin = new Padding(4);
 			AboutTabPage.Name = "AboutTabPage";
-			AboutTabPage.Size = new Size(511, 284);
+			AboutTabPage.Size = new Size(511, 309);
 			AboutTabPage.TabIndex = 5;
 			AboutTabPage.Text = "About";
 			// 
@@ -1430,7 +1456,7 @@ namespace EveOPreview.View
 			AboutPanel.Location = new Point(0, 0);
 			AboutPanel.Margin = new Padding(4);
 			AboutPanel.Name = "AboutPanel";
-			AboutPanel.Size = new Size(511, 284);
+			AboutPanel.Size = new Size(511, 309);
 			AboutPanel.TabIndex = 2;
 			// 
 			// CreditMaintLabel
@@ -1520,7 +1546,7 @@ namespace EveOPreview.View
 			AutoScaleDimensions = new SizeF(7F, 15F);
 			AutoScaleMode = AutoScaleMode.Font;
 			BackColor = SystemColors.Control;
-			ClientSize = new Size(639, 292);
+			ClientSize = new Size(639, 317);
 			Controls.Add(ContentTabControl);
 			FormBorderStyle = FormBorderStyle.FixedSingle;
 			Icon = (Icon)resources.GetObject("$this.Icon");
@@ -1650,5 +1676,6 @@ namespace EveOPreview.View
 		private Panel OverlayLabelOutlineColorButton;
 		private CheckBox CoreAffinityCheckBox;
 		private CheckBox UseLazyMinimizeCheckBox;
+		private ComboBox ActiveClientOutlineStyleCombo;
 	}
 }

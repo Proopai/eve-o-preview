@@ -1,15 +1,16 @@
-﻿using System;
+﻿using EveOPreview.Configuration;
+using EveOPreview.Configuration.Implementation;
+using EveOPreview.Mediator.Messages;
+using EveOPreview.Presenters.Implementation;
+using EveOPreview.Properties;
+using EveOPreview.View;
+using MediatR;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using EveOPreview.Configuration;
-using EveOPreview.Configuration.Implementation;
-using EveOPreview.Mediator.Messages;
-using EveOPreview.Properties;
-using EveOPreview.View;
-using MediatR;
 
 namespace EveOPreview.Presenters
 {
@@ -158,6 +159,7 @@ namespace EveOPreview.Presenters
 			this.View.CoreAffinity = this._configuration.CoreAffinity;
 			this.View.CaptionOnClientsStyle = ViewCaptionBarStyleConverter.Convert(this._configuration.CaptionOnClientsStyle);
 			this.View.WindowsAnimationStyle = ViewAnimationStyleConverter.Convert(this._configuration.WindowsAnimationStyle);
+			this.View.ActiveClientOutlineStyle = ViewOutlineStyleConverter.Convert(this._configuration.ActiveClientHighlightDashStyle);
 			this.View.ShowThumbnailsAlwaysOnTop = this._configuration.ShowThumbnailsAlwaysOnTop;
             this.View.UseLazyMinimize = this._configuration.UseLazyMinimize;
 			this.View.PreventPreviews = this._configuration.PreventPreviews;
@@ -209,8 +211,8 @@ namespace EveOPreview.Presenters
 			this._configuration.CoreAffinity = this.View.CoreAffinity;
 
 			this._configuration.WindowsAnimationStyle = ViewAnimationStyleConverter.Convert(this.View.WindowsAnimationStyle);
-
-			this._configuration.CaptionOnClientsStyle= ViewCaptionBarStyleConverter.Convert(this.View.CaptionOnClientsStyle);
+			this._configuration.CaptionOnClientsStyle = ViewCaptionBarStyleConverter.Convert(this.View.CaptionOnClientsStyle);
+			this._configuration.ActiveClientHighlightDashStyle = ViewOutlineStyleConverter.Convert(this.View.ActiveClientOutlineStyle);
 			await this._mediator.Publish(new ThumbnailFrameSettingsUpdated());
 
 			this._configuration.ShowThumbnailsAlwaysOnTop = this.View.ShowThumbnailsAlwaysOnTop;

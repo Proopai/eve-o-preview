@@ -324,7 +324,7 @@ namespace EveOPreview.View
 			Invalidate();
 		}
 
-		public void SetHighlight(bool enabled, int width, DashStyle ds, bool forceSet = false)
+		public void SetHighlight(bool enabled, int width, OutlineStyle ds, bool forceSet = false)
 		{
 
 			if (this._isHighlightRequested == enabled && !forceSet )
@@ -350,7 +350,7 @@ namespace EveOPreview.View
 
 		public void ClearBorder()
 		{
-			this.SetHighlight(false, 0, DashStyle.Solid);
+			this.SetHighlight(false, 0, OutlineStyle.Solid);
 			this.Refresh(true);
 		}
 

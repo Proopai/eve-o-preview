@@ -79,7 +79,8 @@ namespace EveOPreview.View
 
 			this.AnimationStyleCombo.DataSource = Enum.GetValues(typeof(AnimationStyle));
 			this.CaptionOnClientsStyleCombo.DataSource = Enum.GetValues(typeof(CaptionBarStyle));
-            this.InitHotkeysTab();
+			this.ActiveClientOutlineStyleCombo.DataSource = Enum.GetValues(typeof(OutlineStyle));
+			this.InitHotkeysTab();
             this.InitProfilesTab();
             this.InitThemeControls();
 			this.InitTabSeparator();
@@ -184,6 +185,11 @@ namespace EveOPreview.View
 		{
 			get => (ViewAnimationStyle)this.AnimationStyleCombo.SelectedItem;
 			set => this.AnimationStyleCombo.SelectedIndex = (int)value;
+		}
+		public ViewOutlineStyle ActiveClientOutlineStyle
+		{
+			get => (ViewOutlineStyle)this.ActiveClientOutlineStyleCombo.SelectedItem;
+			set => this.ActiveClientOutlineStyleCombo.SelectedIndex = (int)value;
 		}
 
 		public bool ShowThumbnailsAlwaysOnTop

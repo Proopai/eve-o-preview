@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -117,91 +117,93 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="RestoreWindowMenuItem.GenerateMember" type="System.Boolean, mscorlib">
+  <metadata name="RestoreWindowMenuItem.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="ExitMenuItem.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="ExitMenuItem.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="TitleMenuItem.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="TitleMenuItem.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="SeparatorMenuItem.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="SeparatorMenuItem.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="ContentTabControl.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="ContentTabControl.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="GeneralTabPage.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="GeneralTabPage.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="GeneralSettingsPanel.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="GeneralSettingsPanel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="captionBarStyleLabel.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="captionBarStyleLabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="animationStyleLabel.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="animationStyleLabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="ThumbnailTabPage.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="ThumbnailTabPage.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="ThumbnailSettingsPanel.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="ThumbnailSettingsPanel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="HeigthLabel.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="HeigthLabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="WidthLabel.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="WidthLabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="OpacityLabel.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="OpacityLabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="ZoomSettingsPanel.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="ZoomSettingsPanel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="ZoomFactorLabel.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="ZoomFactorLabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="ZoomAnchorLabel.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="ZoomAnchorLabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="OverlayTabPage.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="OverlayTabPage.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="OverlaySettingsPanel.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="OverlaySettingsPanel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="label1.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="label2.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="ClientsTabPage.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="label1.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="ClientsPanel.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="ClientsTabPage.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="ThumbnailsListLabel.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="ClientsPanel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="AboutTabPage.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="ThumbnailsListLabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="AboutPanel.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="AboutTabPage.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="CreditMaintLabel.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="AboutPanel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="DocumentationLinkLabel.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="CreditMaintLabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <data name="DescriptionLabel.GenerateMember" type="System.Boolean, mscorlib">
+  </metadata>
+  <metadata name="DocumentationLinkLabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
+  </metadata>
+  <metadata name="DescriptionLabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>False</value>
+  </metadata>
   <data name="DescriptionLabel.Text" xml:space="preserve">
     <value>An advanced task switcher for EVE Online clients.
 
@@ -212,16 +214,16 @@ The program does NOT
 • interact with EVE Online except of;
     - resizing or bringing it to the foreground</value>
   </data>
-  <data name="NameLabel.GenerateMember" type="System.Boolean, mscorlib">
+  <metadata name="NameLabel.GenerateMember" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
-  </data>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="NotifyIcon.TrayLocation" type="System.Drawing.Point, System.Drawing">
+  </metadata>
+  <metadata name="NotifyIcon.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
-  </data>
-  <data name="TrayMenu.TrayLocation" type="System.Drawing.Point, System.Drawing">
+  </metadata>
+  <metadata name="TrayMenu.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>123, 17</value>
-  </data>
+  </metadata>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="NotifyIcon.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         AAABAAQAEBAAAAEAIABoBAAARgAAACAgAAABACAAqBAAAK4EAAAwMAAAAQAgAKglAABWFQAAQEAAAAEA
@@ -760,9 +762,9 @@ The program does NOT
         Af//4AAAAAAH///wAAAAAA////gAAAAAH////gAAAAB/////AAAAAP/////AAAAD/////+AAAAf//w==
 </value>
   </data>
-  <data name="$this.TrayHeight" type="System.Int32, mscorlib">
+  <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>36</value>
-  </data>
+  </metadata>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         AAABAAQAEBAAAAEAIABoBAAARgAAACAgAAABACAAqBAAAK4EAAAwMAAAAQAgAKglAABWFQAAQEAAAAEA
@@ -1300,33 +1302,5 @@ The program does NOT
         AAAAAAAAgAAAAAAAAAHAAAAAAAAAA/AAAAAAAAAP+AAAAAAAAB/8AAAAAAAAP/8AAAAAAAD//4AAAAAA
         Af//4AAAAAAH///wAAAAAA////gAAAAAH////gAAAAB/////AAAAAP/////AAAAD/////+AAAAf//w==
 </value>
-  </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="IconAmber" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\..\Icons\EVE-O_Amber.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="IconBlue" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\..\Icons\EVE-O_Blue.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="IconCherry" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\..\Icons\EVE-O_Cherry.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="IconDal" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\..\Icons\EVE-O_Dal.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="IconDark" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\..\Icons\EVE-O_Dark.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="IconDefault" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\..\Icons\EVE-O_Default.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="IconMint" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\..\Icons\EVE-O_Mint.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="IconPurple" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\..\Icons\EVE-O_Purple.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="IconUrns" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\..\Icons\EVE-O_urns.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

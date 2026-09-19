@@ -162,7 +162,7 @@ namespace EveOPreview.Configuration.Implementation
 
             this.EnableActiveClientHighlight = false;
             this.ActiveClientHighlightColor = Color.GreenYellow;
-            this.ActiveClientHighlightDashStyle = DashStyle.DashDotDot;
+            this.ActiveClientHighlightDashStyle = OutlineStyle.DashDotDot;
 
 			this.PreventPreviewColor = Color.Purple;
             this.ActiveClientHighlightThickness = 4;
@@ -368,7 +368,7 @@ namespace EveOPreview.Configuration.Implementation
         public int ThumbnailSnapToGridSizeY { get; set; }
 
         public bool EnableActiveClientHighlight { get; set; }
-		public DashStyle ActiveClientHighlightDashStyle { get; set; }
+		public OutlineStyle ActiveClientHighlightDashStyle { get; set; }
 		public Color ActiveClientHighlightColor { get; set; }
 		public Color[] AlertColors { get; set; } 
         public int AlertSeconds { get; set; }

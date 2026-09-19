@@ -30,7 +30,7 @@ namespace EveOPreview.View
 		void SetCycleGroupIndicator(bool displayCycleGroup, ZoomAnchor anchor);
 		void SetTopMost(bool enableTopmost);
 		void SetHighlight(bool forceSet = false);
-		void SetHighlight(bool enabled, int width, DashStyle ds, bool forceSet = false);
+		void SetHighlight(bool enabled, int width, OutlineStyle ds, bool forceSet = false);
 		bool IsPreventPreviews();
 		void SetPreventPreviews();
 		void ZoomIn(ViewZoomAnchor anchor, int zoomFactor);
