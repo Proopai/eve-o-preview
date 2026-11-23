@@ -371,6 +371,10 @@ You can build using :
 
 <div style="page-break-after: always;"></div>
 
+### Certificate
+
+The Certificate is provided through SignPath
+
 ## Credits
 
 ### Maintained by
