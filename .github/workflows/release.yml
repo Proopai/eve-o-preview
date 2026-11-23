@@ -40,10 +40,10 @@ jobs:
       IS_RELEASE: ${{ github.event_name == 'release' }}
       # Policy slugs come from repo secrets: SIGNPATH_SINGING_SLUG_RELEASE / SIGNPATH_SINGING_SLUG_TEST
       SIGNING_POLICY: ${{ github.event_name == 'release' && secrets.SIGNPATH_SINGING_SLUG_RELEASE || secrets.SIGNPATH_SINGING_SLUG_TEST }}
-      VERSION: ${{ github.event.release.tag_name || inputs.version }}
-      PUBLISH_DIR: Eve-O-Preview-${{ github.event.release.tag_name || inputs.version }}-${{ matrix.platform.name }}
-      SIGNED_DIR: signed\Eve-O-Preview-${{ github.event.release.tag_name || inputs.version }}-${{ matrix.platform.name }}
-      ZIP_NAME: Release-${{ github.event.release.tag_name || inputs.version }}-${{ matrix.platform.name }}.zip
+      VERSION: ${{ github.event.release.tag_name || inputs.version || '8.0.2.0' }}
+      PUBLISH_DIR: Eve-O-Preview-${{ github.event.release.tag_name || inputs.version || '8.0.2.0' }}-${{ matrix.platform.name }}
+      SIGNED_DIR: signed\Eve-O-Preview-${{ github.event.release.tag_name || inputs.version || '8.0.2.0' }}-${{ matrix.platform.name }}
+      ZIP_NAME: Release-${{ github.event.release.tag_name || inputs.version || '8.0.2.0' }}-${{ matrix.platform.name }}.zip
 
     steps:
       - name: Checkout Repository
