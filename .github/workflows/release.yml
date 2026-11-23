@@ -1,47 +1,126 @@
 name: Eve-O Preview Release
 
+# Builds both flavours (Windows / Linux-via-Wine) and signs EVE-O-Preview.exe through SignPath.
+#
+#   Manual run (Actions tab > Run workflow)  -> SignPath test policy    (secret SIGNPATH_SINGING_SLUG_TEST)
+#       Signed with the test certificate; result is uploaded as a workflow artifact only.
+#   Release published                        -> SignPath release policy (secret SIGNPATH_SINGING_SLUG_RELEASE)
+#       Signed with the SignPath Foundation certificate; zips are attached to the release.
+
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to stamp into the test build (e.g. 8.0.2.99)'
+        required: true
+        default: '8.0.2.0'
+
+permissions:
+  contents: write   # upload assets to the release
+  actions: read     # lets SignPath read the job details and the unsigned artifact
 
 jobs:
-  release:
-    name: Release
-    runs-on: ${{ matrix.platform.os }}
-     
+  build-and-sign:
+    name: ${{ matrix.platform.name }} (${{ github.event_name == 'release' && 'release-signing' || 'test-signing' }})
+    # SignPath Foundation requires every job leading to a signing request to run on GitHub-hosted runners.
+    runs-on: windows-2022
+
     strategy:
       fail-fast: false
       matrix:
         platform:
-        - { name: Linux, os: windows-2022, self_contained: true }
-        - { name: Windows, os: windows-2022, self_contained: false }
-        dotnet:
-        - { name: .NET 8, version: '8.0.x' }
+        - { name: Linux, self_contained: true }
+        - { name: Windows, self_contained: false }
+
+    env:
+      IS_RELEASE: ${{ github.event_name == 'release' }}
+      # Policy slugs come from repo secrets: SIGNPATH_SINGING_SLUG_RELEASE / SIGNPATH_SINGING_SLUG_TEST
+      SIGNING_POLICY: ${{ github.event_name == 'release' && secrets.SIGNPATH_SINGING_SLUG_RELEASE || secrets.SIGNPATH_SINGING_SLUG_TEST }}
+      VERSION: ${{ github.event.release.tag_name || inputs.version }}
+      PUBLISH_DIR: Eve-O-Preview-${{ github.event.release.tag_name || inputs.version }}-${{ matrix.platform.name }}
+      SIGNED_DIR: signed\Eve-O-Preview-${{ github.event.release.tag_name || inputs.version }}-${{ matrix.platform.name }}
+      ZIP_NAME: Release-${{ github.event.release.tag_name || inputs.version }}-${{ matrix.platform.name }}.zip
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
-      - name: Restore
-        run: dotnet restore src\\Eve-O-Preview\\Eve-O-Preview.csproj
-      - name: Build
-        run: |
-           echo "${{matrix.platform.name}} ${{ github.event.release.tag_name }}"
-           dotnet build src\\Eve-O-Preview\\Eve-O-Preview.csproj --configuration Release  -p:EVEOTARGET="${{matrix.platform.name}}" -p:AssemblyVersion="${{ github.event.release.tag_name }}" -p:FileVersion="${{ github.event.release.tag_name }}"
-      - name: BuildPackage
-        run: |
-          git log --pretty=format:'%d %s' ${GITHUB_REF} | perl -pe 's| \(.*tag: v(\d+.\d+.\d+(-preview\d{3})?)(, .*?)*\)|\n## \1\n|g' 
-          # Build everything
-          dotnet publish src\\Eve-O-Preview\\Eve-O-Preview.csproj -c Release -o "Eve-O-Preview-${{ github.event.release.tag_name }}-${{ matrix.platform.name }}" -p:EVEOTARGET="${{matrix.platform.name}}" -p:AssemblyVersion="${{ github.event.release.tag_name }}" -p:FileVersion="${{ github.event.release.tag_name }}" --self-contained  ${{matrix.platform.self_contained}}
-      - name: Create archive
-        run: |
-          Compress-Archive -Path "Eve-O-Preview-${{ github.event.release.tag_name }}-${{ matrix.platform.name }}\\*" -Destination "Release-${{ github.event.release.tag_name }}-${{ matrix.platform.name }}.zip"
-      - name: Upload Asset
-        id: upload-release-client-asset 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/checkout@v5
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v5
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: "Release-${{ github.event.release.tag_name }}-${{ matrix.platform.name }}.zip"
-          asset_name: "Release-${{ github.event.release.tag_name }}-${{ matrix.platform.name }}.zip"
-          asset_content_type: application/zip
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore src\Eve-O-Preview\Eve-O-Preview.csproj
+
+      # -p:Version sets AssemblyVersion, FileVersion and ProductVersion together, so the
+      # exe metadata matches the product-version restriction in the SignPath artifact configuration.
+      - name: Publish
+        run: >
+          dotnet publish src\Eve-O-Preview\Eve-O-Preview.csproj
+          -c Release
+          -o "${{ env.PUBLISH_DIR }}"
+          -p:EVEOTARGET="${{ matrix.platform.name }}"
+          -p:Version="${{ env.VERSION }}"
+          --self-contained ${{ matrix.platform.self_contained }}
+          --no-restore
+
+      - name: Upload unsigned build
+        id: upload-unsigned
+        uses: actions/upload-artifact@v7
+        with:
+          name: unsigned-${{ matrix.platform.name }}
+          path: ${{ env.PUBLISH_DIR }}
+          if-no-files-found: error
+
+      # release-signing needs a manual approval in SignPath, so allow up to an hour for an approver.
+      - name: Sign with SignPath (${{ github.event_name == 'release' && 'release policy' || 'test policy' }})
+        id: signpath
+        uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ secrets.SIGNPATH_ORG_ID }}
+          project-slug: ${{ secrets.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ env.SIGNING_POLICY }}
+          github-artifact-id: ${{ steps.upload-unsigned.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: ${{ env.SIGNED_DIR }}
+          parameters: |
+            version: ${{ toJSON(env.VERSION) }}
+
+      # Test certificates are not trusted by Windows, so for test-signing we only check that a
+      # signature is present and intact; release-signing must be fully Valid.
+      - name: Verify signature
+        shell: pwsh
+        run: |
+          $exe = Join-Path $env:SIGNED_DIR 'EVE-O-Preview.exe'
+          $sig = Get-AuthenticodeSignature $exe
+          Write-Host "Release: $env:IS_RELEASE  Status: $($sig.Status)  Signer: $($sig.SignerCertificate.Subject)"
+          if ($env:IS_RELEASE -eq 'true') {
+            if ($sig.Status -ne 'Valid') { throw "EVE-O-Preview.exe is not validly signed ($($sig.Status))" }
+          } else {
+            if (-not $sig.SignerCertificate -or $sig.Status -in 'NotSigned','HashMismatch') {
+              throw "EVE-O-Preview.exe has no intact signature ($($sig.Status))"
+            }
+          }
+
+      - name: Create archive
+        shell: pwsh
+        run: Compress-Archive -Path "$env:SIGNED_DIR\*" -DestinationPath $env:ZIP_NAME
+
+      - name: Upload test-signed build
+        if: github.event_name != 'release'
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-signed-${{ matrix.platform.name }}
+          path: ${{ env.ZIP_NAME }}
+          if-no-files-found: error
+
+      - name: Upload release asset
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ env.VERSION }}" "${{ env.ZIP_NAME }}" --clobber
