@@ -8,8 +8,6 @@ name: Eve-O Preview Release
 #       Signed with the SignPath Foundation certificate; zips are attached to the release.
 
 on:
-  push:
-    branches: [ cert-signing-test ]   # TEMP – remove before merging
   release:
     types: [published]
   workflow_dispatch:
