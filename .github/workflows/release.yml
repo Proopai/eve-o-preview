@@ -9,7 +9,7 @@ name: Eve-O Preview Release
 
 on:
   push:
-    branches: [ feature/signpath-code-signing ]   # TEMP – remove before merging
+    branches: [ cert-signing-test ]   # TEMP – remove before merging
   release:
     types: [published]
   workflow_dispatch:
